@@ -1,0 +1,61 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to bottom right, #001f3f, #1e0b3c);
+    color: white;
+}
+
+.lottery-ball {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background-color: #ffd700;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+}
+
+.special-ball {
+    background-color: #ff6347;
+    color: white;
+}
+
+.cash-ball {
+    background-color: #6a0dad;
+    color: white;
+}
+
+.hot-number {
+    background-color: #ff6347;
+    color: white;
+}
+
+.cold-number {
+    background-color: #4682b4;
+    color: white;
+}
+
+.pair-box {
+    background-color: #4a5568;
+    padding: 8px 12px;
+    border-radius: 9999px;
+    font-weight: bold;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
