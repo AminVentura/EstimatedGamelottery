@@ -38,7 +38,7 @@ const domElements = {};
 // Función para generar un ID de usuario amigable y único
 function generateFriendlyId() {
     const adjectives = ["Ágil", "Azul", "Brillante", "Cálido", "Valiente", "Creativo", "Dinámico", "Elegante", "Fértil", "Gigante"];
-    const animals = ["Águila", "Ballena", "Conejo", "Delfín", "Elefante", "Foca", "Gato", "Halcon", "Iguana", "Jaguar"];
+    const animals = ["Águila", "Ballena", "Conejo", "Delfín", "Elefante", "Foca", "Gato", "Halcón", "Iguana", "Jaguar"];
     const number = Math.floor(Math.random() * 1000);
     const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
     const animal = animals[Math.floor(Math.random() * animals.length)];
@@ -54,38 +54,57 @@ function formatDate(dateString) {
     return `${yyyy}-${mm}-${dd}`;
 }
 
+// --- MEJORA: Lógica de finalización más clara y robusta ---
 function finalizeDrawing(date, allNumbers, ranges) {
+    // 1. Filtra números que estén en los rangos válidos.
     const validNumbers = allNumbers.filter(n => 
         (n >= ranges.main.min && n <= ranges.main.max) || 
         (n >= ranges.special.min && n <= ranges.special.max)
     );
     const uniqueValidNumbers = Array.from(new Set(validNumbers)).slice(0, 6);
     
-    if (uniqueValidNumbers.length < 6) return null;
-    
-    // Heurística simple: Asume que el ÚLTIMO número es el especial.
-    const specialNum = uniqueValidNumbers.slice(-1)[0];
-    const mainNumbers = uniqueValidNumbers.slice(0, 5);
-    
-    // Verificación final para asegurar que los números están en los rangos correctos.
-    if (!validateNumber(specialNum, ranges.special) || !mainNumbers.every(n => validateNumber(n, ranges.main))) {
-         return null;
+    if (uniqueValidNumbers.length < 6) {
+        console.error("finalizeDrawing: No se encontraron 6 números válidos.", uniqueValidNumbers);
+        return null;
     }
     
-    if (mainNumbers.length === 5 && specialNum !== null) {
-        return {
-            mainNumbers: mainNumbers.sort((a, b) => a - b),
-            special: specialNum,
-            date: date,
-            createdAt: new Date(),
-            userId: userId,
-        };
-    }
+    let specialNum = null;
+    let mainNumbers = [];
 
-    return null;
+    // 2. Lógica mejorada para encontrar el número especial
+    // Si los rangos no se solapan (como en Mega Millions), es más fácil.
+    if (ranges.special.max < ranges.main.min) {
+        // Encuentra el primer número que esté en el rango especial
+        for (const num of uniqueValidNumbers) {
+            if (validateNumber(num, ranges.special)) {
+                specialNum = num;
+                break;
+            }
+        }
+        // Los demás son los principales
+        mainNumbers = uniqueValidNumbers.filter(n => n !== specialNum);
+    } else {
+        // Para rangos que se solapan (Powerball), usa la lógica anterior
+        specialNum = uniqueValidNumbers.slice(-1)[0];
+        mainNumbers = uniqueValidNumbers.slice(0, 5);
+    }
+    
+    // 3. Verificación final
+    if (!specialNum || mainNumbers.length !== 5 || !validateNumber(specialNum, ranges.special) || !validateNumbers(mainNumbers, ranges.main)) {
+        console.error("finalizeDrawing: Falló la validación final.", { specialNum, mainNumbers, ranges });
+        return null;
+    }
+    
+    return {
+        mainNumbers: mainNumbers.sort((a, b) => a - b),
+        special: specialNum,
+        date: date,
+        createdAt: new Date(),
+        userId: userId,
+    };
 }
 
-function processBlock(blockText, ranges) {
+function processBlock(blockText, lottery) {
     // 1. Elimina texto basura y normaliza espacios en blanco
     const cleanBlock = blockText.replace(/(Power|Cash)\s*Play\s*\d*x?/gi, ' ')
                                      .replace(/(PB|CB|PowerBall|Cash Ball|MEGA|MEGAPLIER):?\s*/gi, ' ')
@@ -95,11 +114,17 @@ function processBlock(blockText, ranges) {
     
     // 2. Busca la Fecha (patrón Mes Día, Año)
     const dateMatch = cleanBlock.match(/(\w+)\s*(\d{1,2}),\s*(\d{4})/i);
-    if (!dateMatch) return null;
+    if (!dateMatch) {
+        console.error("processBlock: No se encontró una fecha válida en el bloque.", cleanBlock);
+        return null;
+    }
     
     const dateString = `${dateMatch[1]} ${dateMatch[2]}, ${dateMatch[3]}`;
     const date = formatDate(dateString);
-    if (!date) return null;
+    if (!date) {
+        console.error("processBlock: formatDate falló.", dateString);
+        return null;
+    }
 
     // 3. Busca los Números
     let allNumbers = [];
@@ -117,7 +142,7 @@ function processBlock(blockText, ranges) {
         if (/^\d{7,}$/.test(token)) { 
              for (let i = 0; i < token.length; i += 2) {
                 const subNum = parseInt(token.substring(i, i + 2));
-                if (!isNaN(subNum) && subNum >= 1 && subNum <= ranges.main.max) {
+                if (!isNaN(subNum) && subNum >= 1) {
                     allNumbers.push(subNum);
                 }
             }
@@ -125,10 +150,13 @@ function processBlock(blockText, ranges) {
     }
     
     // Usa la lógica principal para extraer el mejor 5 main + 1 special
-    return finalizeDrawing(date, allNumbers, ranges);
+    return finalizeDrawing(date, allNumbers, getLotteryRanges(lottery));
 }
 
+// --- FUNCIÓN DE ANÁLISIS (con depuración) ---
 function parsePastedData(text, lottery) {
+    console.log(`parsePastedData: Iniciando análisis para ${lottery}. Texto recibido:`, text);
+
     if (lottery === 'megamillions') {
         return parseMegaMillionsData(text);
     }
@@ -142,45 +170,69 @@ function parsePastedData(text, lottery) {
     for (const line of rawLines) {
         const trimmedLine = line.trim();
         if (trimmedLine.length === 0) continue;
+        
         const isNewDrawingStart = /(Mon|Tue|Wed|Thu|Fri|Sat|Sun),/i.test(trimmedLine) || /,?\s*\w+\s*\d{1,2},\s*\d{4}/i.test(trimmedLine);
         
         if (isNewDrawingStart && currentBlock.length > 0) {
             const drawing = processBlock(currentBlock, numberRanges);
-            if (drawing) drawings.push(drawing);
+            console.log(`parsePastedData: Bloque procesado. Resultado:`, drawing);
+            if (drawing) {
+                drawings.push(drawing);
+            } else {
+                console.warn(`parsePastedData: No se pudo procesar un bloque. Se omitirá.`);
+            }
+            // Inicia un nuevo bloque con la línea actual
             currentBlock = trimmedLine + ' ';
         } else {
             currentBlock += trimmedLine + ' ';
         }
     }
 
+    // Procesa el bloque final
     if (currentBlock.length > 0) {
         const drawing = processBlock(currentBlock, numberRanges);
-        if (drawing) drawings.push(drawing);
+        console.log(`parsePastedData: Último bloque procesado. Resultado:`, drawing);
+        if (drawing) {
+            drawings.push(drawing);
+        } else {
+            console.warn(`parsePastedData: No se pudo procesar el último bloque.`);
+        }
     }
 
+    console.log(`parsePastedData: Análisis completo para ${lottery}. Se encontraron ${drawings.length} sorteos.`);
     return drawings;
 }
 
-// --- NUEVA FUNCIÓN PARA MEGA MILLIONS ---
+// --- NUEVA FUNCIÓN PARA MEGA MILLIONS (con depuración) ---
 function parseMegaMillionsData(text) {
+    console.log("parseMegaMillionsData: Iniciando análisis para Mega Millions.");
     const drawings = [];
-    const numberRanges = { main: { min: 1, max: 70 }, special: { min: 1, max: 24 } }; // Rangos de Mega Millions
+    const numberRanges = { main: { min: 1, max: 70 }, special: { min: 1, max: 24 } };
 
     // 1. Encontrar todas las fechas en formato MM/DD/YYYY
     const dateRegex = /\b(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}\b/g;
     const dates = text.match(dateRegex);
-    if (!dates) return [];
+    if (!dates) {
+        console.error("parseMegaMillionsData: No se encontraron fechas válidas.", text);
+        return [];
+    }
 
     // 2. Encontrar todos los conjuntos de números (5 números + 1 Mega Ball)
     const numberSetRegex = /(?:\b\d{1,2}\b){5,6}/g;
     const numberSets = text.match(numberSetRegex);
-    if (!dates || !numberSets || dates.length !== numberSets.length) return [];
+    if (!dates || !numberSets || dates.length !== numberSets.length) {
+        console.error("parseMegaMillionsData: El número de fechas no coincide con el número de conjuntos de números.", { dates, numberSets });
+        return [];
+    }
 
     for (let i = 0; i < dates.length; i++) {
         const date = dates[i];
         const dateStr = date.substring(0, 2) + date.substring(3, 5) + date.substring(6, 10); // Formato MM/DD/YYYY
         const formattedDate = formatDate(dateStr);
-        if (!formattedDate) continue;
+        if (!formattedDate) {
+            console.warn(`parseMegaMillionsData: Fecha inválida encontrada, saltando: ${dateStr}`);
+            continue;
+        }
 
         // Buscar el conjunto de números que viene DESPUÉS de la fecha en el texto
         let numbersAfterDate = '';
@@ -193,23 +245,27 @@ function parseMegaMillionsData(text) {
             }
         }
 
-        if (!numbersAfterDate) continue;
+        if (!numbersAfterDate) {
+            console.warn(`parseMegaMillionsData: No se encontraron números después de la fecha ${dateStr}, saltando.`);
+            continue;
+        }
 
         // Extraer los 6 números del conjunto encontrado
         const nums = numbersAfterDate.match(/\d{1,2}/g);
         if (nums && nums.length >= 6) {
             const mainNumbers = nums.slice(0, 5).map(Number);
             const specialNum = Number(nums[5]);
-
-            drawings.push({
-                mainNumbers: mainNumbers.sort((a, b) => a - b),
-                special: specialNum,
-                date: formattedDate,
-                createdAt: new Date(),
-                userId: userId,
-            });
+            const drawing = finalizeDrawing(formattedDate, [ ...mainNumbers, specialNum ], numberRanges);
+            if (drawing) {
+                drawings.push(drawing);
+            } else {
+                console.error(`parseMegaMillionsData: finalizeDrawing falló para la fecha ${dateStr}`);
+            }
+        } else {
+            console.error(`parseMegaMillionsData: No se encontraron 6 números válidos después de la fecha ${dateStr}.`);
         }
     }
+    console.log(`parseMegaMillionsData: Análisis completo para Mega Millions. Se encontraron ${drawings.length} sorteos.`);
     return drawings;
 }
 
@@ -218,7 +274,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDomElements();
     setupEventListeners();
     try {
-        // ÚNICA inicialización de Firebase
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
@@ -227,7 +282,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userCredential = await signInAnonymously(auth);
         userId = userCredential.user.uid;
 
-        // Lógica para el ID amigable
         let friendlyId = localStorage.getItem('friendlyUserId');
         if (!friendlyId) {
             friendlyId = generateFriendlyId();
@@ -266,7 +320,8 @@ function setupEventListeners() {
             const q = query(collection(db, collectionPath), where("date", "==", date));
             const querySnapshot = await getDocs(q);
             if (!querySnapshot.empty) {
-                showMessage('Ya existe un sorteo guardado para esta fecha.', 'bg-red-500');
+                // --- MEJORA: Mensaje de error más específico ---
+                showMessage(`Ya existe un sorteo guardado para la fecha: ${date}.`, 'bg-red-500');
                 return;
             }
             try {
@@ -291,7 +346,7 @@ function setupEventListeners() {
             showMessage('Procesando datos...', 'bg-blue-500');
             const newDrawings = parsePastedData(pastedText, lottery);
             if (newDrawings.length === 0) {
-                showMessage('No se pudieron encontrar sorteos válidos en el texto.', 'bg-red-500');
+                showMessage('No se pudieron encontrar sorteos válidos en el texto. Revisa el formato.', 'bg-red-500');
                 return;
             }
             const collectionPath = getCollectionPath(lottery);
@@ -434,7 +489,7 @@ function getHistoryData(lottery) {
 function getLotteryRanges(lottery) {
     if (lottery === 'powerball') return { main: { min: 1, max: 69 }, special: { min: 1, max: 26 } };
     if (lottery === 'cash4life') return { main: { min: 1, max: 60 }, special: { min: 1, max: 4 } };
-    if (lottery === 'megamillions') return { main: { min: 1, max: 70 }, special: { min: 1, max: 24 } }; // Rangos correctos para Mega Millions
+    if (lottery === 'megamillions') return { main: { min: 1, max: 70 }, special: { min: 1, max: 24 } };
     return null;
 }
 function validateNumber(num, range) { return num >= range.min && num <= range.max; }
@@ -480,12 +535,16 @@ function renderHistory(lottery) {
     
     loadingSpinner.style.display = 'none';
     historyList.innerHTML = '';
-    const itemsToDisplay = showAll ? data : data.slice(0, NUM_TO_DISPLAY);
+    
+    // --- MEJORA: Siempre mostrar los últimos 5 ---
+    const itemsToDisplay = data.slice(0, NUM_TO_DISPLAY);
+    
     if (itemsToDisplay.length === 0) {
         historyList.innerHTML = `<p class="text-gray-400">Aún no hay sorteos guardados.</p>`;
         verMasContainer.style.display = 'none';
         return;
     }
+    
     itemsToDisplay.forEach(item => {
         const drawingDate = item.data.date;
         const mainNumbers = typeof item.data.mainNumbers === 'string' ? JSON.parse(item.data.mainNumbers) : item.data.mainNumbers;
@@ -498,14 +557,16 @@ function renderHistory(lottery) {
             deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`;
             deleteBtn.className = 'ml-4 flex-shrink-0';
             deleteBtn.title = 'Eliminar este sorteo';
-            deleteBtn.addEventListener('click', async () => { if (window.confirm('¿Estás seguro de que quieres eliminar este sorteo?')) { await deleteDoc(doc(db, getCollectionPath(lottery), item.id)); showMessage('Sorteo eliminado.', 'bg-yellow-500'); } });
+            deleteBtn.addEventListener('click', async () => { if (window.confirm('¿Estás seguro de que quieres eliminar este sorteo?')) { await deleteDoc(doc(db, getCollectionPath(lottery), item.id)); showMessage('Sorteo eliminado.', 'bg-yellow-500'); renderHistory(lottery); } });
             entryDiv.appendChild(deleteBtn);
         }
         historyList.appendChild(entryDiv);
     });
+    
+    // --- MEJORA: Mostrar botón "Ver más" solo si hay más de 5 ---
     if (data.length > NUM_TO_DISPLAY) {
         verMasContainer.style.display = 'block';
-        domElements[lottery].verMasBtn.textContent = showAll ? 'Ver menos historial' : 'Ver más historial';
+        domElements[lottery].verMasBtn.textContent = 'Ver más historial';
     } else {
         verMasContainer.style.display = 'none';
     }
@@ -541,6 +602,6 @@ function hideLoadingSpinners() { domElements.powerball.loadingSpinner.style.disp
 function getSpecialBallClass(lottery) {
     if (lottery === 'powerball') return 'special-ball';
     if (lottery === 'cash4life') return 'cash-ball';
-    if (lottery === 'megamillions') return 'mega-ball'; // Usamos la nueva clase para Mega Millions
+    if (lottery === 'megamillions') return 'mega-ball';
     return '';
 }
