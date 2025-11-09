@@ -36,6 +36,18 @@ const app = initializeApp(firebaseConfig);
 // Puede ser cualquier cadena de texto única, por ejemplo: "lottery-analyzer-app"
 const appId = "EstimatedGamelottery-app";
 
+// Función para generar un ID de usuario amigable y único
+function generateFriendlyId() {
+    const adjectives = ["Ágil", "Azul", "Brillante", "Cálido", "Valiente", "Creativo", "Dinámico", "Elegante", "Fértil", "Gigante"];
+    const animals = ["Águila", "Ballena", "Conejo", "Delfín", "Elefante", "Foca", "Gato", "Halcon", "Iguana", "Jaguar"];
+    const number = Math.floor(Math.random() * 1000);
+
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const animal = animals[Math.floor(Math.random() * animals.length)];
+
+    return `${adj}-${animal}-${number}`;
+}
+
 // --- NO NECESITAS CAMBIAR NADA MÁS AQUÍ ABAJO ---
 let db, auth, userId;
 
@@ -174,8 +186,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app); db = getFirestore(app); setLogLevel('silent');
-        const userCredential = await signInAnonymously(auth); userId = userCredential.user.uid;
-        document.getElementById('userIdDisplay').textContent = userId;
+        const userCredential = await signInAnonymously(auth); 
+        userId = userCredential.user.uid;
+
+        // --- NUEVA LÓGICA PARA EL ID AMIGABLE ---
+        let friendlyId = localStorage.getItem('friendlyUserId');
+        if (!friendlyId) {
+            // Si no existe, genera uno nuevo y guárdalo en el navegador
+            friendlyId = generateFriendlyId();
+            localStorage.setItem('friendlyUserId', friendlyId);
+        }
+        // Muestra el ID amigable en la página en lugar del ID de Firebase
+        document.getElementById('userIdDisplay').textContent = friendlyId;
+        // --- FIN DE LA LÓGICA NUEVA ---
+
         setupRealtimeListeners();
     } catch (e) {
         console.error("Error initializing Firebase:", e);
