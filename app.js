@@ -74,7 +74,6 @@ function finalizeDrawing(date, allNumbers, ranges) {
     // 2. Lógica mejorada para encontrar el número especial
     if (ranges.special.max < ranges.main.min) {
         // Para Mega Millions, donde el rango especial no se solapa con el principal
-        // Buscamos el número más pequeño que podría ser el especial
         for (const num of uniqueValidNumbers) {
             if (validateNumber(num, ranges.special)) {
                 specialNum = num;
@@ -95,13 +94,17 @@ function finalizeDrawing(date, allNumbers, ranges) {
         return null;
     }
     
-    return {
-        mainNumbers: mainNumbers.sort((a, b) => a - b),
-        special: specialNum,
-        date: date,
-        createdAt: new Date(),
-        userId: userId,
-    };
+    if (mainNumbers.length === 5 && specialNum !== null) {
+        return {
+            mainNumbers: mainNumbers.sort((a, b) => a - b),
+            special: specialNum,
+            date: date,
+            createdAt: new Date(),
+            userId: userId,
+        };
+    }
+
+    return null;
 }
 
 // --- FUNCIÓN ESPECÍFICA PARA CASH 4 LIFE ---
@@ -126,9 +129,9 @@ function processCash4LifeBlock(text) {
         }
         
         // Extraer números principales
-        const mainNumMatch = trimmedLine.match(/(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})/i);
+        const mainNumMatch = trimmedLine.match(/(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})/);
         if (mainNumMatch) {
-            mainNumbers = [parseInt(mainNumMatch[1]), parseInt(mainNumMatch[2]), parseInt(mainNumMatch[3]), parseInt(mainNumMatch[4]), parseInt(mainNumMatch[5])];
+            mainNumbers = [parseInt(mainNumMatch[1]), parseInt(mainNumMatch[2]), parseInt(mainNumMatch[3]), parseInt(mainNumMatch[4]), parseInt(mainNumMatch[5]), parseInt(mainNumMatch[6])];
         }
         
         // Extraer número especial Cash Ball
@@ -170,7 +173,7 @@ function processMegaMillionsBlock(text) {
         // Extraer números principales
         const mainNumMatch = trimmedLine.match(/(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})/);
         if (mainNumMatch) {
-            mainNumbers = [parseInt(mainNumMatch[1]), parseInt(mainNumMatch[2]), parseInt(mainNumMatch[3]), parseInt(mainNumMatch[4]), parseInt(mainNumMatch[5])];
+            mainNumbers = [parseInt(mainNumMatch[1]), parseInt(mainNumMatch[2]), parseInt(mainNumMatch[3]), parseInt(mainNumMatch[4]), parseInt(mainNumMatch[5]), parseInt(mainNumMatch[6])];
         }
         
         // Extraer número especial Mega Ball
@@ -188,7 +191,7 @@ function processMegaMillionsBlock(text) {
     return null;
 }
 
-// --- FUNCIÓN DE ANÁLISIS DE TEXTO MEJORADA ---
+// --- FUNCIÓN DE ANÁLISIS (CON DEPURACIÓN) ---
 function parsePastedData(text, lottery) {
     console.log(`parsePastedData: Iniciando análisis para ${lottery}.`);
     const drawings = [];
@@ -201,10 +204,7 @@ function parsePastedData(text, lottery) {
             if (block.trim() === '') continue;
             const drawing = processCash4LifeBlock(block);
             if (drawing) {
-                const finalizedDrawing = finalizeDrawing(drawing.date, [...drawing.mainNumbers, drawing.specialNum], numberRanges);
-                if (finalizedDrawing) {
-                    drawings.push(finalizedDrawing);
-                }
+                drawings.push(drawing);
             }
         }
     } else if (lottery === 'megamillions') {
@@ -214,10 +214,7 @@ function parsePastedData(text, lottery) {
             if (block.trim() === '') continue;
             const drawing = processMegaMillionsBlock(block);
             if (drawing) {
-                const finalizedDrawing = finalizeDrawing(drawing.date, [...drawing.mainNumbers, drawing.specialNum], numberRanges);
-                if (finalizedDrawing) {
-                    drawings.push(finalizedDrawing);
-                }
+                drawings.push(drawing);
             }
         }
     } else {
@@ -427,7 +424,7 @@ function setupEventListeners() {
             const numberRanges = getLotteryRanges(lottery);
             
             allHistoryData.forEach(item => {
-                const mainNums = typeof item.data.mainNumbers === 'string' ? JSON.parse(item.data.mainNumbers) : [];
+                const mainNums = typeof item.data.mainNumbers === 'string' ? JSON.parse(item.data.mainNumbers) : item.data.mainNumbers;
                 allMainNumbers.push(...mainNums);
                 allSpecials.push(item.data.special);
                 allDrawings.push(mainNums);
@@ -612,8 +609,7 @@ function renderHistory(lottery) {
     loadingSpinner.style.display = 'none';
     historyList.innerHTML = '';
     
-    // Siempre mostrar solo los últimos 5
-    const itemsToDisplay = data.slice(0, NUM_TO_DISPLAY);
+    const itemsToDisplay = showAll ? data : data.slice(0, NUM_TO_DISPLAY);
     
     if (itemsToDisplay.length === 0) {
         historyList.innerHTML = `<p class="text-gray-400">Aún no hay sorteos guardados.</p>`;
@@ -639,7 +635,7 @@ function renderHistory(lottery) {
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
                 </svg>
             `;
             deleteBtn.className = 'ml-4 flex-shrink-0';
@@ -657,7 +653,6 @@ function renderHistory(lottery) {
         historyList.appendChild(entryDiv);
     });
     
-    // Mostrar botón "Ver más" solo si hay más de 5
     if (data.length > NUM_TO_DISPLAY) {
         verMasContainer.style.display = 'block';
         domElements[lottery].verMasBtn.textContent = showAll ? 'Ver menos historial' : 'Ver más historial';
@@ -711,7 +706,6 @@ function calculatePairFrequency(drawings) {
                 pairFreq[pair] = (pairFreq[pair] || 0) + 1; 
             } 
         } 
-    }); 
     return pairFreq; 
 }
 
@@ -735,7 +729,9 @@ function displayBalls(container, numbers, type, ballType) {
         const ball = document.createElement('div'); 
         ball.textContent = num; 
         let ballClass = ''; 
-        if (ballType === 'main') ballClass = type === 'hot' ? 'hot-number' : 'cold-number'; 
+        if (ballType === 'main') { 
+            ballClass = type === 'hot' ? 'hot-number' : 'cold-number'; 
+        } 
         ball.className = `lottery-ball ${ballClass}`; 
         container.appendChild(ball); 
     }); 
@@ -757,18 +753,16 @@ function displayPairs(container, pairs) {
 function displayCombination(container, title, mainNumbers, specialNumber, lottery, isRandom) { 
     const drawingDiv = document.createElement('div'); 
     drawingDiv.className = 'p-4 bg-gray-700 rounded-lg shadow-md'; 
-    const specialClass = getSpecialBallClass(lottery);
-    
+    const specialClass = getSpecialBallClass(lottery); 
     drawingDiv.innerHTML = `
         <h4 class="text-lg font-bold mb-2">${title}</h4>
         <div class="flex flex-wrap items-center justify-center gap-2">
             ${mainNumbers.map(num => `<div class="lottery-ball">${num}</div>`).join('')}
             <div class="lottery-ball ${specialClass}">${specialNumber}</div>
         </div>
-    `;
-    
-    container.appendChild(drawingDiv);
-    container.style.display = 'block';
+    `; 
+    container.appendChild(drawingDiv); 
+    container.style.display = 'block'; 
 }
 
 function showMessage(message, className) { 
@@ -788,9 +782,9 @@ function hideLoadingSpinners() {
     domElements.loadingComments.style.display = 'none'; 
 }
 
-function getSpecialBallClass(lottery) {
-    if (lottery === 'powerball') return 'special-ball';
-    if (lottery === 'cash4life') return 'cash-ball';
-    if (lottery === 'megamillions') return 'mega-ball';
-    return '';
+function getSpecialBallClass(lottery) { 
+    if (lottery === 'powerball') return 'special-ball'; 
+    if (lottery === 'cash4life') return 'cash-ball'; 
+    if (lottery === 'megamillions') return 'mega-ball'; 
+    return ''; 
 }
