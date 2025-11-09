@@ -1,279 +1,277 @@
- <!DOCTYPE html>
- <html lang="es">
- <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Estimador de Lotería</title>
- <!-- Tailwind CSS -->
- <script src="https://cdn.tailwindcss.com"></script>
- <!-- Google Fonts -->
- <link rel="preconnect" href="https://fonts.googleapis.com">
- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
- <!-- Custom CSS -->
- <link rel="stylesheet" href="styles.css">
- </head>
- <body class="p-4 sm:p-8 min-h-screen flex flex-col items-center justify-center">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estimador de Lotería</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="p-4 sm:p-8 min-h-screen flex flex-col items-center justify-center">
 
- <!-- Main App Container -->
- <div class="bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-7xl text-center">
- <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-white">Estimador de Lotería</h1>
- <p class="text-gray-400 mb-6 text-sm sm:text-base">Análisis de sorteos para Powerball, Cash 4 Life y Mega Millions.</p>
- <p class="text-gray-400 text-xs mb-4">ID de usuario: <span id="userIdDisplay">Cargando...</span></p>
+    <!-- Main App Container -->
+    <div class="bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-6xl text-center">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-white">Estimador de Lotería</h1>
+        <p class="text-gray-400 mb-6 text-sm sm:text-base">Análisis de sorteos para Powerball, Cash 4 Life y Mega Millions.</p>
+        <p class="text-gray-400 text-xs mb-4">ID de usuario: <span id="userIdDisplay">Cargando...</span></p>
 
- <div id="messageBox" class="mt-4 p-4 text-center rounded-lg hidden"></div>
+        <div id="messageBox" class="mt-4 p-4 text-center rounded-lg hidden"></div>
 
- <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 mt-8">
- <!-- Powerball Section -->
- <div id="powerball-section" class="bg-gray-800 p-6 rounded-2xl">
- <h2 class="text-2xl font-bold text-red-400 mb-4">Powerball</h2>
- <!-- Manual Input Section -->
- <div class="mb-6 text-left">
- <h3 class="text-xl font-bold mb-2">Ingresar un Nuevo Sorteo</h3>
- <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
- <div class="flex-1 w-full">
- <label for="dateInput_pb" class="block text-gray-200 mb-1 font-bold">Fecha</label>
- <input type="date" id="dateInput_pb" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200">
- </div>
- </div>
- <div class="flex flex-wrap gap-2 mb-4 justify-center">
- <label class="block w-full text-gray-200 mb-1 font-bold text-center">Números Principales (1-69)</label>
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
- </div>
- <div class="mb-4">
- <label for="powerballNum" class="block text-gray-200 mb-1 font-bold">PowerBall (1-26)</label>
- <input type="number" id="powerballNum" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="26" data-lottery="powerball" data-type="special">
- </div>
- <button class="save-btn w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="powerball">
- Guardar Sorteo
- </button>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- Paste Data Section -->
- <div class="mb-6 text-left">
- <h3 class="text-xl font-bold mb-2">Agregar Historial Masivo</h3>
- <p class="text-gray-400 text-sm mb-4">Pega aquí los resultados directamente de la web.</p>
- <textarea class="paste-data-input w-full h-32 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Pega los datos aquí..." data-lottery="powerball"></textarea>
- <button class="process-btn w-full px-6 py-3 mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="powerball">
- Procesar y Guardar
- </button>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- Analysis Section -->
- <div class="text-left">
- <h3 class="text-xl font-bold mb-4">Análisis del Historial</h3>
- <button class="generate-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 mb-4" data-lottery="powerball">
- Generar Sorteo Automático
- </button>
- <div class="generated-numbers-container space-y-4 hidden" data-lottery="powerball"></div>
- <button class="analyze-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="powerball">
- Ver Análisis Completo
-</button>
- <div class="analysis-results mt-6 hidden" data-lottery="powerball">
- <h4 class="text-lg font-bold text-yellow-300 mb-2">Números Calientes</h4>
- <div class="hot-numbers flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
- <h4 class="text-lg font-bold text-blue-400 mb-2">Pares Calientes</h4>
- <div class="hot-pairs flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
- <h4 class="text-lg font-bold text-green-400 mb-2">Números Fríos</h4>
- <div class="cold-numbers flex flex-wrap gap-2 justify-center sm:justify-start"></div>
- </div>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- History Section -->
- <div class="text-left">
- <h3 class="text-xl font-bold mb-4">Historial de Sorteos</h3>
- <div class="loading-history flex items-center justify-center text-gray-400" data-lottery="powerball">
- <div class="loading-spinner mr-2"></div>
- Cargando historial...
- </div>
- <div class="history-list space-y-4" data-lottery="powerball"></div>
- <div class="text-center mt-4 hidden" id="verMasContainer_pb">
- <button id="verMasBtn_pb" class="text-blue-400 hover:text-blue-200 font-semibold transition-colors duration-300">
- Ver más historial
- </button>
- </div>
- </div>
- </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+            <!-- Powerball Section -->
+            <div id="powerball-section" class="bg-gray-800 p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold text-red-400 mb-4">Powerball</h2>
+                <!-- Manual Input Section -->
+                <div class="mb-6 text-left">
+                    <h3 class="text-xl font-bold mb-2">Ingresar un Nuevo Sorteo</h3>
+                    <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
+                        <div class="flex-1 w-full">
+                            <label for="dateInput_pb" class="block text-gray-200 mb-1 font-bold">Fecha</label>
+                            <input type="date" id="dateInput_pb" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-4 justify-center">
+                        <label class="block w-full text-gray-200 mb-1 font-bold text-center">Números Principales (1-69)</label>
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="69" data-lottery="powerball" data-type="main">
+                    </div>
+                    <div class="mb-4">
+                        <label for="powerballNum" class="block text-gray-200 mb-1 font-bold">PowerBall (1-26)</label>
+                        <input type="number" id="powerballNum" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="26" data-lottery="powerball" data-type="special">
+                    </div>
+                    <button class="save-btn w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="powerball">
+                        Guardar Sorteo
+                    </button>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- Paste Data Section -->
+                <div class="mb-6 text-left">
+                    <h3 class="text-xl font-bold mb-2">Agregar Historial Masivo</h3>
+                    <p class="text-gray-400 text-sm mb-4">Pega aquí los resultados directamente de la web.</p>
+                    <textarea class="paste-data-input w-full h-32 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Pega los datos aquí..." data-lottery="powerball"></textarea>
+                    <button class="process-btn w-full px-6 py-3 mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="powerball">
+                        Procesar y Guardar
+                    </button>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- Analysis Section -->
+                <div class="text-left">
+                    <h3 class="text-xl font-bold mb-4">Análisis del Historial</h3>
+                    <button class="generate-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 mb-4" data-lottery="powerball">
+                        Generar Sorteo Automático
+                    </button>
+                    <div class="generated-numbers-container space-y-4 hidden" data-lottery="powerball"></div>
+                    <button class="analyze-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="powerball">
+                        Ver Análisis Completo
+                    </button>
+                    <div class="analysis-results mt-6 hidden" data-lottery="powerball">
+                        <h4 class="text-lg font-bold text-yellow-300 mb-2">Números Calientes</h4>
+                        <div class="hot-numbers flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
+                        <h4 class="text-lg font-bold text-blue-400 mb-2">Pares Calientes</h4>
+                        <div class="hot-pairs flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
+                        <h4 class="text-lg font-bold text-green-400 mb-2">Números Fríos</h4>
+                        <div class="cold-numbers flex flex-wrap gap-2 justify-center sm:justify-start"></div>
+                    </div>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- History Section -->
+                <div class="text-left">
+                    <h3 class="text-xl font-bold mb-4">Historial de Sorteos</h3>
+                    <div class="loading-history flex items-center justify-center text-gray-400" data-lottery="powerball">
+                        <div class="loading-spinner mr-2"></div>
+                        Cargando historial...
+                    </div>
+                    <div class="history-list space-y-4" data-lottery="powerball"></div>
+                    <div class="text-center mt-4 hidden" id="verMasContainer_pb">
+                        <button id="verMasBtn_pb" class="text-blue-400 hover:text-blue-200 font-semibold transition-colors duration-300">
+                            Ver más historial
+                        </button>
+                    </div>
+                </div>
+            </div>
 
- <!-- Cash 4 Life Section -->
- <div id="cash4life-section" class="bg-gray-800 p-6 rounded-2xl">
- <h2 class="text-2xl font-bold text-purple-400 mb-4">Cash 4 Life</h2>
- <!-- Manual Input Section -->
- <div class="mb-6 text-left">
- <h3 class="text-xl font-bold mb-2">Ingresar un Nuevo Sorteo</h3>
- <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
- <div class="flex-1 w-full">
- <label for="dateInput_c4l" class="block text-gray-200 mb-1 font-bold">Fecha</label>
- <input type="date" id="dateInput_c4l" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200">
- </div>
- </div>
- <div class="flex flex-wrap gap-2 mb-4 justify-center">
- <label class="block w-full text-gray-200 mb-1 font-bold text-center">Números Principales (1-60)</label>
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
- </div>
- <div class="mb-4">
- <label for="cashBallNum" class="block text-gray-200 mb-1 font-bold">Cash Ball (1-4)</label>
- <input type="number" id="cashBallNum" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="4" data-lottery="cash4life" data-type="special">
- </div>
- <button class="save-btn w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="cash4life">
- Guardar Sorteo
- </button>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- Paste Data Section -->
- <div class="mb-6 text-left">
- <h3 class="text-xl font-bold mb-2">Agregar Historial Masivo</h3>
- <p class="text-gray-400 text-sm mb-4">Pega aquí los resultados directamente de la web.</p>
- <textarea class="paste-data-input w-full h-32 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Pega los datos aquí..." data-lottery="cash4life"></textarea>
- <button class="process-btn w-full px-6 py-3 mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="cash4life">
- Procesar y Guardar
- </button>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- Analysis Section -->
- <div class="text-left">
- <h3 class="text-xl font-bold mb-4">Análisis del Historial</h3>
- <button class="generate-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 mb-4" data-lottery="cash4life">
- Generar Sorteo Automático
- </button>
- <div class="generated-numbers-container space-y-4 hidden" data-lottery="cash4life"></div>
- <button class="analyze-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="cash4life">
- Ver Análisis Completo
- </button>
- <div class="analysis-results mt-6 hidden" data-lottery="cash4life">
- <h4 class="text-lg font-bold text-yellow-300 mb-2">Números Calientes</h4>
- <div class="hot-numbers flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
- <h4 class="text-lg font-bold text-blue-400 mb-2">Pares Calientes</h4>
- <div class="hot-pairs flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
- <h4 class="text-lg font-bold text-green-400 mb-2">Números Fríos</h4>
- <div class="cold-numbers flex flex-wrap gap-2 justify-center sm:justify-start"></div>
- </div>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- History Section -->
- <div class="text-left">
- <h3 class="text-xl font-bold mb-4">Historial de Sorteos</h3>
- <div class="loading-history flex items-center justify-center text-gray-400" data-lottery="cash4life">
- <div class="loading-spinner mr-2"></div>
- Cargando historial...
- </div>
- <div class="history-list space-y-4" data-lottery="cash4life"></div>
- <div class="text-center mt-4 hidden" id="verMasContainer_c4l">
- <button id="verMasBtn_c4l" class="text-blue-400 hover:text-blue-200 font-semibold transition-colors duration-300">
- Ver más historial
- </button>
- </div>
- </div>
- </div>
+            <!-- Cash 4 Life Section -->
+            <div id="cash4life-section" class="bg-gray-800 p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold text-purple-400 mb-4">Cash 4 Life</h2>
+                <!-- Manual Input Section -->
+                <div class="mb-6 text-left">
+                    <h3 class="text-xl font-bold mb-2">Ingresar un Nuevo Sorteo</h3>
+                    <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
+                        <div class="flex-1 w-full">
+                            <label for="dateInput_c4l" class="block text-gray-200 mb-1 font-bold">Fecha</label>
+                            <input type="date" id="dateInput_c4l" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-4 justify-center">
+                        <label class="block w-full text-gray-200 mb-1 font-bold text-center">Números Principales (1-60)</label>
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="60" data-lottery="cash4life" data-type="main">
+                    </div>
+                    <div class="mb-4">
+                        <label for="cashBallNum" class="block text-gray-200 mb-1 font-bold">Cash Ball (1-4)</label>
+                        <input type="number" id="cashBallNum" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="4" data-lottery="cash4life" data-type="special">
+                    </div>
+                    <button class="save-btn w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="cash4life">
+                        Guardar Sorteo
+                    </button>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- Paste Data Section -->
+                <div class="mb-6 text-left">
+                    <h3 class="text-xl font-bold mb-2">Agregar Historial Masivo</h3>
+                    <p class="text-gray-400 text-sm mb-4">Pega aquí los resultados directamente de la web.</p>
+                    <textarea class="paste-data-input w-full h-32 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Pega los datos aquí..." data-lottery="cash4life"></textarea>
+                    <button class="process-btn w-full px-6 py-3 mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="cash4life">
+                        Procesar y Guardar
+                    </button>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- Analysis Section -->
+                <div class="text-left">
+                    <h3 class="text-xl font-bold mb-4">Análisis del Historial</h3>
+                    <button class="generate-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 mb-4" data-lottery="cash4life">
+                        Generar Sorteo Automático
+                    </button>
+                    <div class="generated-numbers-container space-y-4 hidden" data-lottery="cash4life"></div>
+                    <button class="analyze-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="cash4life">
+                        Ver Análisis Completo
+                    </button>
+                    <div class="analysis-results mt-6 hidden" data-lottery="cash4life">
+                        <h4 class="text-lg font-bold text-yellow-300 mb-2">Números Calientes</h4>
+                        <div class="hot-numbers flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
+                        <h4 class="text-lg font-bold text-blue-400 mb-2">Pares Calientes</h4>
+                        <div class="hot-pairs flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
+                        <h4 class="text-lg font-bold text-green-400 mb-2">Números Fríos</h4>
+                        <div class="cold-numbers flex flex-wrap gap-2 justify-center sm:justify-start"></div>
+                    </div>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- History Section -->
+                <div class="text-left">
+                    <h3 class="text-xl font-bold mb-4">Historial de Sorteos</h3>
+                    <div class="loading-history flex items-center justify-center text-gray-400" data-lottery="cash4life">
+                        <div class="loading-spinner mr-2"></div>
+                        Cargando historial...
+                    </div>
+                    <div class="history-list space-y-4" data-lottery="cash4life"></div>
+                    <div class="text-center mt-4 hidden" id="verMasContainer_c4l">
+                        <button id="verMasBtn_c4l" class="text-blue-400 hover:text-blue-200 font-semibold transition-colors duration-300">
+                            Ver más historial
+                        </button>
+                    </div>
+                </div>
+            </div>
 
- <!-- Mega Millions Section -->
- <div id="megamillions-section" class="bg-gray-800 p-6 rounded-2xl">
- <h2 class="text-2xl font-bold text-yellow-400 mb-4">Mega Millions</h2>
- <!-- Manual Input Section -->
- <div class="mb-6 text-left">
- <h3 class="text-xl font-bold mb-2">Ingresar un Nuevo Sorteo</h3>
- <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
- <div class="flex-1 w-full">
- <label for="dateInput_mm" class="block text-gray-200 mb-1 font-bold">Fecha</label>
- <input type="date" id="dateInput_mm" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200">
- </div>
- </div>
- <div class="flex flex-wrap gap-2 mb-4 justify-center">
- <label class="block w-full text-gray-200 mb-1 font-bold text-center">Números Principales (1-70)</label>
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
- <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
- </div>
- <div class="mb-4">
- <label for="megaBallNum" class="block text-gray-200 mb-1 font-bold">Mega Ball (1-24)</label>
- <input type="number" id="megaBallNum" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="24" data-lottery="megamillions" data-type="special">
- </div>
- <button class="save-btn w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="megamillions">
- Guardar Sorteo
- </button>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- Paste Data Section -->
- <div class="mb-6 text-left">
- <h3 class="text-xl font-bold mb-2">Agregar Historial Masivo</h3>
- <p class="text-gray-400 text-sm mb-4">Pega aquí los resultados directamente de la web.</p>
- <textarea class="paste-data-input w-full h-32 p-2 rounded-lg bg-gray-700 text-gray-200 border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Pega los datos aquí..." data-lottery="megamillions"></textarea>
- <button class="process-btn w-full px-6 py-3 mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="megamillions">
- Procesar y Guardar
- </button>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- Analysis Section -->
- <div class="text-left">
- <h3 class="text-xl font-bold mb-4">Análisis del Historial</h3>
- <button class="generate-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 mb-4" data-lottery="megamillions">
- Generar Sorteo Automático
- </button>
- <div class="generated-numbers-container space-y-4 hidden" data-lottery="megamillions"></div>
- <button class="analyze-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="megamillions">
- Ver Análisis Completo
- </button>
- <div class="analysis-results mt-6 hidden" data-lottery="megamillions">
- <h4 class="text-lg font-bold text-yellow-300 mb-2">Números Calientes</h4>
- <div class="hot-numbers flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
- <h4 class="text-lg font-bold text-blue-400 mb-2">Pares Calientes</h4>
- <div class="hot-pairs flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
- <h4 class="text-lg font-bold text-green-400 mb-2">Números Fríos</h4>
- <div class="cold-numbers flex flex-wrap gap-2 justify-center sm:justify-start"></div>
- </div>
- </div>
- <hr class="border-gray-700 my-6">
- <!-- History Section -->
- <div class="text-left">
- <h3 class="text-xl font-bold mb-4">Historial de Sorteos</h3>
- <div class="loading-history flex items-center justify-center text-gray-400" data-lottery="megamillions">
- <div class="loading-spinner mr-2"></div>
- Cargando historial...
- </div>
- <div class="history-list space-y-4" data-lottery="megamillions"></div>
- <div class="text-center mt-4 hidden" id="verMasContainer_mm">
- <button id="verMasBtn_mm" class="text-blue-400 hover:text-blue-200 font-semibold transition-colors duration-300">
- Ver más historial
- </button>
- </div>
- </div>
- </div>
- </div>
- <hr class="border-gray-700 my-8">
- <!-- Comments Section -->
- <div class="text-left w-full">
- <h2 class="text-xl sm:text-2xl font-bold mb-4">Comentarios y Anuncios</h2>
- <div class="mb-4 p-4 bg-gray-800 rounded-lg">
- <p class="text-gray-300">Este es el espacio de la comunidad. Aquí puedes dejar comentarios, compartir tus estrategias o cualquier otra idea.</p>
- </div>
- <div class="mb-4">
- <textarea id="commentInput" class="w-full h-20 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Escribe tu comentario..."></textarea>
- <button id="postCommentBtn" class="w-full px-6 py-3 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95">
- Publicar Comentario
- </button>
- </div>
- <div id="commentsList" class="space-y-4">
- <div id="loadingComments" class="flex items-center justify-center text-gray-400">
- <div class="loading-spinner mr-2"></div>
- Cargando comentarios...
- </div>
- </div>
- </div>
- </div>
+            <!-- NUEVO: Mega Millions Section -->
+            <div id="megamillions-section" class="bg-gray-800 p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-4">Mega Millions</h2>
+                <!-- Manual Input Section -->
+                <div class="mb-6 text-left">
+                    <h3 class="text-xl font-bold mb-2">Ingresar un Nuevo Sorteo</h3>
+                    <div class="flex flex-col sm:flex-row gap-4 items-end mb-4">
+                        <div class="flex-1 w-full">
+                            <label for="dateInput_mm" class="block text-gray-200 mb-1 font-bold">Fecha</label>
+                            <input type="date" id="dateInput_mm" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-4 justify-center">
+                        <label class="block w-full text-gray-200 mb-1 font-bold text-center">Números Principales (1-70)</label>
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
+                        <input type="number" class="w-1/6 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="70" data-lottery="megamillions" data-type="main">
+                    </div>
+                    <div class="mb-4">
+                        <label for="megaBallNum" class="block text-gray-200 mb-1 font-bold">Mega Ball (1-24)</label>
+                        <input type="number" id="megaBallNum" class="w-full p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 text-center" min="1" max="24" data-lottery="megamillions" data-type="special">
+                    </div>
+                    <button class="save-btn w-full px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="megamillions">
+                        Guardar Sorteo
+                    </button>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- Paste Data Section -->
+                <div class="mb-6 text-left">
+                    <h3 class="text-xl font-bold mb-2">Agregar Historial Masivo</h3>
+                    <p class="text-gray-400 text-sm mb-4">Pega aquí los resultados directamente de la web.</p>
+                    <textarea class="paste-data-input w-full h-32 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Pega los datos aquí..." data-lottery="megamillions"></textarea>
+                    <button class="process-btn w-full px-6 py-3 mt-4 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="megamillions">
+                        Procesar y Guardar
+                    </button>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- Analysis Section -->
+                <div class="text-left">
+                    <h3 class="text-xl font-bold mb-4">Análisis del Historial</h3>
+                    <button class="generate-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95 mb-4" data-lottery="megamillions">
+                        Generar Sorteo Automático
+                    </button>
+                    <div class="generated-numbers-container space-y-4 hidden" data-lottery="megamillions"></div>
+                    <button class="analyze-btn w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95" data-lottery="megamillions">
+                        Ver Análisis Completo
+                    </button>
+                    <div class="analysis-results mt-6 hidden" data-lottery="megamillions">
+                        <h4 class="text-lg font-bold text-yellow-300 mb-2">Números Calientes</h4>
+                        <div class="hot-numbers flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
+                        <h4 class="text-lg font-bold text-blue-400 mb-2">Pares Calientes</h4>
+                        <div class="hot-pairs flex flex-wrap gap-2 justify-center sm:justify-start mb-6"></div>
+                        <h4 class="text-lg font-bold text-green-400 mb-2">Números Fríos</h4>
+                        <div class="cold-numbers flex flex-wrap gap-2 justify-center sm:justify-start"></div>
+                    </div>
+                </div>
+                <hr class="border-gray-700 my-6">
+                <!-- History Section -->
+                <div class="text-left">
+                    <h3 class="text-xl font-bold mb-4">Historial de Sorteos</h3>
+                    <div class="loading-history flex items-center justify-center text-gray-400" data-lottery="megamillions">
+                        <div class="loading-spinner mr-2"></div>
+                        Cargando historial...
+                    </div>
+                    <div class="history-list space-y-4" data-lottery="megamillions"></div>
+                    <div class="text-center mt-4 hidden" id="verMasContainer_mm">
+                        <button id="verMasBtn_mm" class="text-blue-400 hover:text-blue-200 font-semibold transition-colors duration-300">
+                            Ver más historial
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="border-gray-700 my-8">
+        <!-- Comments Section -->
+        <div class="text-left w-full">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4">Comentarios y Anuncios</h2>
+            <div class="mb-4 p-4 bg-gray-800 rounded-lg">
+                <p class="text-gray-300">Este es el espacio de la comunidad. Aquí puedes dejar comentarios, compartir tus estrategias o cualquier otra idea.</p>
+            </div>
+            <div class="mb-4">
+                <textarea id="commentInput" class="w-full h-20 p-2 rounded-lg bg-gray-700 text-gray-200 border border-gray-600 focus:border-blue-500 focus:outline-none transition-colors duration-200" placeholder="Escribe tu comentario..."></textarea>
+                <button id="postCommentBtn" class="w-full px-6 py-3 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full transition-colors duration-200 shadow-md transform hover:scale-105 active:scale-95">
+                    Publicar Comentario
+                </button>
+            </div>
+            <div id="commentsList" class="space-y-4">
+                <div id="loadingComments" class="flex items-center justify-center text-gray-400">
+                    <div class="loading-spinner mr-2"></div>
+                    Cargando comentarios...
+                </div>
+            </div>
+        </div>
+    </div>
 
- <!-- Firebase Scripts -->
- <script type="module" src="app.js"></script>
- </body>
- </html>
+    <!-- Firebase Scripts -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

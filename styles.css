@@ -29,10 +29,10 @@ body {
     color: white;
 }
 
+/* NUEVO: Estilo para la bola de Mega Millions */
 .mega-ball {
-    background-color: #FFD700; /* Un amarillo dorado para diferenciarlo */
+    background-color: #fbbf24; /* Un amarillo vibrante para diferenciarlo */
     color: #000;
-    border: 2px solid #fff; /* Un borde blanco para destacarlo */
 }
 
 .hot-number {
