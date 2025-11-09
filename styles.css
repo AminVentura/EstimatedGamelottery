@@ -29,6 +29,12 @@ body {
     color: white;
 }
 
+.mega-ball {
+    background-color: #FFD700; /* Un amarillo dorado para diferenciarlo */
+    color: #000;
+    border: 2px solid #fff; /* Un borde blanco para destacarlo */
+}
+
 .hot-number {
     background-color: #ff6347;
     color: white;

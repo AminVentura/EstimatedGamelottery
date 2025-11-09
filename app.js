@@ -21,6 +21,7 @@ let db, auth, userId;
 
 const powerballCollectionPath = `artifacts/${appId}/public/data/powerball_drawings`;
 const cash4lifeCollectionPath = `artifacts/${appId}/public/data/cash4life_drawings`;
+const megamillionsCollectionPath = `artifacts/${appId}/public/data/megamillions_drawings`;
 const commentsCollectionPath = `artifacts/${appId}/public/data/lotto_comments`;
 
 const NUM_TO_DISPLAY = 5;
@@ -28,6 +29,8 @@ let allHistoryData_pb = [];
 let showAll_pb = false;
 let allHistoryData_c4l = [];
 let showAll_c4l = false;
+let allHistoryData_mm = [];
+let showAll_mm = false;
 const domElements = {};
 
 // --- FUNCIONES AUXILIARES ---
@@ -52,25 +55,19 @@ function formatDate(dateString) {
 }
 
 function finalizeDrawing(date, allNumbers, ranges) {
-    // 1. Filtra números que estén en los rangos válidos.
     const validNumbers = allNumbers.filter(n => 
         (n >= ranges.main.min && n <= ranges.main.max) || 
         (n >= ranges.special.min && n <= ranges.special.max)
     );
-
-    // Usa los primeros 6 números únicos válidos que encuentre.
     const uniqueValidNumbers = Array.from(new Set(validNumbers)).slice(0, 6);
     
-    if (uniqueValidNumbers.length < 6) {
-        return null;
-    }
+    if (uniqueValidNumbers.length < 6) return null;
     
-    // 2. Heurística simple: Asume que el ÚLTIMO número es el especial.
-    // Este es el formato más común en los resultados de lotería.
+    // Heurística simple: Asume que el ÚLTIMO número es el especial.
     const specialNum = uniqueValidNumbers.slice(-1)[0];
     const mainNumbers = uniqueValidNumbers.slice(0, 5);
     
-    // 3. Verificación final para asegurar que los números están en los rangos correctos.
+    // Verificación final para asegurar que los números están en los rangos correctos.
     if (!validateNumber(specialNum, ranges.special) || !mainNumbers.every(n => validateNumber(n, ranges.main))) {
          return null;
     }
@@ -84,19 +81,16 @@ function finalizeDrawing(date, allNumbers, ranges) {
             userId: userId,
         };
     }
-
     return null;
 }
 
 function processBlock(blockText, ranges) {
-    // 1. Elimina texto basura y normaliza espacios en blanco
     const cleanBlock = blockText.replace(/(Power|Cash)\s*Play\s*\d*x?/gi, ' ')
-                                     .replace(/(PB|CB|PowerBall|Cash Ball):?\s*/gi, ' ')
+                                     .replace(/(PB|CB|PowerBall|Cash Ball|MEGA|MEGAPLIER):?\s*/gi, ' ')
                                      .replace(/Top prize\s*\$?\d{1,3}(?:,\d{3})*(?:\s*Per\s*(?:day|week|month|year)\s*for\s*life)?/gi, ' ')
                                      .replace(/Ad ends in\s*\d+/gi, ' ')
                                      .replace(/\s+/g, ' ').trim();
     
-    // 2. Busca la Fecha (patrón Mes Día, Año)
     const dateMatch = cleanBlock.match(/(\w+)\s*(\d{1,2}),\s*(\d{4})/i);
     if (!dateMatch) return null;
     
@@ -104,19 +98,14 @@ function processBlock(blockText, ranges) {
     const date = formatDate(dateString);
     if (!date) return null;
 
-    // 3. Busca los Números
     let allNumbers = [];
     const tokens = cleanBlock.split(' ').filter(t => t.length > 0);
-
     for (const token of tokens) {
-        // Intenta parsear como número simple
         const num = parseInt(token);
         if (!isNaN(num) && num >= 1) {
             allNumbers.push(num);
             continue;
         }
-
-        // Maneja números concatenados (ej: "10163261664")
         if (/^\d{7,}$/.test(token)) { 
              for (let i = 0; i < token.length; i += 2) {
                 const subNum = parseInt(token.substring(i, i + 2));
@@ -127,11 +116,68 @@ function processBlock(blockText, ranges) {
         }
     }
     
-    // Usa la lógica principal para extraer el mejor 5 main + 1 special
     return finalizeDrawing(date, allNumbers, ranges);
 }
 
+// --- NUEVA FUNCIÓN PARA MEGA MILLIONS ---
+function parseMegaMillionsData(text) {
+    const drawings = [];
+    const numberRanges = { main: { min: 1, max: 70 }, special: { min: 1, max: 24 } }; // Rangos de Mega Millions
+
+    // 1. Encontrar todas las fechas en formato MM/DD/YYYY
+    const dateRegex = /\b(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}\b/g;
+    const dates = text.match(dateRegex);
+    if (!dates) return [];
+
+    // 2. Encontrar todos los conjuntos de números (5 números + 1 Mega Ball)
+    // Buscamos líneas que contengan 5 o 6 números seguidos
+    const numberSetRegex = /(?:\b\d{1,2}\b){5,6}/g;
+    const numberSets = text.match(numberSetRegex);
+    if (!dates || !numberSets || dates.length !== numberSets.length) return [];
+
+    for (let i = 0; i < dates.length; i++) {
+        const date = dates[i];
+        const dateStr = date.substring(0, 2) + date.substring(3, 5) + date.substring(6, 10); // Formato MM/DD/YYYY
+        const formattedDate = formatDate(dateStr);
+        if (!formattedDate) continue;
+
+        // Buscar el conjunto de números que viene DESPUÉS de la fecha en el texto
+        let numbersAfterDate = '';
+        const dateIndex = text.indexOf(date);
+        if (dateIndex !== -1) {
+            const textAfterDate = text.substring(dateIndex + date.length);
+            const firstNumberSet = textAfterDate.match(numberSetRegex);
+            if (firstNumberSet) {
+                numbersAfterDate = firstNumberSet[0];
+            }
+        }
+
+        if (!numbersAfterDate) continue;
+
+        // Extraer los 6 números del conjunto encontrado
+        const nums = numbersAfterDate.match(/\d{1,2}/g);
+        if (nums && nums.length >= 6) {
+            const mainNumbers = nums.slice(0, 5).map(Number);
+            const specialNum = Number(nums[5]);
+
+            drawings.push({
+                mainNumbers: mainNumbers.sort((a, b) => a - b),
+                special: specialNum,
+                date: formattedDate,
+                createdAt: new Date(),
+                userId: userId,
+            });
+        }
+    }
+    return drawings;
+}
+
 function parsePastedData(text, lottery) {
+    if (lottery === 'megamillions') {
+        return parseMegaMillionsData(text);
+    }
+    
+    // Para Powerball y Cash 4 Life, usamos la lógica anterior
     const rawLines = text.split('\n');
     const drawings = [];
     const numberRanges = getLotteryRanges(lottery);
@@ -164,7 +210,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDomElements();
     setupEventListeners();
     try {
-        // ÚNICA inicialización de Firebase
         const app = initializeApp(firebaseConfig);
         auth = getAuth(app);
         db = getFirestore(app);
@@ -173,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userCredential = await signInAnonymously(auth);
         userId = userCredential.user.uid;
 
-        // Lógica para el ID amigable
         let friendlyId = localStorage.getItem('friendlyUserId');
         if (!friendlyId) {
             friendlyId = generateFriendlyId();
@@ -267,7 +311,7 @@ function setupEventListeners() {
         button.addEventListener('click', (e) => {
             const lottery = e.target.getAttribute('data-lottery');
             const section = document.getElementById(`${lottery}-section`);
-            const allHistoryData = lottery === 'powerball' ? allHistoryData_pb : allHistoryData_c4l;
+            const allHistoryData = getHistoryData(lottery);
             if (allHistoryData.length === 0) {
                 showMessage('No hay datos en el historial para generar un sorteo.', 'bg-yellow-500');
                 return;
@@ -297,7 +341,7 @@ function setupEventListeners() {
         button.addEventListener('click', (e) => {
             const lottery = e.target.getAttribute('data-lottery');
             const section = document.getElementById(`${lottery}-section`);
-            const allHistoryData = lottery === 'powerball' ? allHistoryData_pb : allHistoryData_c4l;
+            const allHistoryData = getHistoryData(lottery);
             if (allHistoryData.length === 0) {
                 showMessage('No hay datos en el historial para analizar.', 'bg-yellow-500');
                 return;
@@ -328,7 +372,7 @@ function setupEventListeners() {
                 const specialBallContainer = analysisContainer.querySelector('.hot-numbers');
                 const specialBall = document.createElement('div');
                 specialBall.textContent = hotSpecial[0];
-                const specialClass = lottery === 'powerball' ? 'special-ball' : 'cash-ball';
+                const specialClass = getSpecialBallClass(lottery);
                 specialBall.className = `lottery-ball ${specialClass} mr-4`;
                 specialBallContainer.prepend(specialBall);
             }
@@ -353,44 +397,77 @@ function setupEventListeners() {
     });
     if (domElements.powerball.verMasBtn) domElements.powerball.verMasBtn.addEventListener('click', () => { showAll_pb = !showAll_pb; renderHistory('powerball'); });
     if (domElements.cash4life.verMasBtn) domElements.cash4life.verMasBtn.addEventListener('click', () => { showAll_c4l = !showAll_c4l; renderHistory('cash4life'); });
+    if (domElements.megamillions.verMasBtn) domElements.megamillions.verMasBtn.addEventListener('click', () => { showAll_mm = !showAll_mm; renderHistory('megamillions'); });
 }
 
 // --- FUNCIONES DE INTERFAZ Y MANEJO DE DATOS ---
 function initDomElements() {
     domElements.powerball = { historyList: document.querySelector('.history-list[data-lottery="powerball"]'), loadingSpinner: document.querySelector('.loading-history[data-lottery="powerball"]'), verMasBtn: document.getElementById('verMasBtn_pb'), verMasContainer: document.getElementById('verMasContainer_pb') };
     domElements.cash4life = { historyList: document.querySelector('.history-list[data-lottery="cash4life"]'), loadingSpinner: document.querySelector('.loading-history[data-lottery="cash4life"]'), verMasBtn: document.getElementById('verMasBtn_c4l'), verMasContainer: document.getElementById('verMasContainer_c4l') };
+    domElements.megamillions = { historyList: document.querySelector('.history-list[data-lottery="megamillions"]'), loadingSpinner: document.querySelector('.loading-history[data-lottery="megamillions"]'), verMasBtn: document.getElementById('verMasBtn_mm'), verMasContainer: document.getElementById('verMasContainer_mm') };
     domElements.commentsList = document.getElementById('commentsList');
     domElements.loadingComments = document.getElementById('loadingComments');
     domElements.messageBox = document.getElementById('messageBox');
 }
-function getCollectionPath(lottery) { return lottery === 'powerball' ? powerballCollectionPath : cash4lifeCollectionPath; }
-function getLotteryRanges(lottery) { if (lottery === 'powerball') return { main: { min: 1, max: 69 }, special: { min: 1, max: 26 } }; if (lottery === 'cash4life') return { main: { min: 1, max: 60 }, special: { min: 1, max: 4 } }; return null; }
+function getCollectionPath(lottery) {
+    if (lottery === 'powerball') return powerballCollectionPath;
+    if (lottery === 'cash4life') return cash4lifeCollectionPath;
+    if (lottery === 'megamillions') return megamillionsCollectionPath;
+    return null;
+}
+function getHistoryData(lottery) {
+    if (lottery === 'powerball') return allHistoryData_pb;
+    if (lottery === 'cash4life') return allHistoryData_c4l;
+    if (lottery === 'megamillions') return allHistoryData_mm;
+    return [];
+}
+function getLotteryRanges(lottery) {
+    if (lottery === 'powerball') return { main: { min: 1, max: 69 }, special: { min: 1, max: 26 } };
+    if (lottery === 'cash4life') return { main: { min: 1, max: 60 }, special: { min: 1, max: 4 } };
+    if (lottery === 'megamillions') return { main: { min: 1, max: 70 }, special: { min: 1, max: 24 } }; // Rangos correctos para Mega Millions
+    return null;
+}
 function validateNumber(num, range) { return num >= range.min && num <= range.max; }
 function validateNumbers(nums, range) { return nums.every(num => validateNumber(num, range)); }
-function clearInputs(section) { const mainInputs = section.querySelectorAll(`input[data-type="main"]`); const specialInput = section.querySelector(`input[data-type="special"]`); const dateInput = section.querySelector(`input[type="date"]`); mainInputs.forEach(input => input.value = ''); specialInput.value = ''; dateInput.value = ''; }
+function clearInputs(section) {
+    const mainInputs = section.querySelectorAll(`input[data-type="main"]`);
+    const specialInput = section.querySelector(`input[data-type="special"]`);
+    const dateInput = section.querySelector(`input[type="date"]`);
+    mainInputs.forEach(input => input.value = '');
+    specialInput.value = '';
+    dateInput.value = '';
+}
 function setupRealtimeListeners() {
     onSnapshot(query(collection(db, powerballCollectionPath), orderBy("date", "desc")), (snapshot) => { allHistoryData_pb = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() })); renderHistory('powerball'); });
     onSnapshot(query(collection(db, cash4lifeCollectionPath), orderBy("date", "desc")), (snapshot) => { allHistoryData_c4l = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() })); renderHistory('cash4life'); });
+    onSnapshot(query(collection(db, megamillionsCollectionPath), orderBy("date", "desc")), (snapshot) => { allHistoryData_mm = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() })); renderHistory('megamillions'); });
     onSnapshot(query(collection(db, commentsCollectionPath), orderBy("createdAt", "desc")), (snapshot) => { domElements.loadingComments.style.display = 'none'; renderComments(snapshot.docs); });
 }
 function setupDemoMode() {
     const demoPowerballData = [{ date: '2025-08-25', mainNumbers: JSON.stringify([1, 10, 25, 30, 45]), special: 12 }, { date: '2025-08-22', mainNumbers: JSON.stringify([5, 12, 28, 40, 55]), special: 20 }];
     const demoCash4LifeData = [{ date: '2025-08-25', mainNumbers: JSON.stringify([2, 5, 10, 15, 20]), special: 3 }, { date: '2025-08-22', mainNumbers: JSON.stringify([8, 12, 20, 35, 40]), special: 1 }];
+    const demoMegaMillionsData = [{ date: '2025-08-25', mainNumbers: JSON.stringify([5, 10, 25, 35, 70]), special: 24 }, { date: '2025-08-22', mainNumbers: JSON.stringify([8, 12, 20, 35, 70]), special: 15 }];
+    
     allHistoryData_pb = demoPowerballData.map(data => ({ id: `demo_${data.date}`, data }));
     allHistoryData_c4l = demoCash4LifeData.map(data => ({ id: `demo_${data.date}`, data }));
+    allHistoryData_mm = demoMegaMillionsData.map(data => ({ id: `demo_${data.date}`, data }));
+    
     renderHistory('powerball');
     renderHistory('cash4life');
+    renderHistory('megamillions');
+    
     document.querySelectorAll('.save-btn, .process-btn, #postCommentBtn').forEach(btn => { btn.disabled = true; btn.style.opacity = 0.5; btn.style.cursor = 'not-allowed'; });
     const commentsList = domElements.commentsList;
     domElements.loadingComments.style.display = 'none';
     commentsList.innerHTML = `<div class="p-4 bg-gray-700 rounded-lg text-gray-300">Modo de demostración: Los datos y comentarios no se guardarán.</div>`;
 }
 function renderHistory(lottery) {
-    const data = lottery === 'powerball' ? allHistoryData_pb : allHistoryData_c4l;
+    const data = getHistoryData(lottery);
     const historyList = domElements[lottery].historyList;
     const loadingSpinner = domElements[lottery].loadingSpinner;
     const verMasContainer = domElements[lottery].verMasContainer;
-    const showAll = lottery === 'powerball' ? showAll_pb : showAll_c4l;
+    const showAll = lottery === 'powerball' ? showAll_pb : (lottery === 'cash4life' ? showAll_c4l : showAll_mm);
+    
     loadingSpinner.style.display = 'none';
     historyList.innerHTML = '';
     const itemsToDisplay = showAll ? data : data.slice(0, NUM_TO_DISPLAY);
@@ -405,7 +482,7 @@ function renderHistory(lottery) {
         const specialNum = item.data.special;
         const entryDiv = document.createElement('div');
         entryDiv.className = 'flex flex-wrap items-center gap-2 p-4 bg-gray-700 rounded-lg shadow-md';
-        entryDiv.innerHTML = `<span class="text-gray-400 text-sm font-semibold flex-shrink-0">${drawingDate}</span><div class="flex flex-wrap gap-2 ml-auto">${mainNumbers.map(num => `<div class="lottery-ball">${num}</div>`).join('')}<div class="lottery-ball ${lottery === 'powerball' ? 'special-ball' : 'cash-ball'}">${specialNum}</div></div>`;
+        entryDiv.innerHTML = `<span class="text-gray-400 text-sm font-semibold flex-shrink-0">${drawingDate}</span><div class="flex flex-wrap gap-2 ml-auto">${mainNumbers.map(num => `<div class="lottery-ball">${num}</div>`).join('')}<div class="lottery-ball ${getSpecialBallClass(lottery)}">${specialNum}</div></div>`;
         if (item.data.userId && item.data.userId === userId) {
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`;
@@ -444,10 +521,30 @@ function getSortedNumbers(freqMap, order, limit) { return Object.entries(freqMap
 function getSortedPairs(pairFreq, limit) { return Object.entries(pairFreq).sort(([, a], [, b]) => b - a).slice(0, limit).map(([pair]) => pair.split('-').map(Number)); }
 function displayBalls(container, numbers, type, ballType) { container.innerHTML = ''; numbers.forEach(num => { const ball = document.createElement('div'); ball.textContent = num; let ballClass = ''; if (ballType === 'main') ballClass = type === 'hot' ? 'hot-number' : 'cold-number'; ball.className = `lottery-ball ${ballClass}`; container.appendChild(ball); }); }
 function displayPairs(container, pairs) { container.innerHTML = ''; pairs.forEach(pair => { const pairBox = document.createElement('div'); pairBox.className = 'pair-box flex items-center gap-2'; pairBox.innerHTML = `<div class="lottery-ball lottery-ball-sm">${pair[0]}</div><div class="lottery-ball lottery-ball-sm">${pair[1]}</div>`; container.appendChild(pairBox); }); }
-function displayCombination(container, title, mainNumbers, specialNumber, lottery, isRandom) { const drawingDiv = document.createElement('div'); drawingDiv.className = 'p-4 bg-gray-700 rounded-lg shadow-md'; const specialClass = lottery === 'powerball' ? 'special-ball' : 'cash-ball';
+function displayCombination(container, title, mainNumbers, specialNumber, lottery, isRandom) {
+    const drawingDiv = document.createElement('div');
+    drawingDiv.className = 'p-4 bg-gray-700 rounded-lg shadow-md';
+    const specialClass = getSpecialBallClass(lottery);
     drawingDiv.innerHTML = `<h4 class="text-lg font-bold mb-2">${title}</h4><div class="flex flex-wrap items-center justify-center gap-2">${mainNumbers.map(num => `<div class="lottery-ball">${num}</div>`).join('')}<div class="lottery-ball ${specialClass}">${specialNumber}</div></div>`;
     container.appendChild(drawingDiv);
     container.style.display = 'block';
 }
-function showMessage(message, className) { const msgBox = domElements.messageBox; msgBox.textContent = message; msgBox.className = `mt-4 p-4 text-center rounded-lg transition-colors duration-300 ${className}`; msgBox.style.display = 'block'; setTimeout(() => { msgBox.style.display = 'none'; }, 5000); }
-function hideLoadingSpinners() { domElements.powerball.loadingSpinner.style.display = 'none'; domElements.cash4life.loadingSpinner.style.display = 'none'; domElements.loadingComments.style.display = 'none'; }
+function showMessage(message, className) {
+    const msgBox = domElements.messageBox;
+    msgBox.textContent = message;
+    msgBox.className = `mt-4 p-4 text-center rounded-lg transition-colors duration-300 ${className}`;
+    msgBox.style.display = 'block';
+    setTimeout(() => { msgBox.style.display = 'none'; }, 5000);
+}
+function hideLoadingSpinners() {
+    domElements.powerball.loadingSpinner.style.display = 'none';
+    domElements.cash4life.loadingSpinner.style.display = 'none';
+    domElements.megamillions.loadingSpinner.style.display = 'none';
+    domElements.loadingComments.style.display = 'none';
+}
+function getSpecialBallClass(lottery) {
+    if (lottery === 'powerball') return 'special-ball';
+    if (lottery === 'cash4life') return 'cash-ball';
+    if (lottery === 'megamillions') return 'mega-ball';
+    return '';
+}
