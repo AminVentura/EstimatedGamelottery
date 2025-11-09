@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, writeBatch, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "firebase/app";
 
 // --- CONFIGURACIÓN DE FIREBASE ---
 // Tu configuración real de Firebase
@@ -24,6 +25,8 @@ let db, auth, userId;
 const powerballCollectionPath = `artifacts/${appId}/public/data/powerball_drawings`;
 const cash4lifeCollectionPath = `artifacts/${appId}/public/data/cash4life_drawings`;
 const commentsCollectionPath = `artifacts/${appId}/public/data/lotto_comments`;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
 const NUM_TO_DISPLAY = 5;
 let allHistoryData_pb = [];
@@ -54,24 +57,39 @@ function formatDate(dateString) {
 }
 
 function finalizeDrawing(date, allNumbers, ranges) {
-    const validNumbers = allNumbers.filter(n => (n >= ranges.main.min && n <= ranges.main.max) || (n >= ranges.special.min && n <= ranges.special.max));
+    // 1. Filtra los números que estén dentro de los rangos válidos.
+    const validNumbers = allNumbers.filter(n => 
+        (n >= ranges.main.min && n <= ranges.main.max) || 
+        (n >= ranges.special.min && n <= ranges.special.max)
+    );
+
+    // Usa los primeros 6 números únicos válidos que encuentre.
     const uniqueValidNumbers = Array.from(new Set(validNumbers)).slice(0, 6);
-    if (uniqueValidNumbers.length < 6) return null;
-    let specialNum = null, mainNumbers = [];
-    for (const num of uniqueValidNumbers) {
-        if (validateNumber(num, ranges.special) && !validateNumber(num, {min: ranges.main.max + 1, max: 999})) {
-            const remainingMains = uniqueValidNumbers.filter(n => n !== num && validateNumber(n, ranges.main));
-            if (remainingMains.length === 5) { specialNum = num; mainNumbers = remainingMains; break; }
-        }
+    
+    if (uniqueValidNumbers.length < 6) {
+        return null;
     }
-    if (specialNum === null) {
-        specialNum = uniqueValidNumbers.slice(-1)[0];
-        mainNumbers = uniqueValidNumbers.slice(0, 5);
-        if (!validateNumber(specialNum, ranges.special) || !mainNumbers.every(n => validateNumber(n, ranges.main))) return null;
+    
+    // 2. Heurística simple: Asume que el ÚLTIMO número es el especial.
+    // Este es el formato más común en los resultados de lotería.
+    const specialNum = uniqueValidNumbers.slice(-1)[0];
+    const mainNumbers = uniqueValidNumbers.slice(0, 5);
+    
+    // 3. Verificación final para asegurar que los números están en los rangos correctos.
+    if (!validateNumber(specialNum, ranges.special) || !mainNumbers.every(n => validateNumber(n, ranges.main))) {
+         return null;
     }
+    
     if (mainNumbers.length === 5 && specialNum !== null) {
-        return { mainNumbers: mainNumbers.sort((a, b) => a - b), special: specialNum, date: date, createdAt: new Date(), userId: userId };
+        return {
+            mainNumbers: mainNumbers.sort((a, b) => a - b),
+            special: specialNum,
+            date: date,
+            createdAt: new Date(),
+            userId: userId,
+        };
     }
+
     return null;
 }
 
