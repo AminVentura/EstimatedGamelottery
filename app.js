@@ -2,10 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, writeBatch, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { initializeApp } from "firebase/app";
 
 // --- CONFIGURACIÓN DE FIREBASE ---
-// Tu configuración real de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBtNNiANCMdMILI5qiL9fF5aWhjfknUMWQ",
   authDomain: "game-lottery-b0e90.firebaseapp.com",
@@ -15,8 +13,7 @@ const firebaseConfig = {
   appId: "1:192610858921:web:7e76e398b3c5978f7b36b8"
 };
 
-// --- ID DE LA APLICACIÓN (para las rutas de la base de datos) ---
-// Este es el ID que usamos para nombrar tus colecciones en Firestore
+// --- ID DE LA APLICACIÓN ---
 const appId = "EstimatedGamelottery-app";
 
 // --- VARIABLES GLOBALES ---
@@ -25,8 +22,6 @@ let db, auth, userId;
 const powerballCollectionPath = `artifacts/${appId}/public/data/powerball_drawings`;
 const cash4lifeCollectionPath = `artifacts/${appId}/public/data/cash4life_drawings`;
 const commentsCollectionPath = `artifacts/${appId}/public/data/lotto_comments`;
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
 
 const NUM_TO_DISPLAY = 5;
 let allHistoryData_pb = [];
@@ -57,7 +52,7 @@ function formatDate(dateString) {
 }
 
 function finalizeDrawing(date, allNumbers, ranges) {
-    // 1. Filtra los números que estén dentro de los rangos válidos.
+    // 1. Filtra números que estén en los rangos válidos.
     const validNumbers = allNumbers.filter(n => 
         (n >= ranges.main.min && n <= ranges.main.max) || 
         (n >= ranges.special.min && n <= ranges.special.max)
@@ -94,12 +89,14 @@ function finalizeDrawing(date, allNumbers, ranges) {
 }
 
 function processBlock(blockText, ranges) {
+    // 1. Elimina texto basura y normaliza espacios en blanco
     const cleanBlock = blockText.replace(/(Power|Cash)\s*Play\s*\d*x?/gi, ' ')
                                      .replace(/(PB|CB|PowerBall|Cash Ball):?\s*/gi, ' ')
                                      .replace(/Top prize\s*\$?\d{1,3}(?:,\d{3})*(?:\s*Per\s*(?:day|week|month|year)\s*for\s*life)?/gi, ' ')
                                      .replace(/Ad ends in\s*\d+/gi, ' ')
                                      .replace(/\s+/g, ' ').trim();
     
+    // 2. Busca la Fecha (patrón Mes Día, Año)
     const dateMatch = cleanBlock.match(/(\w+)\s*(\d{1,2}),\s*(\d{4})/i);
     if (!dateMatch) return null;
     
@@ -107,14 +104,19 @@ function processBlock(blockText, ranges) {
     const date = formatDate(dateString);
     if (!date) return null;
 
+    // 3. Busca los Números
     let allNumbers = [];
     const tokens = cleanBlock.split(' ').filter(t => t.length > 0);
+
     for (const token of tokens) {
+        // Intenta parsear como número simple
         const num = parseInt(token);
         if (!isNaN(num) && num >= 1) {
             allNumbers.push(num);
             continue;
         }
+
+        // Maneja números concatenados (ej: "10163261664")
         if (/^\d{7,}$/.test(token)) { 
              for (let i = 0; i < token.length; i += 2) {
                 const subNum = parseInt(token.substring(i, i + 2));
@@ -125,6 +127,7 @@ function processBlock(blockText, ranges) {
         }
     }
     
+    // Usa la lógica principal para extraer el mejor 5 main + 1 special
     return finalizeDrawing(date, allNumbers, ranges);
 }
 
@@ -133,10 +136,12 @@ function parsePastedData(text, lottery) {
     const drawings = [];
     const numberRanges = getLotteryRanges(lottery);
     let currentBlock = '';
+
     for (const line of rawLines) {
         const trimmedLine = line.trim();
         if (trimmedLine.length === 0) continue;
         const isNewDrawingStart = /(Mon|Tue|Wed|Thu|Fri|Sat|Sun),/i.test(trimmedLine) || /,?\s*\w+\s*\d{1,2},\s*\d{4}/i.test(trimmedLine);
+        
         if (isNewDrawingStart && currentBlock.length > 0) {
             const drawing = processBlock(currentBlock, numberRanges);
             if (drawing) drawings.push(drawing);
@@ -145,10 +150,12 @@ function parsePastedData(text, lottery) {
             currentBlock += trimmedLine + ' ';
         }
     }
+
     if (currentBlock.length > 0) {
         const drawing = processBlock(currentBlock, numberRanges);
         if (drawing) drawings.push(drawing);
     }
+
     return drawings;
 }
 
