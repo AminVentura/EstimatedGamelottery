@@ -1,67 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(to bottom right, #001f3f, #1e0b3c);
-    color: white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  overflow-x: hidden;
 }
 
-.lottery-ball {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    background-color: #ffd700;
-    border-radius: 50%;
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    flex-shrink: 0;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.special-ball {
-    background-color: #ff6347;
-    color: white;
+::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 4px;
 }
 
-.cash-ball {
-    background-color: #6a0dad;
-    color: white;
+::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.8);
+  border-radius: 4px;
+  transition: background 0.3s ease;
 }
 
-/* NUEVO: Estilo para la bola de Mega Millions */
-.mega-ball {
-    background-color: #fbbf24; /* Un amarillo vibrante para diferenciarlo */
-    color: #000;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.9);
 }
 
-.hot-number {
-    background-color: #ff6347;
-    color: white;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.cold-number {
-    background-color: #4682b4;
-    color: white;
-}
-
-.pair-box {
-    background-color: #4a5568;
-    padding: 8px 12px;
-    border-radius: 9999px;
-    font-weight: bold;
-}
-
-.loading-spinner {
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-top: 4px solid white;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    animation: spin 1s linear infinite;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-hot {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes pulse-cold {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Input number arrows removal - Corregido para compatibilidad */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  appearance: none;
+}
+
+input[type="number"] {
+  /* Firefox */
+  -moz-appearance: textfield;
+  /* Chrome, Safari, Edge, Opera */
+  appearance: none;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Lottery Ball Styles */
+.lottery-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(145deg, #ffd700, #ffed4e);
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lottery-ball::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), transparent);
+  border-radius: 50%;
+}
+
+.lottery-ball:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Special Ball Styles */
+.special-ball {
+  background: linear-gradient(145deg, #ff6347, #ff7f50);
+  color: white;
+}
+
+.cash-ball {
+  background: linear-gradient(145deg, #6a0dad, #8b2dc7);
+  color: white;
+}
+
+.mega-ball {
+  background: linear-gradient(145deg, #fbbf24, #fcd34d);
+  color: #000;
+}
+
+/* Analysis Ball Styles */
+.hot-number {
+  background: linear-gradient(145deg, #ff6347, #ff7f50);
+  color: white;
+  animation: pulse-hot 2s infinite;
+}
+
+.cold-number {
+  background: linear-gradient(145deg, #4682b4, #5a9fd4);
+  color: white;
+  animation: pulse-cold 2s infinite;
+}
+
+/* Pair Box Styles */
+.pair-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(74, 85, 104, 0.5);
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  border: 1px solid rgba(74, 85, 104, 0.8);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.pair-box:hover {
+  background: rgba(74, 85, 104, 0.7);
+  transform: translateY(-1px);
+}
+
+.lottery-ball-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.8rem;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+/* Tab Styles */
+.lottery-tab {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.lottery-tab.active {
+  color: white;
+  border-bottom-color: currentColor;
+}
+
+.lottery-tab[data-lottery="powerball"].active {
+  border-bottom-color: #ef4444;
+}
+
+.lottery-tab[data-lottery="cash4life"].active {
+  border-bottom-color: #a855f7;
+}
+
+.lottery-tab[data-lottery="megamillions"].active {
+  border-bottom-color: #eab308;
+}
+
+/* Input Styles */
+.lottery-input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Button Styles */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* History Item Styles */
+.history-item {
+  animation: fadeIn 0.3s ease;
+}
+
+.history-item:hover {
+  transform: translateX(4px);
+}
+
+/* Comment Styles */
+.comment-item {
+  animation: fadeIn 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.comment-item:hover {
+  background: rgba(55, 65, 81, 0.5);
+}
+
+/* Generated Combination Styles */
+.generated-combination {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.5s ease;
+}
+
+.generated-combination:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .lottery-ball {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+  
+  .lottery-ball-sm {
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Utility Classes */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(10px);
 }
