@@ -5,6 +5,57 @@
  */
 
 /**
+ * Función auxiliar para extraer números principales de un objeto de sorteo
+ * @param {Object} drawing - Objeto de sorteo
+ * @returns {Array} Array de números principales
+ */
+function extractMainNumbers(drawing) {
+    // Intentar diferentes estructuras de datos
+    if (drawing.data && drawing.data.mainNumbers) {
+        if (Array.isArray(drawing.data.mainNumbers)) {
+            return drawing.data.mainNumbers;
+        } else if (typeof drawing.data.mainNumbers === 'string') {
+            try {
+                const parsed = JSON.parse(drawing.data.mainNumbers);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error("Error parsing drawing.data.mainNumbers:", e);
+                return [];
+            }
+        }
+    } else if (drawing.mainNumbers) {
+        if (Array.isArray(drawing.mainNumbers)) {
+            return drawing.mainNumbers;
+        } else if (typeof drawing.mainNumbers === 'string') {
+            try {
+                const parsed = JSON.parse(drawing.mainNumbers);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.error("Error parsing drawing.mainNumbers:", e);
+                return [];
+            }
+        }
+    }
+    
+    return [];
+}
+
+/**
+ * Función auxiliar para extraer número especial de un objeto de sorteo
+ * @param {Object} drawing - Objeto de sorteo
+ * @returns {Number} Número especial
+ */
+function extractSpecialNumber(drawing) {
+    if (drawing.data && drawing.data.special !== undefined) {
+        return drawing.data.special;
+    } else if (drawing.special !== undefined) {
+        return drawing.special;
+    }
+    
+    return null;
+}
+
+/**
  * Analiza patrones de distribución por decenas
  * @param {Array} drawings - Historial de sorteos
  * @param {Object} ranges - Rangos de números válidos
@@ -19,40 +70,23 @@ function analyzeDecadeDistribution(drawings, ranges) {
         decadeDistribution[i] = 0;
     }
     
+    // Verificar que drawings sea un array válido
+    if (!Array.isArray(drawings)) {
+        console.error("drawings no es un array válido");
+        return decadeDistribution;
+    }
+    
     // Contar números por decena
     drawings.forEach(drawing => {
-        // Verificar que drawing.mainNumbers exista y sea válido
-        let mainNums = [];
+        const mainNums = extractMainNumbers(drawing);
         
-        if (drawing.mainNumbers) {
-            if (typeof drawing.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.mainNumbers)) {
-                mainNums = drawing.mainNumbers;
-            }
-        } else if (drawing.data && drawing.data.mainNumbers) {
-            if (typeof drawing.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing drawing.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.data.mainNumbers)) {
-                mainNums = drawing.data.mainNumbers;
-            }
-        }
-        
-        // Verificar que mainNums sea un array válido antes de usar forEach
+        // Verificar que mainNums sea un array válido
         if (Array.isArray(mainNums)) {
             mainNums.forEach(num => {
-                const decade = Math.floor(num / 10);
-                decadeDistribution[decade]++;
+                if (typeof num === 'number' && !isNaN(num)) {
+                    const decade = Math.floor(num / 10);
+                    decadeDistribution[decade] = (decadeDistribution[decade] || 0) + 1;
+                }
             });
         }
     });
@@ -68,43 +102,26 @@ function analyzeDecadeDistribution(drawings, ranges) {
 function analyzeOddEvenPatterns(drawings) {
     const patterns = { '0-5': 0, '1-4': 0, '2-3': 0, '3-2': 0, '4-1': 0, '5-0': 0 };
     
+    // Verificar que drawings sea un array válido
+    if (!Array.isArray(drawings)) {
+        console.error("drawings no es un array válido");
+        return patterns;
+    }
+    
     drawings.forEach(drawing => {
-        // Verificar que drawing.mainNumbers exista y sea válido
-        let mainNums = [];
-        
-        if (drawing.mainNumbers) {
-            if (typeof drawing.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.mainNumbers)) {
-                mainNums = drawing.mainNumbers;
-            }
-        } else if (drawing.data && drawing.data.mainNumbers) {
-            if (typeof drawing.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing drawing.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.data.mainNumbers)) {
-                mainNums = drawing.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(drawing);
         
         // Verificar que mainNums sea un array válido
-        if (Array.isArray(mainNums)) {
+        if (Array.isArray(mainNums) && mainNums.length === 5) {
             let oddCount = 0;
             mainNums.forEach(num => {
-                if (num % 2 !== 0) oddCount++;
+                if (typeof num === 'number' && !isNaN(num) && num % 2 !== 0) {
+                    oddCount++;
+                }
             });
             
             const evenCount = 5 - oddCount;
-            patterns[`${oddCount}-${evenCount}`]++;
+            patterns[`${oddCount}-${evenCount}`] = (patterns[`${oddCount}-${evenCount}`] || 0) + 1;
         }
     });
     
@@ -119,49 +136,30 @@ function analyzeOddEvenPatterns(drawings) {
 function analyzeConsecutivePatterns(drawings) {
     const patterns = { '0': 0, '1': 0, '2': 0, '3+': 0 };
     
+    // Verificar que drawings sea un array válido
+    if (!Array.isArray(drawings)) {
+        console.error("drawings no es un array válido");
+        return patterns;
+    }
+    
     drawings.forEach(drawing => {
-        // Verificar que drawing.mainNumbers exista y sea válido
-        let mainNums = [];
-        
-        if (drawing.mainNumbers) {
-            if (typeof drawing.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.mainNumbers)) {
-                mainNums = drawing.mainNumbers;
-            }
-        } else if (drawing.data && drawing.data.mainNumbers) {
-            if (typeof drawing.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing drawing.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.data.mainNumbers)) {
-                mainNums = drawing.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(drawing);
         
         // Verificar que mainNums sea un array válido
-        if (Array.isArray(mainNums)) {
-            mainNums.sort((a, b) => a - b);
+        if (Array.isArray(mainNums) && mainNums.length === 5) {
+            const sortedNums = [...mainNums].sort((a, b) => a - b);
             
             let consecutiveCount = 0;
-            for (let i = 0; i < mainNums.length - 1; i++) {
-                if (mainNums[i+1] - mainNums[i] === 1) {
+            for (let i = 0; i < sortedNums.length - 1; i++) {
+                if (sortedNums[i+1] - sortedNums[i] === 1) {
                     consecutiveCount++;
                 }
             }
             
-            if (consecutiveCount === 0) patterns['0']++;
-            else if (consecutiveCount === 1) patterns['1']++;
-            else if (consecutiveCount === 2) patterns['2']++;
-            else patterns['3+']++;
+            if (consecutiveCount === 0) patterns['0'] = (patterns['0'] || 0) + 1;
+            else if (consecutiveCount === 1) patterns['1'] = (patterns['1'] || 0) + 1;
+            else if (consecutiveCount === 2) patterns['2'] = (patterns['2'] || 0) + 1;
+            else patterns['3+'] = (patterns['3+'] || 0) + 1;
         }
     });
     
@@ -176,39 +174,22 @@ function analyzeConsecutivePatterns(drawings) {
 function analyzeSumPatterns(drawings) {
     const sumDistribution = {};
     
+    // Verificar que drawings sea un array válido
+    if (!Array.isArray(drawings)) {
+        console.error("drawings no es un array válido");
+        return sumDistribution;
+    }
+    
     drawings.forEach(drawing => {
-        // Verificar que drawing.mainNumbers exista y sea válido
-        let mainNums = [];
-        
-        if (drawing.mainNumbers) {
-            if (typeof drawing.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.mainNumbers)) {
-                mainNums = drawing.mainNumbers;
-            }
-        } else if (drawing.data && drawing.data.mainNumbers) {
-            if (typeof drawing.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(drawing.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing drawing.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.data.mainNumbers)) {
-                mainNums = drawing.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(drawing);
         
         // Verificar que mainNums sea un array válido
-        if (Array.isArray(mainNums)) {
-            const sum = mainNums.reduce((acc, num) => acc + num, 0);
-            const range = Math.floor(sum / 50) * 50; // Agrupar en rangos de 50
+        if (Array.isArray(mainNums) && mainNums.length === 5) {
+            const sum = mainNums.reduce((acc, num) => {
+                return acc + (typeof num === 'number' && !isNaN(num) ? num : 0);
+            }, 0);
             
+            const range = Math.floor(sum / 50) * 50; // Agrupar en rangos de 50
             sumDistribution[range] = (sumDistribution[range] || 0) + 1;
         }
     });
@@ -224,70 +205,31 @@ function analyzeSumPatterns(drawings) {
 function analyzeRepeatPatterns(drawings) {
     const patterns = { '0': 0, '1': 0, '2': 0, '3+': 0 };
     
+    // Verificar que drawings sea un array válido
+    if (!Array.isArray(drawings) || drawings.length < 2) {
+        console.error("drawings no es un array válido o no tiene suficientes elementos");
+        return patterns;
+    }
+    
     for (let i = 1; i < drawings.length; i++) {
-        // Obtener números del sorteo actual
-        let current = [];
-        if (drawings[i].mainNumbers) {
-            if (typeof drawings[i].mainNumbers === 'string') {
-                try {
-                    current = JSON.parse(drawings[i].mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing current mainNumbers:", e);
-                    continue;
-                }
-            } else if (Array.isArray(drawings[i].mainNumbers)) {
-                current = drawings[i].mainNumbers;
-            }
-        } else if (drawings[i].data && drawings[i].data.mainNumbers) {
-            if (typeof drawings[i].data.mainNumbers === 'string') {
-                try {
-                    current = JSON.parse(drawings[i].data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing current data.mainNumbers:", e);
-                    continue;
-                }
-            } else if (Array.isArray(drawings[i].data.mainNumbers)) {
-                current = drawings[i].data.mainNumbers;
-            }
-        }
-        
-        // Obtener números del sorteo anterior
-        let previous = [];
-        if (drawings[i-1].mainNumbers) {
-            if (typeof drawings[i-1].mainNumbers === 'string') {
-                try {
-                    previous = JSON.parse(drawings[i-1].mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing previous mainNumbers:", e);
-                    continue;
-                }
-            } else if (Array.isArray(drawings[i-1].mainNumbers)) {
-                previous = drawings[i-1].mainNumbers;
-            }
-        } else if (drawings[i-1].data && drawings[i-1].data.mainNumbers) {
-            if (typeof drawings[i-1].data.mainNumbers === 'string') {
-                try {
-                    previous = JSON.parse(drawings[i-1].data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing previous data.mainNumbers:", e);
-                    continue;
-                }
-            } else if (Array.isArray(drawings[i-1].data.mainNumbers)) {
-                previous = drawings[i-1].data.mainNumbers;
-            }
-        }
+        const current = extractMainNumbers(drawings[i]);
+        const previous = extractMainNumbers(drawings[i-1]);
         
         // Verificar que ambos arrays sean válidos
-        if (Array.isArray(current) && Array.isArray(previous)) {
+        if (Array.isArray(current) && Array.isArray(previous) && 
+            current.length === 5 && previous.length === 5) {
+            
             let repeatCount = 0;
             current.forEach(num => {
-                if (previous.includes(num)) repeatCount++;
+                if (typeof num === 'number' && !isNaN(num) && previous.includes(num)) {
+                    repeatCount++;
+                }
             });
             
-            if (repeatCount === 0) patterns['0']++;
-            else if (repeatCount === 1) patterns['1']++;
-            else if (repeatCount === 2) patterns['2']++;
-            else patterns['3+']++;
+            if (repeatCount === 0) patterns['0'] = (patterns['0'] || 0) + 1;
+            else if (repeatCount === 1) patterns['1'] = (patterns['1'] || 0) + 1;
+            else if (repeatCount === 2) patterns['2'] = (patterns['2'] || 0) + 1;
+            else patterns['3+'] = (patterns['3+'] || 0) + 1;
         }
     }
     
@@ -302,7 +244,7 @@ function analyzeRepeatPatterns(drawings) {
  * @returns {Object} Combinación generada
  */
 function generateAdvancedCombination(allHistoryData, ranges, lottery) {
-    if (allHistoryData.length < 10) {
+    if (!Array.isArray(allHistoryData) || allHistoryData.length < 10) {
         // Si hay pocos datos, usar método básico
         return generateBasicCombination(allHistoryData, ranges, lottery);
     }
@@ -319,27 +261,15 @@ function generateAdvancedCombination(allHistoryData, ranges, lottery) {
     const allSpecials = [];
     
     allHistoryData.forEach(item => {
-        let mainNums = [];
-        
-        if (item.data && item.data.mainNumbers) {
-            if (typeof item.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(item.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing item.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(item.data.mainNumbers)) {
-                mainNums = item.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(item);
+        const specialNum = extractSpecialNumber(item);
         
         if (Array.isArray(mainNums)) {
             allMainNumbers.push(...mainNums);
         }
         
-        if (item.data && item.data.special) {
-            allSpecials.push(item.data.special);
+        if (typeof specialNum === 'number' && !isNaN(specialNum)) {
+            allSpecials.push(specialNum);
         }
     });
     
@@ -348,19 +278,19 @@ function generateAdvancedCombination(allHistoryData, ranges, lottery) {
     
     // Determinar patrón de pares/impares más común
     const oddEvenPattern = Object.keys(oddEvenPatterns).reduce((a, b) => 
-        oddEvenPatterns[a] > oddEvenPatterns[b] ? a : b
+        (oddEvenPatterns[a] || 0) > (oddEvenPatterns[b] || 0) ? a : b, '2-3'
     );
     const [oddCount, evenCount] = oddEvenPattern.split('-').map(Number);
     
     // Determinar patrón de consecutivos más común
     const consecutivePattern = Object.keys(consecutivePatterns).reduce((a, b) => 
-        consecutivePatterns[a] > consecutivePatterns[b] ? a : b
+        (consecutivePatterns[a] || 0) > (consecutivePatterns[b] || 0) ? a : b, '1'
     );
     const targetConsecutive = consecutivePattern === '3+' ? 3 : parseInt(consecutivePattern);
     
     // Determinar rango de suma más común
     const targetSumRange = Object.keys(sumPatterns).reduce((a, b) => 
-        sumPatterns[a] > sumPatterns[b] ? a : b
+        (sumPatterns[a] || 0) > (sumPatterns[b] || 0) ? a : b, '100'
     );
     const targetSum = parseInt(targetSumRange) + 25; // Punto medio del rango
     
@@ -482,7 +412,7 @@ function generateAdvancedCombination(allHistoryData, ranges, lottery) {
     
     return {
         mainNumbers: mainNumbers,
-        special: hotSpecial,
+        special: hotSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'advanced',
         patterns: {
@@ -504,28 +434,26 @@ function generateBasicCombination(allHistoryData, ranges, lottery) {
     const allMainNumbers = [];
     const allSpecials = [];
     
+    if (!Array.isArray(allHistoryData)) {
+        // Si no hay datos, generar combinación aleatoria
+        return {
+            mainNumbers: Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+            special: Math.floor(Math.random() * ranges.special.max) + 1,
+            date: new Date().toISOString().split('T')[0],
+            method: 'random'
+        };
+    }
+    
     allHistoryData.forEach(item => {
-        let mainNums = [];
-        
-        if (item.data && item.data.mainNumbers) {
-            if (typeof item.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(item.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing item.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(item.data.mainNumbers)) {
-                mainNums = item.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(item);
+        const specialNum = extractSpecialNumber(item);
         
         if (Array.isArray(mainNums)) {
             allMainNumbers.push(...mainNums);
         }
         
-        if (item.data && item.data.special) {
-            allSpecials.push(item.data.special);
+        if (typeof specialNum === 'number' && !isNaN(specialNum)) {
+            allSpecials.push(specialNum);
         }
     });
     
@@ -535,8 +463,8 @@ function generateBasicCombination(allHistoryData, ranges, lottery) {
     const hotSpecial = getSortedNumbers(specialFreq, 'desc', 1)[0];
     
     return {
-        mainNumbers: hotMain,
-        special: hotSpecial,
+        mainNumbers: hotMain.length === 5 ? hotMain : Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+        special: hotSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'basic'
     };
@@ -552,24 +480,37 @@ function generateBasicCombination(allHistoryData, ranges, lottery) {
 function generateMultipleCombinations(allHistoryData, ranges, lottery) {
     const combinations = [];
     
-    // 1. Combinación basada en análisis avanzado
-    combinations.push(generateAdvancedCombination(allHistoryData, ranges, lottery));
-    
-    // 2. Combinación basada en números fríos (estrategia contraria)
-    const coldCombination = generateColdNumbersCombination(allHistoryData, ranges, lottery);
-    combinations.push(coldCombination);
-    
-    // 3. Combinación mixta (calientes y fríos)
-    const mixedCombination = generateMixedCombination(allHistoryData, ranges, lottery);
-    combinations.push(mixedCombination);
-    
-    // 4. Combinación basada en patrones de repetición
-    const repeatCombination = generateRepeatPatternCombination(allHistoryData, ranges, lottery);
-    combinations.push(repeatCombination);
-    
-    // 5. Combinación aleatoria optimizada
-    const randomOptimizedCombination = generateRandomOptimizedCombination(allHistoryData, ranges, lottery);
-    combinations.push(randomOptimizedCombination);
+    try {
+        // 1. Combinación basada en análisis avanzado
+        combinations.push(generateAdvancedCombination(allHistoryData, ranges, lottery));
+        
+        // 2. Combinación basada en números fríos (estrategia contraria)
+        const coldCombination = generateColdNumbersCombination(allHistoryData, ranges, lottery);
+        combinations.push(coldCombination);
+        
+        // 3. Combinación mixta (calientes y fríos)
+        const mixedCombination = generateMixedCombination(allHistoryData, ranges, lottery);
+        combinations.push(mixedCombination);
+        
+        // 4. Combinación basada en patrones de repetición
+        const repeatCombination = generateRepeatPatternCombination(allHistoryData, ranges, lottery);
+        combinations.push(repeatCombination);
+        
+        // 5. Combinación aleatoria optimizada
+        const randomOptimizedCombination = generateRandomOptimizedCombination(allHistoryData, ranges, lottery);
+        combinations.push(randomOptimizedCombination);
+    } catch (error) {
+        console.error("Error en generateMultipleCombinations:", error);
+        // Si hay error, devolver combinaciones aleatorias
+        for (let i = 0; i < 5; i++) {
+            combinations.push({
+                mainNumbers: Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+                special: Math.floor(Math.random() * ranges.special.max) + 1,
+                date: new Date().toISOString().split('T')[0],
+                method: 'random-fallback'
+            });
+        }
+    }
     
     return combinations;
 }
@@ -585,28 +526,20 @@ function generateColdNumbersCombination(allHistoryData, ranges, lottery) {
     const allMainNumbers = [];
     const allSpecials = [];
     
+    if (!Array.isArray(allHistoryData)) {
+        return generateBasicCombination(allHistoryData, ranges, lottery);
+    }
+    
     allHistoryData.forEach(item => {
-        let mainNums = [];
-        
-        if (item.data && item.data.mainNumbers) {
-            if (typeof item.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(item.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing item.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(item.data.mainNumbers)) {
-                mainNums = item.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(item);
+        const specialNum = extractSpecialNumber(item);
         
         if (Array.isArray(mainNums)) {
             allMainNumbers.push(...mainNums);
         }
         
-        if (item.data && item.data.special) {
-            allSpecials.push(item.data.special);
+        if (typeof specialNum === 'number' && !isNaN(specialNum)) {
+            allSpecials.push(specialNum);
         }
     });
     
@@ -616,8 +549,8 @@ function generateColdNumbersCombination(allHistoryData, ranges, lottery) {
     const coldSpecial = getSortedNumbers(specialFreq, 'asc', 1)[0];
     
     return {
-        mainNumbers: coldMain,
-        special: coldSpecial,
+        mainNumbers: coldMain.length === 5 ? coldMain : Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+        special: coldSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'cold'
     };
@@ -634,28 +567,20 @@ function generateMixedCombination(allHistoryData, ranges, lottery) {
     const allMainNumbers = [];
     const allSpecials = [];
     
+    if (!Array.isArray(allHistoryData)) {
+        return generateBasicCombination(allHistoryData, ranges, lottery);
+    }
+    
     allHistoryData.forEach(item => {
-        let mainNums = [];
-        
-        if (item.data && item.data.mainNumbers) {
-            if (typeof item.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(item.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing item.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(item.data.mainNumbers)) {
-                mainNums = item.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(item);
+        const specialNum = extractSpecialNumber(item);
         
         if (Array.isArray(mainNums)) {
             allMainNumbers.push(...mainNums);
         }
         
-        if (item.data && item.data.special) {
-            allSpecials.push(item.data.special);
+        if (typeof specialNum === 'number' && !isNaN(specialNum)) {
+            allSpecials.push(specialNum);
         }
     });
     
@@ -669,8 +594,8 @@ function generateMixedCombination(allHistoryData, ranges, lottery) {
     const mixedMain = [...hotMain, ...coldMain].sort((a, b) => a - b);
     
     return {
-        mainNumbers: mixedMain,
-        special: hotSpecial,
+        mainNumbers: mixedMain.length === 5 ? mixedMain : Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+        special: hotSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'mixed'
     };
@@ -684,7 +609,7 @@ function generateMixedCombination(allHistoryData, ranges, lottery) {
  * @returns {Object} Combinación generada
  */
 function generateRepeatPatternCombination(allHistoryData, ranges, lottery) {
-    if (allHistoryData.length < 2) {
+    if (!Array.isArray(allHistoryData) || allHistoryData.length < 2) {
         return generateBasicCombination(allHistoryData, ranges, lottery);
     }
     
@@ -692,34 +617,8 @@ function generateRepeatPatternCombination(allHistoryData, ranges, lottery) {
     const lastDrawing = allHistoryData[0];
     const previousDrawing = allHistoryData[1];
     
-    let lastMain = [];
-    let previousMain = [];
-    
-    // Extraer números del último sorteo
-    if (lastDrawing.data && lastDrawing.data.mainNumbers) {
-        if (typeof lastDrawing.data.mainNumbers === 'string') {
-            try {
-                lastMain = JSON.parse(lastDrawing.data.mainNumbers);
-            } catch (e) {
-                console.error("Error parsing lastDrawing.data.mainNumbers:", e);
-            }
-        } else if (Array.isArray(lastDrawing.data.mainNumbers)) {
-            lastMain = lastDrawing.data.mainNumbers;
-        }
-    }
-    
-    // Extraer números del sorteo anterior
-    if (previousDrawing.data && previousDrawing.data.mainNumbers) {
-        if (typeof previousDrawing.data.mainNumbers === 'string') {
-            try {
-                previousMain = JSON.parse(previousDrawing.data.mainNumbers);
-            } catch (e) {
-                console.error("Error parsing previousDrawing.data.mainNumbers:", e);
-            }
-        } else if (Array.isArray(previousDrawing.data.mainNumbers)) {
-            previousMain = previousDrawing.data.mainNumbers;
-        }
-    }
+    const lastMain = extractMainNumbers(lastDrawing);
+    const previousMain = extractMainNumbers(previousDrawing);
     
     // Encontrar números que se repiten entre los dos últimos sorteos
     const repeatNumbers = lastMain.filter(num => previousMain.includes(num));
@@ -729,27 +628,15 @@ function generateRepeatPatternCombination(allHistoryData, ranges, lottery) {
     const allSpecials = [];
     
     allHistoryData.forEach(item => {
-        let mainNums = [];
-        
-        if (item.data && item.data.mainNumbers) {
-            if (typeof item.data.mainNumbers === 'string') {
-                try {
-                    mainNums = JSON.parse(item.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing item.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(item.data.mainNumbers)) {
-                mainNums = item.data.mainNumbers;
-            }
-        }
+        const mainNums = extractMainNumbers(item);
+        const specialNum = extractSpecialNumber(item);
         
         if (Array.isArray(mainNums)) {
             allMainNumbers.push(...mainNums);
         }
         
-        if (item.data && item.data.special) {
-            allSpecials.push(item.data.special);
+        if (typeof specialNum === 'number' && !isNaN(specialNum)) {
+            allSpecials.push(specialNum);
         }
     });
     
@@ -787,7 +674,7 @@ function generateRepeatPatternCombination(allHistoryData, ranges, lottery) {
     
     return {
         mainNumbers: mainNumbers,
-        special: hotSpecial,
+        special: hotSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'repeat-pattern',
         repeatNumbers: repeatNumbers
@@ -809,17 +696,17 @@ function generateRandomOptimizedCombination(allHistoryData, ranges, lottery) {
     
     // Determinar patrones más comunes
     const oddEvenPattern = Object.keys(oddEvenPatterns).reduce((a, b) => 
-        oddEvenPatterns[a] > oddEvenPatterns[b] ? a : b
+        (oddEvenPatterns[a] || 0) > (oddEvenPatterns[b] || 0) ? a : b, '2-3'
     );
     const [oddCount, evenCount] = oddEvenPattern.split('-').map(Number);
     
     const consecutivePattern = Object.keys(consecutivePatterns).reduce((a, b) => 
-        consecutivePatterns[a] > consecutivePatterns[b] ? a : b
+        (consecutivePatterns[a] || 0) > (consecutivePatterns[b] || 0) ? a : b, '1'
     );
     const targetConsecutive = consecutivePattern === '3+' ? 3 : parseInt(consecutivePattern);
     
     const targetSumRange = Object.keys(sumPatterns).reduce((a, b) => 
-        sumPatterns[a] > sumPatterns[b] ? a : b
+        (sumPatterns[a] || 0) > (sumPatterns[b] || 0) ? a : b, '100'
     );
     const targetSum = parseInt(targetSumRange) + 25; // Punto medio del rango
     
@@ -949,31 +836,8 @@ function evaluatePredictionAccuracy(predictions, actualDrawings) {
         const actualDrawing = actualDrawings.find(drawing => drawing.date === prediction.date);
         
         if (actualDrawing) {
-            let actualMain = [];
-            
-            if (actualDrawing.mainNumbers) {
-                if (typeof actualDrawing.mainNumbers === 'string') {
-                    try {
-                        actualMain = JSON.parse(actualDrawing.mainNumbers);
-                    } catch (e) {
-                        console.error("Error parsing actualDrawing.mainNumbers:", e);
-                    }
-                } else if (Array.isArray(actualDrawing.mainNumbers)) {
-                    actualMain = actualDrawing.mainNumbers;
-                }
-            } else if (actualDrawing.data && actualDrawing.data.mainNumbers) {
-                if (typeof actualDrawing.data.mainNumbers === 'string') {
-                    try {
-                        actualMain = JSON.parse(actualDrawing.data.mainNumbers);
-                    } catch (e) {
-                        console.error("Error parsing actualDrawing.data.mainNumbers:", e);
-                    }
-                } else if (Array.isArray(actualDrawing.data.mainNumbers)) {
-                    actualMain = actualDrawing.data.mainNumbers;
-                }
-            }
-                
-            const actualSpecial = actualDrawing.special || actualDrawing.data.special;
+            const actualMain = extractMainNumbers(actualDrawing);
+            const actualSpecial = extractSpecialNumber(actualDrawing);
             
             // Contar coincidencias de números principales
             let mainMatches = 0;
@@ -1011,39 +875,22 @@ function calculateFrequency(numbers, max) {
         freq[i] = 0; 
     } 
     numbers.forEach(num => { 
-        freq[num] = (freq[num] || 0) + 1; 
+        if (typeof num === 'number' && !isNaN(num)) {
+            freq[num] = (freq[num] || 0) + 1; 
+        }
     }); 
     return freq; 
 }
 
 function calculatePairFrequency(drawings) { 
     const pairFreq = {}; 
-    drawings.forEach(drawing => { 
-        let sortedNums = [];
-        
-        if (drawing.mainNumbers) {
-            if (typeof drawing.mainNumbers === 'string') {
-                try {
-                    sortedNums = JSON.parse(drawing.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing drawing.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.mainNumbers)) {
-                sortedNums = drawing.mainNumbers;
-            }
-        } else if (drawing.data && drawing.data.mainNumbers) {
-            if (typeof drawing.data.mainNumbers === 'string') {
-                try {
-                    sortedNums = JSON.parse(drawing.data.mainNumbers);
-                } catch (e) {
-                    console.error("Error parsing drawing.data.mainNumbers:", e);
-                    return;
-                }
-            } else if (Array.isArray(drawing.data.mainNumbers)) {
-                sortedNums = drawing.data.mainNumbers;
-            }
-        }
+    
+    if (!Array.isArray(drawings)) {
+        return pairFreq;
+    }
+    
+    drawings.forEach(drawing => {
+        const sortedNums = extractMainNumbers(drawing);
         
         if (Array.isArray(sortedNums)) {
             sortedNums.sort((a, b) => a - b); 
