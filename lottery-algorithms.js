@@ -1,8 +1,75 @@
 /**
  * Algoritmos avanzados para predicción de lotería
  * Este archivo contiene funciones para análisis estadístico avanzado
- * que complementan el análisis de frecuencia básico existente
+ * y las funciones auxiliares necesarias (frecuencia y ordenamiento) para ser autocontenido.
  */
+
+// =========================================================================================
+// FUNCIONES AUXILIARES NECESARIAS (Dependencias resueltas)
+// =========================================================================================
+
+/**
+ * Calcula la frecuencia de aparición de cada número.
+ * @param {Array<number>} numbersArray - Array de todos los números sorteados.
+ * @param {number} maxNumber - El número máximo posible en el sorteo.
+ * @returns {Object<number, number>} Objeto donde la clave es el número y el valor es su frecuencia.
+ */
+function calculateFrequency(numbersArray, maxNumber) {
+    const frequencyMap = {};
+
+    // Inicializar el mapa con todos los números posibles en 0
+    for (let i = 1; i <= maxNumber; i++) {
+        frequencyMap[i] = 0;
+    }
+
+    // Contar las ocurrencias
+    if (Array.isArray(numbersArray)) {
+        numbersArray.forEach(num => {
+            if (typeof num === 'number' && num >= 1 && num <= maxNumber) {
+                frequencyMap[num]++;
+            }
+        });
+    }
+    
+    return frequencyMap;
+}
+
+/**
+ * Obtiene una lista de números ordenados por su frecuencia (calientes/fríos).
+ * @param {Object<number, number>} frequencyMap - Mapa de frecuencia de números.
+ * @param {string} order - 'desc' para calientes (mayor frecuencia) o 'asc' para fríos (menor frecuencia).
+ * @param {number} count - Número de resultados a devolver.
+ * @returns {Array<number>} Array de números principales ordenados por frecuencia.
+ */
+function getSortedNumbers(frequencyMap, order, count) {
+    // Convertir el mapa a un array de pares [número, frecuencia]
+    const sortedArray = Object.entries(frequencyMap)
+        .map(([number, frequency]) => ({ number: Number(number), frequency }));
+
+    // Ordenar: descendente (caliente) o ascendente (frío)
+    sortedArray.sort((a, b) => {
+        if (order === 'desc') {
+            // Calientes: Mayor frecuencia primero. Si empatan, ordenar por número ascendente.
+            if (b.frequency !== a.frequency) {
+                return b.frequency - a.frequency;
+            }
+            return a.number - b.number; 
+        } else {
+            // Fríos: Menor frecuencia primero. Si empatan, ordenar por número ascendente.
+            if (a.frequency !== b.frequency) {
+                return a.frequency - b.frequency;
+            }
+            return a.number - b.number; 
+        }
+    });
+
+    // Devolver solo los números hasta el conteo solicitado
+    return sortedArray.slice(0, count).map(item => item.number);
+}
+
+// =========================================================================================
+// FUNCIONES DE PARSING Y ESTRUCTURA ORIGINALES
+// =========================================================================================
 
 /**
  * Función auxiliar para extraer números principales de un objeto de sorteo
@@ -54,6 +121,10 @@ function extractSpecialNumber(drawing) {
     
     return null;
 }
+
+// =========================================================================================
+// ALGORITMOS DE ANÁLISIS ESTADÍSTICO (Originales)
+// =========================================================================================
 
 /**
  * Analiza patrones de distribución por decenas
@@ -235,6 +306,10 @@ function analyzeRepeatPatterns(drawings) {
     
     return patterns;
 }
+
+// =========================================================================================
+// ALGORITMOS DE GENERACIÓN DE COMBINACIONES (Originales)
+// =========================================================================================
 
 /**
  * Genera combinación basada en análisis avanzado
@@ -425,6 +500,8 @@ function generateAdvancedCombination(allHistoryData, ranges, lottery) {
 
 /**
  * Genera combinación básica basada en frecuencia (método original)
+ * NOTA: Esta versión es la utilizada como FALLBACK y está duplicada
+ * para asegurar la independencia del archivo.
  * @param {Array} allHistoryData - Historial completo de sorteos
  * @param {Object} ranges - Rangos de números válidos
  * @param {string} lottery - Tipo de lotería
@@ -434,7 +511,7 @@ function generateBasicCombination(allHistoryData, ranges, lottery) {
     const allMainNumbers = [];
     const allSpecials = [];
     
-    if (!Array.isArray(allHistoryData)) {
+    if (!Array.isArray(allHistoryData) || allHistoryData.length === 0) {
         // Si no hay datos, generar combinación aleatoria
         return {
             mainNumbers: Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
@@ -462,8 +539,17 @@ function generateBasicCombination(allHistoryData, ranges, lottery) {
     const hotMain = getSortedNumbers(mainFreq, 'desc', 5);
     const hotSpecial = getSortedNumbers(specialFreq, 'desc', 1)[0];
     
+    // Asegurar 5 números calientes o rellenar con aleatorios si es necesario
+    while (hotMain.length < 5) {
+        let randomNum;
+        do {
+            randomNum = Math.floor(Math.random() * ranges.main.max) + 1;
+        } while (hotMain.includes(randomNum));
+        hotMain.push(randomNum);
+    }
+
     return {
-        mainNumbers: hotMain.length === 5 ? hotMain : Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+        mainNumbers: hotMain.sort((a, b) => a - b),
         special: hotSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'basic'
@@ -547,9 +633,18 @@ function generateColdNumbersCombination(allHistoryData, ranges, lottery) {
     const specialFreq = calculateFrequency(allSpecials, ranges.special.max);
     const coldMain = getSortedNumbers(mainFreq, 'asc', 5);
     const coldSpecial = getSortedNumbers(specialFreq, 'asc', 1)[0];
+
+    // Asegurar 5 números fríos o rellenar con aleatorios si es necesario
+    while (coldMain.length < 5) {
+        let randomNum;
+        do {
+            randomNum = Math.floor(Math.random() * ranges.main.max) + 1;
+        } while (coldMain.includes(randomNum));
+        coldMain.push(randomNum);
+    }
     
     return {
-        mainNumbers: coldMain.length === 5 ? coldMain : Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+        mainNumbers: coldMain.sort((a, b) => a - b),
         special: coldSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'cold'
@@ -591,10 +686,22 @@ function generateMixedCombination(allHistoryData, ranges, lottery) {
     const hotSpecial = getSortedNumbers(specialFreq, 'desc', 1)[0];
     
     // Combinar números calientes y fríos
-    const mixedMain = [...hotMain, ...coldMain].sort((a, b) => a - b);
+    const mixedMain = [...hotMain, ...coldMain];
     
+    // Asegurar 5 números y eliminar duplicados
+    const finalMixedMain = Array.from(new Set(mixedMain));
+    
+    while (finalMixedMain.length < 5) {
+         let randomNum;
+        do {
+            randomNum = Math.floor(Math.random() * ranges.main.max) + 1;
+        } while (finalMixedMain.includes(randomNum));
+        finalMixedMain.push(randomNum);
+    }
+
+
     return {
-        mainNumbers: mixedMain.length === 5 ? mixedMain : Array.from({length: 5}, () => Math.floor(Math.random() * ranges.main.max) + 1).sort((a, b) => a - b),
+        mainNumbers: finalMixedMain.sort((a, b) => a - b),
         special: hotSpecial || Math.floor(Math.random() * ranges.special.max) + 1,
         date: new Date().toISOString().split('T')[0],
         method: 'mixed'
@@ -850,92 +957,33 @@ function evaluatePredictionAccuracy(predictions, actualDrawings) {
             
             // Verificar coincidencia de número especial
             if (prediction.special === actualSpecial) {
-                metrics.specialNumberMatches++;
                 totalSpecialMatches++;
             }
-            
-            // Verificar si es una coincidencia exacta
-            if (mainMatches === 5 && prediction.special === actualSpecial) {
+
+            // Verificar coincidencia exacta (main + special)
+            if (mainMatches === prediction.mainNumbers.length && prediction.special === actualSpecial) {
                 metrics.exactMatches++;
             }
         }
     });
-    
-    // Calcular promedios
-    metrics.averageMainMatches = totalMainMatches / predictions.length;
-    metrics.averageSpecialMatches = totalSpecialMatches / predictions.length;
+
+    metrics.averageMainMatches = metrics.totalPredictions > 0 ? (totalMainMatches / metrics.totalPredictions).toFixed(2) : 0;
+    metrics.averageSpecialMatches = metrics.totalPredictions > 0 ? (totalSpecialMatches / metrics.totalPredictions).toFixed(2) : 0;
     
     return metrics;
 }
 
-// Funciones auxiliares
-function calculateFrequency(numbers, max) { 
-    const freq = {}; 
-    for (let i = 1; i <= max; i++) {
-        freq[i] = 0; 
-    } 
-    numbers.forEach(num => { 
-        if (typeof num === 'number' && !isNaN(num)) {
-            freq[num] = (freq[num] || 0) + 1; 
-        }
-    }); 
-    return freq; 
-}
-
-function calculatePairFrequency(drawings) { 
-    const pairFreq = {}; 
-    
-    if (!Array.isArray(drawings)) {
-        return pairFreq;
-    }
-    
-    drawings.forEach(drawing => {
-        const sortedNums = extractMainNumbers(drawing);
-        
-        if (Array.isArray(sortedNums)) {
-            sortedNums.sort((a, b) => a - b); 
-            for (let i = 0; i < sortedNums.length - 1; i++) { 
-                for (let j = i + 1; j < sortedNums.length; j++) { 
-                    const pair = `${sortedNums[i]}-${sortedNums[j]}`; 
-                    pairFreq[pair] = (pairFreq[pair] || 0) + 1; 
-                } 
-            } 
-        }
-    }); 
-    return pairFreq; 
-}
-
-function getSortedNumbers(freqMap, order, limit) { 
-    return Object.entries(freqMap)
-        .sort(([, a], [, b]) => order === 'desc' ? b - a : a - b)
-        .slice(0, limit)
-        .map(([num]) => parseInt(num)); 
-}
-
-function getSortedPairs(pairFreq, limit) { 
-    return Object.entries(pairFreq)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, limit)
-        .map(([pair]) => pair.split('-').map(Number)); 
-}
-
-// Exportar funciones para uso en otros módulos
-window.lotteryAlgorithms = {
+// Exportar las funciones clave para que estén disponibles en el resto de la aplicación (ej. en el archivo principal o módulo)
+export { 
+    generateAdvancedCombination, 
+    generateBasicCombination, 
+    generateMultipleCombinations,
     analyzeDecadeDistribution,
     analyzeOddEvenPatterns,
     analyzeConsecutivePatterns,
     analyzeSumPatterns,
     analyzeRepeatPatterns,
-    generateAdvancedCombination,
-    generateBasicCombination,
-    generateMultipleCombinations,
-    generateColdNumbersCombination,
-    generateMixedCombination,
-    generateRepeatPatternCombination,
-    generateRandomOptimizedCombination,
-    evaluatePredictionAccuracy,
     calculateFrequency,
-    calculatePairFrequency,
     getSortedNumbers,
-    getSortedPairs
+    evaluatePredictionAccuracy
 };
