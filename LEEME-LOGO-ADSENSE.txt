@@ -1,0 +1,31 @@
+LOGO PARA GOOGLE ADSENSE
+========================
+
+Requisitos de AdSense para el logotipo:
+- Formato: PNG o JPG
+- Peso máximo: 150 KB
+- Relación de aspecto recomendada: 5:1 (ancho : alto)
+
+Archivos en este sitio:
+- logo-adsense.svg : logo en SVG (ya usado en la cabecera de la web). Relación 5:1 (500x100).
+- logo-adsense.png : logo en PNG para Google AdSense (~7 KB, 1000x200, 5:1). Listo para subir.
+
+Cómo obtener el PNG para subir a AdSense (≤150 KB):
+
+Opción 1 – Convertidor online
+1. Abre https://cloudconvert.com/svg-to-png o similar.
+2. Sube sitio/logo-adsense.svg.
+3. Exporta a PNG con tamaño 500x100 o 1000x200 (mantiene 5:1).
+4. Comprime en https://tinypng.com hasta que pese menos de 150 KB.
+
+Opción 2 – Desde el navegador (Chrome)
+1. Abre sitio/logo-adsense.svg en Chrome.
+2. Clic derecho en la imagen → "Guardar imagen como" (si aparece).
+3. O: F12 → selecciona el elemento <img> o <svg> → clic derecho → "Capture node screenshot" para guardar como PNG.
+4. Comprime el PNG en tinypng.com si supera 150 KB.
+
+Opción 3 – Script Node (si tienes sharp)
+  npm install sharp
+  node sitio/exportar-logo-png.js
+
+El logo ya está integrado en la cabecera de index.html (logo-adsense.svg).
