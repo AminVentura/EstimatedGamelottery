@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Función para validar si el usuario está conectado
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // 2. Validar sorteo: mainNumbers (list o string) y fecha; tamaño según juego
+    function hasDrawingFields() {
+      return request.resource.data.keys().hasAll(['mainNumbers', 'date'])
+             && request.resource.data.date is string
+             && (request.resource.data.mainNumbers is list || request.resource.data.mainNumbers is string);
+    }
+    function isValidDrawing() {
+      return isSignedIn() && hasDrawingFields();
+    }
+
+    // 3. Función para validar que el usuario es dueño del dato (para borrar)
+    function isOwner() {
+      return isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // --- REGLAS PARA POWERBALL ---
+    match /artifacts/EstimatedGamelottery-app/public/data/powerball_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+
+    // --- REGLAS PARA CASH 4 LIFE ---
+    match /artifacts/EstimatedGamelottery-app/public/data/cash4life_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+
+    // --- REGLAS PARA MEGA MILLIONS ---
+    match /artifacts/EstimatedGamelottery-app/public/data/megamillions_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+
+    // --- REGLAS PARA PICK 10, TAKE 5, WIN 4 ---
+    match /artifacts/EstimatedGamelottery-app/public/data/pick10_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+    match /artifacts/EstimatedGamelottery-app/public/data/take5day_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+    match /artifacts/EstimatedGamelottery-app/public/data/take5eve_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+    match /artifacts/EstimatedGamelottery-app/public/data/win4day_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+    match /artifacts/EstimatedGamelottery-app/public/data/win4eve_drawings/{docId} {
+      allow read: if true;
+      allow create: if isValidDrawing();
+      allow delete: if isOwner();
+    }
+
+    // --- REGLAS PARA COMENTARIOS ---
+    match /artifacts/EstimatedGamelottery-app/public/data/lotto_comments/{docId} {
+      allow read: if true;
+      allow create: if isSignedIn() 
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() < 500;
+    }
+
+    // --- REGLAS PARA ESTADÍSTICAS DE USUARIO ---
+    match /artifacts/EstimatedGamelottery-app/public/data/user_stats/{userId} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+  }
+}

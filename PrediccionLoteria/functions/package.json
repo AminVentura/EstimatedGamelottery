@@ -1,0 +1,13 @@
+{
+  "name": "prediccionloteria-functions",
+  "description": "Cloud Functions para PrediccionLoteria (limpieza de logs)",
+  "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.1",
+    "firebase-functions": "^4.5.0"
+  },
+  "private": true
+}
