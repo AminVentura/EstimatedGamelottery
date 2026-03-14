@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>USA Lottery Predictions | Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4</title>
+  <meta name="description" content="Predicciones de lotería USA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4. Guía de uso, números calientes y fríos, estadísticas y precisión por juego. Contenido editorial y herramientas de entretenimiento. Solo mayores de 18 años.">
+  <!-- Preload críticos: CSS y fuentes -->
+  <link rel="preload" href="styles.css" as="style">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome: carga diferida para no bloquear el render -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <script>window._origWarn=console.warn;</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { corePlugins: { preflight: true } };
+    if (typeof window._origWarn === 'function') {
+      console.warn = function(msg) {
+        if (typeof msg === 'string' && (msg.indexOf('tailwindcss.com') !== -1 || msg.indexOf('docs/installation') !== -1)) return;
+        return window._origWarn.apply(console, arguments);
+      };
+    }
+  </script>
+  <meta name="google-adsense-account" content="ca-pub-8721021745606812">
+  <!-- ads.txt está en la raíz: https://www.prediccionloteria.com/ads.txt -->
+  <meta name="google-site-verification" content="MVCG8sYtoNU7JvRxOkklKTn5PJGgLdjOExbZk6W-5W8" />
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.prediccionloteria.com/">
+  <meta property="og:url" content="https://www.prediccionloteria.com/">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8721021745606812"
+     crossorigin="anonymous"></script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://www.prediccionloteria.com/#website",
+      "url": "https://www.prediccionloteria.com/",
+      "name": "USA Lottery Predictions",
+      "description": "AI-powered lottery predictions for all US states: Powerball, Mega Millions, Millionaire For Life.",
+      "inLanguage": "es"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.prediccionloteria.com/#webpage",
+      "url": "https://www.prediccionloteria.com/",
+      "name": "USA Lottery Predictions - Powerball, Mega Millions, Millionaire For Life",
+      "description": "AI-powered lottery predictions for all US states: Powerball, Mega Millions, Millionaire For Life. Statistical analysis for entertainment.",
+      "inLanguage": "es",
+      "dateModified": "2026-02-07",
+      "isPartOf": { "@id": "https://www.prediccionloteria.com/#website" }
+    }
+  ]
+}
+</script>
+  <style>
+    /* Área de anuncios: pequeña si no hay ad, se expande con el anuncio */
+    .ad-slot { transition: min-height 0.3s ease, padding 0.3s ease; }
+    .ad-slot.ad-empty { min-height: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden; border: none !important; }
+    .ad-slot.ad-loaded { min-height: 0; }
+  </style>
+  <base target="_blank">
+</head>
+<body class="px-2 py-3 sm:p-6 md:p-8 min-h-screen flex flex-col items-center justify-start bg-gray-900 text-white">
+
+<!-- Top Bar: Traductor + Enlaces (estilo NY Lottery) -->
+<header class="site-topbar w-full max-w-5xl mx-auto mb-2 sm:mb-4 relative z-20">
+  <div class="topbar-inner flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-xl bg-gray-800/90 border border-gray-700 backdrop-blur-sm">
+    <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+      <span class="text-gray-500 text-xs">Idioma / Language:</span>
+      <div id="google_translate_element" class="translate-dropdown"></div>
+      <span class="text-gray-500 text-xs hidden sm:inline">|</span>
+      <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors flex items-center gap-1">
+        <i class="fas fa-ticket-alt"></i> Ticket Check
+      </a>
+      <a href="#aviso-legal" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Integridad</a>
+    </div>
+  </div>
+</header>
+
+<!-- Cookie Banner -->
+<div id="cookie-banner" class="cookie-banner">
+  <div class="cookie-content">
+    <p>Usamos cookies para mejorar la experiencia. <a href="/politica-cookies.html" target="_blank">Política de Cookies</a>.</p>
+    <div class="cookie-buttons">
+      <button id="accept-cookies" class="cookie-btn accept">Aceptar</button>
+      <button id="reject-cookies" class="cookie-btn reject">Rechazar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Background -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+  <div class="absolute -top-20 -right-20 w-60 h-60 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+  <div class="absolute -bottom-20 -left-20 w-60 h-60 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+  <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+</div>
+
+<!-- Contenedor Principal -->
+<div class="bg-gray-900 bg-opacity-95 backdrop-blur-lg p-3 sm:p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-5xl text-center relative z-10 border border-gray-800">
+
+  <!-- Header -->
+  <header class="mb-3 sm:mb-4">
+    <div class="flex flex-col items-center mb-2">
+      <img src="logo-adsense.svg" alt="Predicción Lotería - Powerball, Mega Millions, USA" class="h-10 sm:h-12 md:h-14 w-auto max-w-full object-contain" width="500" height="100" fetchpriority="high">
+    </div>
+    <h1 class="text-xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight">Predicción de Lotería Profesional</h1>
+    <p class="text-gray-400 mb-3 text-xs sm:text-sm md:text-base">Predicciones con IA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4 — USA</p>
+    <div class="flex flex-wrap items-center justify-center gap-2">
+      <div class="flex items-center gap-1 text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
+        <i class="fas fa-user-circle"></i><span>ID:</span><span id="userIdDisplay" class="font-mono text-blue-400">Cargando...</span>
+      </div>
+      <div class="flex items-center gap-1 text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
+        <i class="fas fa-users"></i>
+        <span id="activeUsers">Cargando...</span> activos
+      </div>
+    </div>
+  </header>
+
+  <!-- ¿Eres ganador? How To Claim A Prize (enlace oficial NY Lottery) -->
+  <section class="claim-prize-cta mb-4 sm:mb-6 rounded-xl overflow-hidden border border-cyan-500/30 bg-gradient-to-r from-cyan-900/40 via-blue-900/40 to-purple-900/40 p-4 sm:p-5">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="text-center sm:text-left">
+        <h2 class="text-lg sm:text-xl font-bold text-white mb-1">¿Eres ganador? Are you a winner?</h2>
+        <p class="text-gray-300 text-sm sm:text-base">How To Claim A Prize — Cómo reclamar un premio en la lotería oficial.</p>
+      </div>
+      <a href="https://nylottery.ny.gov/es/how-to-claim" target="_blank" rel="noopener noreferrer" class="claim-prize-btn inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-white bg-cyan-600 hover:bg-cyan-500 border border-cyan-400/50 shadow-lg transition-all hover:scale-105 whitespace-nowrap">
+        <i class="fas fa-trophy"></i>
+        <span>Reclamar premio / Claim</span>
+      </a>
+    </div>
+    <p class="text-gray-500 text-xs mt-3 text-center sm:text-left">Sitio oficial: New York Lottery. Consulta requisitos y plazos según el tipo de premio.</p>
+  </section>
+
+  <!-- Logos de Loterías (estilo NY Lottery: Powerball, Mega Millions, Cash4Life, Numbers) -->
+  <section class="lottery-logos-section mb-4 sm:mb-6" aria-label="Juegos disponibles">
+    <h2 class="sr-only">Juegos de lotería disponibles</h2>
+    <p class="text-center text-gray-400 text-sm mb-3">Elige tu juego</p>
+    <div class="lottery-logos-grid flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+      <a href="#lotteryContent" class="lottery-logo-card lottery-logo-powerball" data-lottery="powerball" title="Powerball">
+        <span class="lottery-logo-icon" aria-hidden="true">PB</span>
+        <span class="lottery-logo-name">Powerball</span>
+      </a>
+      <a href="#lotteryContent" class="lottery-logo-card lottery-logo-megamillions" data-lottery="megamillions" title="Mega Millions">
+        <span class="lottery-logo-icon" aria-hidden="true">MM</span>
+        <span class="lottery-logo-name">Mega Millions</span>
+      </a>
+      <a href="#lotteryContent" class="lottery-logo-card lottery-logo-m4l" data-lottery="millionaireforlife" title="Millionaire For Life">
+        <span class="lottery-logo-icon" aria-hidden="true">M4L</span>
+        <span class="lottery-logo-name">Millionaire For Life</span>
+      </a>
+      <a href="#lotteryContent" class="lottery-logo-card lottery-logo-pick10" data-lottery="pick10" title="Pick 10">
+        <span class="lottery-logo-icon" aria-hidden="true">P10</span>
+        <span class="lottery-logo-name">Pick 10</span>
+      </a>
+      <a href="#lotteryContent" class="lottery-logo-card lottery-logo-take5" data-lottery="take5day" title="Take 5">
+        <span class="lottery-logo-icon" aria-hidden="true">T5</span>
+        <span class="lottery-logo-name">Take 5</span>
+      </a>
+      <a href="#lotteryContent" class="lottery-logo-card lottery-logo-win4" data-lottery="win4day" title="Win 4">
+        <span class="lottery-logo-icon" aria-hidden="true">W4</span>
+        <span class="lottery-logo-name">Win 4</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Contenido editorial (AdSense: mucho contenido antes de cualquier anuncio) -->
+  <section class="main-content-intro collapsible-section collapsed text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
+    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
+      <h2 class="text-lg sm:text-xl font-bold text-white m-0">Sobre prediccionloteria.com</h2>
+      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
+    </div>
+    <div class="collapsible-content">
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
+        Somos un sitio independiente de análisis estadístico para loterías de Estados Unidos. Ofrecemos <strong>predicciones numéricas basadas en historial de sorteos</strong> de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 (diurno y nocturno), con cobertura para todos los estados. Nuestro objetivo es dar a los usuarios <strong>herramientas de referencia y entretenimiento</strong>: números frecuentes y fríos, pares que más salen y varias estrategias de generación (frecuencia, mixta, Markov). No estamos afiliados a ninguna lotería oficial; las predicciones son solo apoyo estadístico y no garantizan premios.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+        Puedes <strong>registrar los resultados oficiales</strong> de cada sorteo, guardar tus predicciones y ver tu precisión por juego. Todo el análisis se hace con algoritmos propios sobre los datos que la comunidad y nosotros mismos vamos añadiendo.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+        Este sitio está pensado para mayores de 18 años. La lotería es un juego de azar; recomendamos jugar con moderación y nunca apostar más de lo que puedas permitirte perder. Para dudas sobre privacidad o cookies, consulta nuestras páginas de Política de Privacidad y Política de Cookies enlazadas en el pie de página.
+      </p>
+    </div>
+  </section>
+
+  <!-- Guía de uso: contenido de valor editorial -->
+  <section class="main-content-intro collapsible-section collapsed text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
+    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
+      <h2 class="text-lg sm:text-xl font-bold text-white m-0">Guía: Cómo usar las predicciones de lotería</h2>
+      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
+    </div>
+    <div class="collapsible-content">
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
+        En esta página puedes obtener <strong>combinaciones sugeridas</strong> para Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4. Cada juego tiene sus propias reglas: Powerball y Mega Millions se juegan con cinco números más una bola especial; Millionaire For Life (nuevo desde feb 2026, sustituye a Cash4Life) con cinco números (1-58) más la Millionaire Ball (1-5); Pick 10 con diez números elegidos de un sorteo de veinte; Take 5 y Win 4 con cinco o cuatro números respectivamente, en versión diurna y nocturna.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+        Los <strong>números calientes</strong> son aquellos que han salido con más frecuencia en los sorteos recientes que tenemos registrados; los <strong>números fríos</strong> son los que menos han aparecido. Nuestros algoritmos combinan estas frecuencias con otros criterios (pares que se repiten, patrones, etc.) para proponerte combinaciones. Puedes usar el botón <strong>PREDECIR</strong> para generar una sugerencia y el botón <strong>ESTADÍSTICAS</strong> para ver qué números están saliendo más o menos en cada juego.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+        Para que tu <strong>precisión real</strong> se actualice, debes generar una predicción y, el mismo día, registrar el resultado oficial del sorteo en la sección «Registrar Sorteo». El sistema compara entonces tu predicción con el resultado y calcula el porcentaje de aciertos por juego. Los historiales que ves en cada pestaña te permiten consultar sorteos pasados y ayudan a que las estadísticas sean más útiles.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+        Recuerda que ningún sistema puede garantizar un premio. Las predicciones son únicamente un apoyo estadístico y de entretenimiento. Siempre verifica los resultados oficiales en las webs de cada lotería.
+      </p>
+    </div>
+  </section>
+
+  <!-- Mensaje -->
+  <div id="messageBox" class="mt-4 p-4 text-center rounded-lg hidden transition-all duration-300 font-medium"></div>
+
+  <p class="text-gray-400 text-sm mb-4 text-center sm:text-left">
+    En cada panel verás <strong class="text-gray-300">winning numbers</strong> en línea, la <strong class="text-gray-300">fecha del próximo sorteo</strong> con cuenta atrás, y enlaces al <strong class="text-gray-300">valor en efectivo estimado (estimated cash value)</strong> y números oficiales en sitios como <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">NY Lottery – All Winning Numbers</a>. Los resultados del historial se muestran por fecha en formato línea para una lectura rápida.
+  </p>
+
+  <!-- Tabs -->
+  <div class="tabs-container flex flex-nowrap sm:flex-wrap justify-start sm:justify-center gap-0 sm:gap-1 mb-4 sm:mb-6 border-b border-gray-700 pb-2 overflow-x-auto">
+    <button class="lottery-tab active px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all" data-lottery="powerball"><i class="fas fa-fire mr-1 text-red-500"></i>Powerball</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-amber-500 transition-all" data-lottery="millionaireforlife"><i class="fas fa-gem mr-1 text-amber-400"></i>M4L</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-yellow-500 transition-all" data-lottery="megamillions"><i class="fas fa-star mr-1 text-yellow-400"></i>MegaM</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-cyan-500 transition-all" data-lottery="pick10"><i class="fas fa-list-ol mr-1 text-cyan-400"></i>Pick 10</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-orange-500 transition-all" data-lottery="take5day"><i class="fas fa-sun mr-1 text-orange-400"></i>T5 Day</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-indigo-500 transition-all" data-lottery="take5eve"><i class="fas fa-moon mr-1 text-indigo-400"></i>T5 Eve</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-rose-500 transition-all" data-lottery="win4day"><i class="fas fa-sun mr-1 text-rose-400"></i>W4 Day</button>
+    <button class="lottery-tab px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-teal-500 transition-all" data-lottery="win4eve"><i class="fas fa-moon mr-1 text-teal-400"></i>W4 Eve</button>
+  </div>
+
+  <!-- Contenido de Lotería -->
+  <div id="lotteryContent" class="w-full max-w-3xl mx-auto">
+    <!-- Powerball -->
+    <div id="powerball-section" class="lottery-section animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-fire mr-2 text-red-500"></i>Powerball Panel</h2>
+        <div class="next-drawing-strip bg-gray-900/90 rounded-xl p-3 sm:p-4 mb-4 border border-gray-700" data-lottery="powerball">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-400">Próximo sorteo:</span> <span class="next-drawing-date font-semibold text-white"></span></div>
+            <div><span class="text-gray-400">Cuenta atrás:</span> <span class="countdown font-mono text-cyan-400 text-base" aria-live="polite"></span></div>
+            <div class="sm:col-span-2"><span class="text-gray-400">Winning numbers y valor en efectivo estimado:</span> <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">NY Lottery – All Winning Numbers</a></div>
+          </div>
+        </div>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-blue-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Números (1-69)</label><div class="grid grid-cols-5 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-blue-500 text-center font-bold text-lg" min="1" max="69" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-blue-500 text-center font-bold text-lg" min="1" max="69" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-blue-500 text-center font-bold text-lg" min="1" max="69" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-blue-500 text-center font-bold text-lg" min="1" max="69" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-blue-500 text-center font-bold text-lg" min="1" max="69" data-type="main"></div></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">PB (1-26)</label><input type="number" class="lottery-input w-full p-3 rounded-lg bg-gray-800 text-red-400 border border-red-900 focus:border-red-500 text-center font-bold text-xl" min="1" max="26" data-type="special"></div>
+            <button class="save-btn w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="powerball">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="powerball"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="powerball"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="powerball"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="powerball">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Frecuentes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial Reciente</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="powerball"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="powerball"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_pb"><button id="verMasBtn_pb" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Millionaire For Life (sustituye a Cash4Life desde feb 2026) -->
+    <div id="millionaireforlife-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-gem mr-2 text-amber-400"></i>Millionaire For Life Panel</h2>
+        <p class="text-gray-400 text-xs sm:text-sm mb-3 text-center">Nuevo juego multijurisdiccional (desde feb 2026). Sustituye a Cash4Life. 5 números (1-58) + Millionaire Ball (1-5). Sorteo diario.</p>
+        <div class="next-drawing-strip bg-gray-900/90 rounded-xl p-3 sm:p-4 mb-4 border border-gray-700" data-lottery="millionaireforlife">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-400">Próximo sorteo:</span> <span class="next-drawing-date font-semibold text-white"></span></div>
+            <div><span class="text-gray-400">Cuenta atrás:</span> <span class="countdown font-mono text-cyan-400 text-base" aria-live="polite"></span></div>
+            <div class="sm:col-span-2"><span class="text-gray-400">Números ganadores y premio:</span> <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">NY Lottery – All Winning Numbers</a></div>
+          </div>
+        </div>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-amber-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-amber-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Números (1-58)</label><div class="grid grid-cols-5 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-amber-500 text-center font-bold" min="1" max="58" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-amber-500 text-center font-bold" min="1" max="58" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-amber-500 text-center font-bold" min="1" max="58" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-amber-500 text-center font-bold" min="1" max="58" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-amber-500 text-center font-bold" min="1" max="58" data-type="main"></div></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Millionaire Ball (1-5)</label><input type="number" class="lottery-input w-full p-3 rounded-lg bg-gray-800 text-amber-400 border border-amber-900 focus:border-amber-500 text-center font-bold text-xl" min="1" max="5" data-type="special"></div>
+            <button class="save-btn w-full px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="millionaireforlife">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="millionaireforlife"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="millionaireforlife"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="millionaireforlife"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="millionaireforlife">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Calientes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="millionaireforlife"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="millionaireforlife"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_m4l"><button id="verMasBtn_m4l" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mega Millions -->
+    <div id="megamillions-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-star mr-2 text-yellow-400"></i>Mega Millions Panel</h2>
+        <div class="next-drawing-strip bg-gray-900/90 rounded-xl p-3 sm:p-4 mb-4 border border-gray-700" data-lottery="megamillions">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div><span class="text-gray-400">Próximo sorteo:</span> <span class="next-drawing-date font-semibold text-white"></span></div>
+            <div><span class="text-gray-400">Cuenta atrás:</span> <span class="countdown font-mono text-cyan-400 text-base" aria-live="polite"></span></div>
+            <div class="sm:col-span-2"><span class="text-gray-400">Winning numbers y estimated cash value:</span> <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">NY Lottery – All Winning Numbers</a></div>
+          </div>
+        </div>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-yellow-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Números (1-70)</label><div class="grid grid-cols-5 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"></div></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Mega Ball (1-25)</label><input type="number" class="lottery-input w-full p-3 rounded-lg bg-gray-800 text-yellow-400 border border-yellow-900 focus:border-yellow-500 text-center font-bold text-xl" min="1" max="25" data-type="special"></div>
+            <button class="save-btn w-full px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="megamillions">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="megamillions"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="megamillions"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="megamillions"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="megamillions">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Calientes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="megamillions"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="megamillions"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_mm"><button id="verMasBtn_mm" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pick 10: el sorteo saca 20 números (1-80); el usuario elige 10 para predecir -->
+    <div id="pick10-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-list-ol mr-2 text-cyan-400"></i>Pick 10 Panel</h2>
+        <div class="mb-3 sm:mb-4 text-center text-gray-400 text-xs sm:text-sm"><strong class="text-cyan-300">How to play:</strong> Choose 10 numbers from 1–80 (or use PREDECIR). The draw has 20 winning numbers. Register the 20 drawn numbers below.</div>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-cyan-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo (20 números)</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">20 números del sorteo (1-80)</label><div class="grid grid-cols-4 sm:grid-cols-10 gap-1 sm:gap-2">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            <input type="number" class="lottery-input p-2 sm:p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 text-center font-bold text-sm" min="1" max="80" data-type="main">
+            </div>
+            <p class="text-gray-500 text-xs mt-1">Son 20 casillas en total (en pantallas grandes se ven en 2 filas de 10). Completa todas para registrar el resultado oficial.</p></div>
+            <button class="save-btn w-full px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="pick10">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="pick10"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="pick10"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="pick10"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="pick10">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Frecuentes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="pick10"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="pick10"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_pick10"><button id="verMasBtn_pick10" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Take 5 Day: 5 números 1-39 -->
+    <div id="take5day-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-sun mr-2 text-orange-400"></i>Take 5 Day Panel</h2>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-orange-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo (Diurno)</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">5 números (1-39)</label><div class="grid grid-cols-5 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 text-center font-bold" min="1" max="39" data-type="main"></div></div>
+            <button class="save-btn w-full px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="take5day">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="take5day"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="take5day"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="take5day"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="take5day">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Frecuentes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="take5day"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="take5day"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_take5day"><button id="verMasBtn_take5day" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Take 5 Eve: 5 números 1-39 -->
+    <div id="take5eve-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-moon mr-2 text-indigo-400"></i>Take 5 Eve Panel</h2>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-indigo-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo (Nocturno)</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-indigo-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">5 números (1-39)</label><div class="grid grid-cols-5 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-indigo-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-indigo-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-indigo-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-indigo-500 text-center font-bold" min="1" max="39" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-indigo-500 text-center font-bold" min="1" max="39" data-type="main"></div></div>
+            <button class="save-btn w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="take5eve">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="take5eve"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="take5eve"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="take5eve"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="take5eve">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Frecuentes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="take5eve"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="take5eve"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_take5eve"><button id="verMasBtn_take5eve" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Win 4 Day: 4 dígitos 0-9 -->
+    <div id="win4day-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-sun mr-2 text-rose-400"></i>Win 4 Day Panel</h2>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-rose-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo (Diurno)</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-rose-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">4 dígitos (0-9 cada uno)</label><div class="grid grid-cols-4 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-rose-500 text-center font-bold text-xl" min="0" max="9" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-rose-500 text-center font-bold text-xl" min="0" max="9" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-rose-500 text-center font-bold text-xl" min="0" max="9" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-rose-500 text-center font-bold text-xl" min="0" max="9" data-type="main"></div></div>
+            <button class="save-btn w-full px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="win4day">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="win4day"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="win4day"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="win4day"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="win4day">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Frecuentes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="win4day"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="win4day"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_win4day"><button id="verMasBtn_win4day" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Win 4 Eve: 4 dígitos 0-9 -->
+    <div id="win4eve-section" class="lottery-section hidden animate-fadeIn">
+      <div class="bg-gray-800 p-3 sm:p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h2 class="text-lg sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center justify-center border-b border-gray-700 pb-3 sm:pb-4"><i class="fas fa-moon mr-2 text-teal-400"></i>Win 4 Eve Panel</h2>
+        <div class="mb-6 sm:mb-8 text-left bg-gray-900 p-3 sm:p-4 rounded-xl">
+          <h3 class="text-sm sm:text-lg font-semibold mb-2 sm:mb-3 text-teal-400 flex items-center"><i class="fas fa-plus-circle mr-2"></i>Registrar Sorteo (Nocturno)</h3>
+          <div class="space-y-4">
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-teal-500 focus:outline-none"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">4 dígitos (0-9 cada uno)</label><div class="grid grid-cols-4 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-teal-500 text-center font-bold text-xl" min="0" max="9" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-teal-500 text-center font-bold text-xl" min="0" max="9" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-teal-500 text-center font-bold text-xl" min="0" max="9" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-teal-500 text-center font-bold text-xl" min="0" max="9" data-type="main"></div></div>
+            <button class="save-btn w-full px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="win4eve">GUARDAR SORTEO</button>
+          </div>
+        </div>
+        <div class="btn-grid-2 grid grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <button class="generate-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="win4eve"><i class="fas fa-magic mr-1 sm:mr-2"></i>PREDECIR</button>
+          <button class="analyze-btn py-2 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-violet-500 to-violet-700 text-white font-bold rounded-lg hover:scale-105 transition-transform shadow-lg" data-lottery="win4eve"><i class="fas fa-chart-bar mr-1 sm:mr-2"></i>ESTADÍSTICAS</button>
+        </div>
+        <div class="generated-numbers-container space-y-3 hidden mb-6" data-lottery="win4eve"></div>
+        <div class="analysis-results mt-6 hidden bg-gray-900 p-4 rounded-xl" data-lottery="win4eve">
+          <div class="grid grid-cols-1 gap-4 text-left">
+            <div><h4 class="text-sm font-bold text-red-400 uppercase mb-2">🔥 Frecuentes</h4><div class="hot-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-blue-400 uppercase mb-2">❄️ Fríos</h4><div class="cold-numbers flex flex-wrap gap-2"></div></div>
+            <div><h4 class="text-sm font-bold text-yellow-400 uppercase mb-2">🔗 Pares</h4><div class="hot-pairs flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="text-left mt-8">
+          <h3 class="text-lg font-semibold mb-3 text-gray-300 border-b border-gray-700 pb-2"><i class="fas fa-history mr-2"></i>Historial</h3>
+          <div class="loading-history flex items-center justify-center text-gray-400 py-4" data-lottery="win4eve"><div class="loading-spinner mr-2"></div> Cargando...</div>
+          <div class="history-list space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar" data-lottery="win4eve"></div>
+          <div class="text-center mt-4 hidden" id="verMasContainer_win4eve"><button id="verMasBtn_win4eve" class="text-xs text-gray-500 hover:text-white uppercase">Ver más</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN INFORMATIVA PRINCIPAL -->
+  <hr class="border-gray-800 my-4">
+
+  <!-- ¿Cómo funciona? -->
+  <section class="info-section collapsible-section collapsed bg-gray-800 p-3 sm:p-6 rounded-xl mb-3 sm:mb-4">
+    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
+      <h2 class="text-base sm:text-xl font-bold text-white m-0">¿Cómo funciona nuestro estimador de lotería?</h2>
+      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
+    </div>
+    <div class="collapsible-content">
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
+        Analizamos <strong>sorteos históricos</strong> de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 para identificar <strong>patrones estadísticos</strong>, <strong>números calientes y fríos</strong> y <strong>frecuencias</strong>. Los números calientes son los que más han salido en los últimos sorteos; los fríos, los que menos. Usamos esos datos para sugerir combinaciones. <strong>No garantizamos premios</strong>; es un apoyo estadístico solo para entretenimiento.
+      </p>
+      <h3 class="text-sm sm:text-base font-semibold text-gray-200 mt-3 sm:mt-4 mb-2">📡 Algoritmos</h3>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-2">Siete modelos: <strong>Frecuencia</strong> (los más salidos), <strong>Fríos</strong> (los menos salidos), <strong>Mixta Equilibrada</strong> (mezcla de calientes y fríos), <strong>Patrones de Repetición</strong>, <strong>Por decenas</strong> (rangos 1-9, 10-19, 20-29, 30-39…; se elige el número más frecuente de cada decena «caliente» según el historial), <strong>IA Aleatoria</strong> y <strong>Markov+Poisson</strong>. Cada predicción muestra debajo con qué lógica se generó. Puedes registrar los resultados oficiales de cada sorteo y comparar con tus predicciones para ver tu <strong>precisión real</strong> por juego.</p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">Cada juego tiene su rango de números y reglas: Powerball y Mega Millions usan bola especial; Pick 10 sortea 20 números y tú eliges 10; Win 4 son cuatro dígitos por posición. Nuestras estadísticas se adaptan a cada uno.</p>
+      <h3 class="text-sm sm:text-base font-semibold text-gray-200 mt-3 mb-2">Juegos disponibles en USA</h3>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed"><strong>Powerball</strong> y <strong>Mega Millions</strong> son loterías multijurisdiccionales con premios muy altos; se juegan en la mayoría de estados. <strong>Millionaire For Life</strong> (desde feb 2026, sustituye a Cash4Life) ofrece premios vitalicios en más de 30 estados. <strong>Pick 10</strong> permite elegir 10 números de 1 a 80 mientras el sorteo extrae 20. <strong>Take 5</strong> (diurno y nocturno) usa 5 números del 1 al 39. <strong>Win 4</strong> (day y evening) usa 4 dígitos del 0 al 9 por posición. En nuestro sitio puedes obtener predicciones y estadísticas para todos ellos y registrar los resultados para seguir tu precisión.</p>
+      <div id="precisionHelp" class="bg-blue-900 bg-opacity-50 border border-blue-600 text-blue-200 text-sm p-3 rounded-lg mt-4 flex items-center justify-between flex-wrap gap-2">
+        <span><i class="fas fa-info-circle mr-2"></i><strong>¿Por qué 0 %?</strong> Genera una predicción y luego guarda el resultado real de ese día para actualizar tu precisión.</span>
+        <button type="button" onclick="this.parentElement.style.display='none'" class="text-blue-300 hover:text-white"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ: contenido único de valor para AdSense -->
+  <section class="info-section collapsible-section collapsed bg-gray-800 p-3 sm:p-6 rounded-xl mb-3 sm:mb-4">
+    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
+      <h2 class="text-base sm:text-xl font-bold text-white m-0">Preguntas frecuentes</h2>
+      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
+    </div>
+    <div class="collapsible-content">
+      <div class="text-left space-y-4 mt-3">
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Las predicciones garantizan ganar?</h3>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">No. La lotería es un juego de azar. Nuestras predicciones son solo análisis estadístico sobre historial de sorteos; no hay forma de garantizar resultados. Úsalas como referencia o entretenimiento.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Qué juegos cubre el sitio?</h3>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 (diurno y nocturno) y Win 4 (diurno y nocturno), válidos para todos los estados de USA que ofrecen estos juegos.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Cómo se calcula mi precisión?</h3>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">Cuando guardas el resultado oficial de un sorteo el mismo día en que generaste una predicción, comparamos cuántos números coinciden (y la bola especial si aplica). El porcentaje se guarda en tu dispositivo por juego.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Los datos de sorteos son oficiales?</h3>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">Los resultados que mostramos en el historial pueden venir de nuestra base de datos (registrados por usuarios o por nosotros) o de fuentes públicas. Siempre recomendamos contrastar con la web oficial de cada lotería.</p>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Necesito crear cuenta?</h3>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">No. Usamos identificación anónima (Firebase) solo para guardar comentarios y estadísticas. Tus predicciones se guardan en tu navegador (localStorage). Puedes usar el sitio sin registrar correo ni datos personales.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Anuncio: solo después de mucho contenido editorial (política AdSense) -->
+  <div id="ad-top-container" class="ad-slot ad-empty w-full bg-gray-800 rounded-lg my-4 flex items-center justify-center border border-dashed border-gray-600">
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-client="ca-pub-8721021745606812"
+         data-ad-slot="7860682213"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- SECCIÓN: Precisión Real por Usuario -->
+  <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700 mt-4 sm:mt-6">
+    <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-bullseye mr-2 text-green-400"></i>Tu Precisión Real</h2>
+    <p class="text-xs text-gray-500 mb-3 sm:mb-4">Se actualiza al guardar el resultado real del día y comparar con tu predicción.</p>
+    <div class="precision-grid grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3 text-sm">
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Powerball</span><div id="precisionReal_powerball" class="text-lg font-bold text-green-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Millionaire For Life</span><div id="precisionReal_millionaireforlife" class="text-lg font-bold text-amber-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Mega Millions</span><div id="precisionReal_megamillions" class="text-lg font-bold text-green-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Pick 10</span><div id="precisionReal_pick10" class="text-lg font-bold text-green-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Take 5 Day</span><div id="precisionReal_take5day" class="text-lg font-bold text-green-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Take 5 Eve</span><div id="precisionReal_take5eve" class="text-lg font-bold text-green-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Win 4 Day</span><div id="precisionReal_win4day" class="text-lg font-bold text-green-400">0%</div></div>
+      <div class="bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 block text-xs">Win 4 Eve</span><div id="precisionReal_win4eve" class="text-lg font-bold text-green-400">0%</div></div>
+    </div>
+  </div>
+
+  <!-- Juega con responsabilidad -->
+  <section class="info-section bg-gray-900 p-3 sm:p-6 rounded-xl mb-4 sm:mb-8">
+    <h2 class="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4">Juega con responsabilidad</h2>
+    <p class="text-gray-400 text-sm sm:text-base leading-relaxed">
+      La lotería es un juego de azar. <strong>Nuestras predicciones son estadísticas, no garantías</strong>. <strong>Solo para mayores de 18 años</strong>. <strong>Juega con moderación</strong> y <strong>nunca apuestes más de lo que puedas perder</strong>. Si crees que tienes un problema con el juego, busca ayuda en organizaciones como la National Council on Problem Gambling (NCPG).
+    </p>
+  </section>
+
+  <!-- Anuncio Inferior: después de todo el contenido editorial. Si ves 400 en consola, revisa en AdSense que la unidad 2043462391 exista y esté activa. -->
+  <div id="ad-bottom-container" class="ad-slot ad-empty w-full bg-gray-800 rounded-lg my-4 flex items-center justify-center border border-dashed border-gray-600" data-ad-slot="2043462391">
+    <ins class="adsbygoogle"
+         style="display:block; text-align:center;"
+         data-ad-client="ca-pub-8721021745606812"
+         data-ad-slot="4656524679"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  </div>
+
+  <!-- Testimonios - ¿Funciona realmente? -->
+  <section class="info-section bg-gray-800 p-3 sm:p-6 rounded-xl mb-4 sm:mb-8">
+    <h2 class="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4">¿Funciona realmente?</h2>
+    <p class="text-gray-400 text-sm sm:text-base mb-3 sm:mb-4">Usuarios de distintos estados usan las predicciones como referencia estadística. Los resultados dependen del azar; nosotros solo ofrecemos análisis.</p>
+    <div class="testimonials-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
+      <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <p class="text-gray-300">"Acerté 3 números en Powerball. No el premio mayor, pero sí un pequeño premio. Uso las estadísticas cada semana."</p>
+        <p class="text-gray-500 text-xs mt-2">— Carlos, Florida</p>
+      </div>
+      <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <p class="text-gray-300">"Ver mi precisión por juego (Powerball, Take 5, Win 4) me ayuda a decidir qué combinaciones probar."</p>
+        <p class="text-gray-500 text-xs mt-2">— Ana, California</p>
+      </div>
+      <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <p class="text-gray-300">"Los números fríos y los pares frecuentes me dan ideas. Uso Pick 10 y Mega Millions."</p>
+        <p class="text-gray-500 text-xs mt-2">— Luis, NY</p>
+      </div>
+      <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <p class="text-gray-300">"Uso Win 4 Day y Eve; tener las dos sesiones y ver historial me resulta muy práctico."</p>
+        <p class="text-gray-500 text-xs mt-2">— María, Texas</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard & Comments -->
+  <div class="stats-chat-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+    <!-- Stats -->
+    <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700">
+      <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-chart-pie mr-2 text-blue-400"></i>Estadísticas Globales</h2>
+      <div class="space-y-4">
+        <div class="flex justify-between bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 text-sm">Sorteos Totales</span><span class="text-xl font-bold text-blue-400" id="totalDrawings">0</span></div>
+        <div class="flex justify-between bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 text-sm">Predicciones</span><span class="text-xl font-bold text-green-400" id="totalPredictions">0</span></div>
+        <div class="flex justify-between bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 text-sm">Precisión Est.</span><span class="text-xl font-bold text-yellow-400" id="avgAccuracy">0%</span></div>
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700 flex flex-col h-full">
+      <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-comments mr-2 text-pink-400"></i>Chat Comunitario</h2>
+      <p class="text-gray-500 text-xs mb-2">Comparte estrategias, resultados o preguntas.</p>
+      <div id="commentsList" class="flex-grow space-y-3 mb-4 max-h-48 overflow-y-auto pr-1"><div id="loadingComments" class="text-center text-gray-500 text-sm">Cargando...</div></div>
+      <div class="mt-auto">
+        <textarea id="commentInput" class="w-full h-16 p-3 rounded-lg bg-gray-900 text-gray-200 border border-gray-600 focus:border-pink-500 focus:outline-none resize-none text-sm mb-2" placeholder="Escribe tu mensaje (estrategia, resultado, pregunta)..."></textarea>
+        <button id="postCommentBtn" class="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-lg text-sm">ENVIAR</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Aviso Legal -->
+  <section id="aviso-legal" class="aviso-legal mt-8">
+    <div class="aviso-legal__inner">
+      <h2 class="aviso-legal__title">Aviso Legal</h2>
+      <p class="aviso-legal__text">
+        Este es un servicio independiente de terceros que ofrece combinaciones numéricas generadas por inteligencia artificial con fines de entretenimiento solamente. NO estamos afiliados, respaldados ni asociados con ninguna organización oficial de lotería incluyendo Millionaire For Life, Mega Millions, Powerball, o sus operadores. Todos los nombres de juegos de lotería son marcas registradas de sus respectivos dueños. No se garantiza ningún premio. Los usuarios deben tener 18+ y jugar de manera responsable.
+      </p>
+    </div>
+  </section>
+
+<!-- Footer -->
+<footer class="mt-6 sm:mt-12 pb-4 sm:pb-8 text-center w-full bg-gray-900 bg-opacity-50 pt-4 sm:pt-8 border-t border-gray-800">
+  <div class="max-w-4xl mx-auto px-4">
+    <p class="text-gray-400 text-sm mb-2">&copy; 2026 Predicción de Lotería Profesional</p>
+    <div class="text-xs text-gray-500 space-x-4 mb-4">
+      <a href="#aviso-legal" class="hover:text-gray-300">Aviso Legal</a>
+      <span>|</span>
+      <a href="/politica-privacidad.html" class="hover:text-gray-300">Política de Privacidad</a>
+      <span>|</span>
+      <a href="/politica-cookies.html" class="hover:text-gray-300">Política de Cookies</a>
+    </div>
+    <p class="text-gray-500 text-xs mb-4">Última actualización: <span id="lastUpdate"></span></p>
+    <p class="text-gray-500 text-xs mb-4">El uso de este sitio implica tu acuerdo con la <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a>.</p>
+
+    <!-- Juego responsable (estilo NY Lottery) -->
+    <div class="footer-responsible-play mt-4 pt-4 border-t border-gray-700 text-left">
+      <p class="text-amber-400/90 text-xs font-semibold uppercase tracking-wide mb-2">Please play responsibly.</p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        Must be 18+ to purchase a Lottery ticket and 21+ for Quick Draw where alcohol is served. Gambling problem? Visit <a href="https://nyproblemgamblinghelp.org" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">NYProblemGamblingHelp.org</a>. Call the HOPEline <a href="tel:+18778467369" class="text-cyan-400 hover:underline">1-877-846-7369</a> or text 467369.
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        All New York Lottery transactions are subject to New York State Gaming Commission rules and regulations. New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. This site is not affiliated with the New York State Gaming Commission or any official lottery.
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
+        The information on this website is believed to be accurate. In the event of a discrepancy between the information displayed on this website and the information in the official records maintained by the New York State Gaming Commission (or other official lottery authorities), the records maintained by the Gaming Commission or the respective authority shall prevail.
+      </p>
+    </div>
+
+    <!-- Copyright y aviso legal del sitio -->
+    <div class="footer-legal mt-6 pt-4 border-t border-gray-700 text-left">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">&copy; 2026 Predicción Lotería. Todos los derechos reservados.</p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. &copy; 2026 New York State Gaming Commission — All rights reserved. Este sitio no está afiliado con la New York State Gaming Commission ni con ninguna lotería oficial.
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
+        Predicción Lotería es un servicio independiente de entretenimiento. No estamos afiliados, respaldados ni asociados con Powerball®, Mega Millions®, Millionaire For Life™, Pick 10, Take 5, Win 4 ni con ninguna lotería oficial. Las predicciones son meramente informativas y no garantizan resultados. Solo para mayores de 18 años. Juega con responsabilidad.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<!-- Google Translate -->
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement(
+    { pageLanguage: 'es', includedLanguages: 'es,en,zh-CN,ru,ar,fr,it,ko,pl', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+    'google_translate_element'
+  );
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
+
+<!-- Scripts (módulos: no bloquean el parser) -->
+<script type="module" src="lottery-algorithms.js"></script>
+<script type="module" src="app.js"></script>
+
+<!-- Expandir / Ocultar texto en secciones colapsables -->
+<script>
+(function() {
+  function initCollapsibles() {
+    document.querySelectorAll('.toggle-collapse-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var section = this.closest('.collapsible-section');
+        if (!section) return;
+        var content = section.querySelector('.collapsible-content');
+        section.classList.toggle('collapsed');
+        var expanded = !section.classList.contains('collapsed');
+        if (content) {
+          content.style.display = expanded ? '' : 'none';
+          content.style.visibility = expanded ? '' : 'hidden';
+          content.style.overflow = expanded ? '' : 'hidden';
+          content.style.maxHeight = expanded ? '' : '0';
+        }
+        this.setAttribute('aria-expanded', expanded);
+        this.textContent = expanded ? 'Ocultar texto' : 'Expandir texto';
+      });
+    });
+    // Asegurar que al cargar el contenido colapsado esté oculto (por si el CSS no aplica)
+    document.querySelectorAll('.collapsible-section.collapsed .collapsible-content').forEach(function(el) {
+      el.style.display = 'none';
+      el.style.maxHeight = '0';
+      el.style.overflow = 'hidden';
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCollapsibles);
+  } else {
+    initCollapsibles();
+  }
+})();
+</script>
+<!-- Clic en logo de lotería: cambiar a esa pestaña -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.lottery-logo-card[data-lottery]').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      var lottery = this.getAttribute('data-lottery');
+      if (!lottery) return;
+      var tab = document.querySelector('.lottery-tab[data-lottery="' + lottery + '"]');
+      if (tab) {
+        e.preventDefault();
+        tab.click();
+        document.getElementById('lotteryContent').scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+});
+</script>
+
+<!-- AdSense: el script ya está en <head>; aquí solo se rellenan los slots al dar consentimiento -->
+<script>
+  function initAdSense() {
+    if (typeof adsbygoogle === 'undefined') return;
+    if (localStorage.getItem('cookieConsent') !== '1') return;
+    try {
+      var introBlocks = document.querySelectorAll('.main-content-intro');
+      if (introBlocks.length < 2) return;
+      var topAd = document.getElementById('ad-top-container');
+      var bottomAd = document.getElementById('ad-bottom-container');
+      if (topAd && topAd.offsetParent !== null) (adsbygoogle = window.adsbygoogle || []).push({});
+      if (bottomAd && bottomAd.offsetParent !== null) (adsbygoogle = window.adsbygoogle || []).push({});
+    } catch(e) {}
+  }
+
+  function hasAdIframe(container) {
+    return container && container.querySelector('iframe');
+  }
+  function updateAdSlot(container) {
+    if (!container || !container.classList.contains('ad-slot')) return;
+    if (hasAdIframe(container)) {
+      container.classList.add('ad-loaded');
+      container.classList.remove('ad-empty');
+    } else {
+      container.classList.add('ad-empty');
+      container.classList.remove('ad-loaded');
+    }
+  }
+  function observeAdSlots() {
+    var ids = ['ad-top-container', 'ad-bottom-container'];
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      updateAdSlot(el);
+      var observer = new MutationObserver(function() { updateAdSlot(el); });
+      observer.observe(el, { childList: true, subtree: true });
+      setTimeout(function() { updateAdSlot(el); }, 2500);
+      // Si tras 6s no hay iframe (ej. 400 del slot), ocultar el contenedor para no dejar caja vacía
+      setTimeout(function() {
+        updateAdSlot(el);
+        if (el.classList.contains('ad-empty') && !el.querySelector('iframe')) {
+          el.style.display = 'none';
+        }
+      }, 6000);
+    });
+  }
+
+  window.addEventListener('load', function() {
+    setTimeout(observeAdSlots, 500);
+    setTimeout(initAdSense, 1200);
+    // Verificación final del sistema (después de que todo cargue)
+    console.log('🎯 Predicción de Lotería: Página completamente cargada.');
+    const today = new Date().toISOString().split('T')[0];
+    const savedKeys = Object.keys(localStorage).filter(k => k.startsWith('prediction_') && k.includes(today));
+    if (savedKeys.length > 0) {
+      console.log(`✅ Se encontraron ${savedKeys.length} predicción(es) guardada(s) para hoy.`);
+    }
+    if (typeof window.lotteryAlgorithms !== 'undefined') {
+      console.log('✅ Módulo de algoritmos cargado correctamente.');
+    } else {
+      console.warn('⚠️ Módulo de algoritmos no detectado.');
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', function() {
+    if (!localStorage.getItem('cookieConsent')) {
+      document.getElementById('cookie-banner').classList.add('show');
+    }
+    document.getElementById('accept-cookies').onclick = function() {
+      localStorage.setItem('cookieConsent', '1');
+      document.getElementById('cookie-banner').classList.remove('show');
+      setTimeout(initAdSense, 800);
+      setTimeout(observeAdSlots, 500);
+    };
+    document.getElementById('reject-cookies').onclick = function() {
+      localStorage.setItem('cookieConsent', '0');
+      document.getElementById('cookie-banner').classList.remove('show');
+      var t = document.getElementById('ad-top-container');
+      var b = document.getElementById('ad-bottom-container');
+      if (t) { t.style.display = 'none'; t.classList.add('ad-empty'); }
+      if (b) { b.style.display = 'none'; b.classList.add('ad-empty'); }
+    };
+  });
+</script>
+</body>
+</html>
