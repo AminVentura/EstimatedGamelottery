@@ -85,6 +85,20 @@
   </div>
 </header>
 
+<!-- Navegación principal (AdSense: UX y navegación) -->
+<nav class="site-nav w-full max-w-5xl mx-auto mb-4 relative z-20">
+  <div class="nav-inner flex flex-wrap items-center justify-between gap-2 py-2 px-4 rounded-xl bg-gray-800/90 border border-gray-700">
+    <div class="flex items-center gap-1 sm:gap-4 flex-wrap text-sm">
+      <a href="/" class="nav-link text-white font-semibold hover:text-cyan-400 transition-colors px-2 py-1">🏠 Inicio</a>
+      <a href="#juegos" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">🎰 Juegos</a>
+      <a href="#como-funciona" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">📖 Cómo funciona</a>
+      <a href="/faq.html" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">❓ FAQ</a>
+      <a href="/about.html" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">ℹ️ Acerca de</a>
+      <a href="/contacto.html" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">✉️ Contacto</a>
+    </div>
+  </div>
+</nav>
+
 <!-- Cookie Banner -->
 <div id="cookie-banner" class="cookie-banner">
   <div class="cookie-content">
@@ -140,7 +154,7 @@
   </section>
 
   <!-- Logos de Loterías (estilo NY Lottery: Powerball, Mega Millions, Cash4Life, Numbers) -->
-  <section class="lottery-logos-section mb-4 sm:mb-6" aria-label="Juegos disponibles">
+  <section class="lottery-logos-section mb-4 sm:mb-6" id="juegos" aria-label="Juegos disponibles">
     <h2 class="sr-only">Juegos de lotería disponibles</h2>
     <p class="text-center text-gray-400 text-sm mb-3">Elige tu juego</p>
     <div class="lottery-logos-grid flex flex-wrap items-center justify-center gap-3 sm:gap-4">
@@ -171,44 +185,179 @@
     </div>
   </section>
 
-  <!-- Contenido editorial (AdSense: mucho contenido antes de cualquier anuncio) -->
-  <section class="main-content-intro collapsible-section collapsed text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
-    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
-      <h2 class="text-lg sm:text-xl font-bold text-white m-0">Sobre prediccionloteria.com</h2>
-      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
-    </div>
-    <div class="collapsible-content">
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
-        Somos un sitio independiente de análisis estadístico para loterías de Estados Unidos. Ofrecemos <strong>predicciones numéricas basadas en historial de sorteos</strong> de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 (diurno y nocturno), con cobertura para todos los estados. Nuestro objetivo es dar a los usuarios <strong>herramientas de referencia y entretenimiento</strong>: números frecuentes y fríos, pares que más salen y varias estrategias de generación (frecuencia, mixta, Markov). No estamos afiliados a ninguna lotería oficial; las predicciones son solo apoyo estadístico y no garantizan premios.
-      </p>
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-        Puedes <strong>registrar los resultados oficiales</strong> de cada sorteo, guardar tus predicciones y ver tu precisión por juego. Todo el análisis se hace con algoritmos propios sobre los datos que la comunidad y nosotros mismos vamos añadiendo.
-      </p>
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
-        Este sitio está pensado para mayores de 18 años. La lotería es un juego de azar; recomendamos jugar con moderación y nunca apostar más de lo que puedas permitirte perder. Para dudas sobre privacidad o cookies, consulta nuestras páginas de Política de Privacidad y Política de Cookies enlazadas en el pie de página.
-      </p>
-    </div>
+  <!-- Contenido editorial (AdSense: visible por defecto para que Google lo indexe) -->
+  <section class="main-content-intro text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700" id="sobre-nosotros">
+    <h2 class="text-lg sm:text-xl font-bold text-white mb-4">Sobre prediccionloteria.com</h2>
+
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
+      <strong>prediccionloteria.com</strong> es un sitio independiente de análisis estadístico
+      especializado en loterías de Estados Unidos. Ofrecemos herramientas de referencia y
+      entretenimiento basadas en el historial de sorteos oficiales de <strong>Powerball,
+      Mega Millions, Millionaire For Life, Pick 10, Take 5</strong> (diurno y nocturno) y
+      <strong>Win 4</strong> (diurno y nocturno), con cobertura para todos los estados
+      participantes.
+    </p>
+
+    <h3 class="text-base sm:text-lg font-semibold text-cyan-400 mb-2 mt-4">¿Qué ofrecemos?</h3>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Nuestra plataforma combina análisis de frecuencia histórica, detección de pares de
+      números que aparecen juntos con regularidad y algoritmos de cadenas de Markov para
+      generar combinaciones sugeridas. Esto no predice el futuro — la lotería es un juego
+      de azar puro — pero te da un punto de partida informado basado en datos reales.
+    </p>
+    <ul class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 list-disc list-inside space-y-2">
+      <li><strong>Números calientes:</strong> los que más han salido en sorteos recientes.</li>
+      <li><strong>Números fríos:</strong> los que llevan más tiempo sin aparecer.</li>
+      <li><strong>Pares frecuentes:</strong> combinaciones de dos números que salen juntas con más regularidad.</li>
+      <li><strong>Estrategia mixta:</strong> combina frecuencia con distribución balanceada.</li>
+      <li><strong>Cadenas de Markov:</strong> modelo probabilístico basado en transiciones entre sorteos consecutivos.</li>
+    </ul>
+
+    <h3 class="text-base sm:text-lg font-semibold text-cyan-400 mb-2 mt-4">¿Por qué registrar sorteos?</h3>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Puedes ingresar los resultados oficiales de cada sorteo directamente en la app. Esto
+      cumple dos funciones: primero, enriquece las estadísticas que usamos para generar
+      predicciones futuras; segundo, te permite ver tu <strong>precisión personal</strong>
+      — cuántos números de tu predicción coincidieron con el resultado real, por juego y
+      en el tiempo.
+    </p>
+
+    <h3 class="text-base sm:text-lg font-semibold text-cyan-400 mb-2 mt-4">¿Cómo se calculan las predicciones?</h3>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      El motor de predicción analiza el historial de sorteos disponible en nuestra base de
+      datos y aplica tres enfoques distintos:
+    </p>
+    <ol class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 list-decimal list-inside space-y-2">
+      <li><strong>Análisis de frecuencia:</strong> ordena todos los números por cuántas veces han salido y pondera los más frecuentes.</li>
+      <li><strong>Detección de pares:</strong> identifica qué pares de números han aparecido juntos más de una vez y los prioriza.</li>
+      <li><strong>Modelo de Markov:</strong> calcula la probabilidad de que un número salga dado el conjunto del sorteo anterior.</li>
+    </ol>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
+      Los tres métodos se pueden combinar en la estrategia «mixta», que equilibra frecuencia
+      con variedad para generar combinaciones que no repiten siempre los mismos números.
+    </p>
+
+    <h3 class="text-base sm:text-lg font-semibold text-yellow-400 mb-2 mt-4">⚠️ Aviso importante</h3>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Este sitio está diseñado exclusivamente para entretenimiento y referencia estadística.
+      <strong>Ningún sistema puede predecir los números ganadores de la lotería</strong>,
+      ya que los sorteos son procesos completamente aleatorios supervisados por organismos
+      oficiales. Las combinaciones generadas aquí no garantizan ningún premio.
+    </p>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+      Recomendamos jugar con moderación. Si crees que el juego está afectando tu vida,
+      visita <a href="https://www.ncpgambling.org/" target="_blank" rel="noopener noreferrer"
+      class="text-cyan-400 hover:underline">National Council on Problem Gambling</a> o
+      llama al 1-800-522-4700. Solo para mayores de 18 años.
+    </p>
   </section>
 
-  <!-- Guía de uso: contenido de valor editorial -->
-  <section class="main-content-intro collapsible-section collapsed text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
-    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
-      <h2 class="text-lg sm:text-xl font-bold text-white m-0">Guía: Cómo usar las predicciones de lotería</h2>
-      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
-    </div>
-    <div class="collapsible-content">
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
-        En esta página puedes obtener <strong>combinaciones sugeridas</strong> para Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4. Cada juego tiene sus propias reglas: Powerball y Mega Millions se juegan con cinco números más una bola especial; Millionaire For Life (nuevo desde feb 2026, sustituye a Cash4Life) con cinco números (1-58) más la Millionaire Ball (1-5); Pick 10 con diez números elegidos de un sorteo de veinte; Take 5 y Win 4 con cinco o cuatro números respectivamente, en versión diurna y nocturna.
-      </p>
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-        Los <strong>números calientes</strong> son aquellos que han salido con más frecuencia en los sorteos recientes que tenemos registrados; los <strong>números fríos</strong> son los que menos han aparecido. Nuestros algoritmos combinan estas frecuencias con otros criterios (pares que se repiten, patrones, etc.) para proponerte combinaciones. Puedes usar el botón <strong>PREDECIR</strong> para generar una sugerencia y el botón <strong>ESTADÍSTICAS</strong> para ver qué números están saliendo más o menos en cada juego.
-      </p>
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-        Para que tu <strong>precisión real</strong> se actualice, debes generar una predicción y, el mismo día, registrar el resultado oficial del sorteo en la sección «Registrar Sorteo». El sistema compara entonces tu predicción con el resultado y calcula el porcentaje de aciertos por juego. Los historiales que ves en cada pestaña te permiten consultar sorteos pasados y ayudan a que las estadísticas sean más útiles.
-      </p>
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
-        Recuerda que ningún sistema puede garantizar un premio. Las predicciones son únicamente un apoyo estadístico y de entretenimiento. Siempre verifica los resultados oficiales en las webs de cada lotería.
-      </p>
+  <!-- Guía completa: siempre visible para AdSense -->
+  <section class="text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700" id="como-funciona">
+    <h2 class="text-lg sm:text-xl font-bold text-white mb-4">Guía completa: Cómo usar las predicciones de lotería</h2>
+
+    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 1 — Elige tu juego</h3>
+    <p class="text-gray-300 text-sm leading-relaxed mb-4">
+      En la parte superior verás los logos de todos los juegos disponibles: Powerball,
+      Mega Millions, Millionaire For Life, Pick 10, Take 5 (Day y Eve) y Win 4 (Day y Eve).
+      Haz clic en el que quieras y se cargará su panel con historial y herramientas.
+    </p>
+
+    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 2 — Genera una predicción</h3>
+    <p class="text-gray-300 text-sm leading-relaxed mb-3">
+      Dentro de cada panel, pulsa el botón <strong class="text-white">PREDECIR</strong>.
+      El sistema consultará el historial registrado y generará entre 3 y 5 combinaciones
+      sugeridas usando los algoritmos disponibles. Cada combinación viene etiquetada con
+      la estrategia usada: Frecuencia, Mixta o Markov.
+    </p>
+
+    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 3 — Consulta las estadísticas</h3>
+    <p class="text-gray-300 text-sm leading-relaxed mb-4">
+      El botón <strong class="text-white">ESTADÍSTICAS</strong> abre un panel con tres
+      bloques: 🔥 Números calientes (más frecuentes), ❄️ Números fríos (menos frecuentes)
+      y 🔗 Pares (combinaciones de dos números que aparecen juntos con regularidad).
+      Úsalos para tomar decisiones más informadas al comprar tu boleto.
+    </p>
+
+    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 4 — Registra el resultado oficial</h3>
+    <p class="text-gray-300 text-sm leading-relaxed mb-4">
+      Después de cada sorteo, ingresa los números ganadores oficiales usando la sección
+      <strong class="text-white">Registrar Sorteo</strong>. Selecciona la fecha, escribe
+      los números y pulsa Guardar. Esto actualiza el historial local y mejora la precisión
+      de las predicciones futuras.
+    </p>
+
+    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 5 — Revisa tu historial y precisión</h3>
+    <p class="text-gray-300 text-sm leading-relaxed mb-4">
+      En la parte inferior de cada panel encontrarás el historial de sorteos registrados.
+      Si generaste una predicción antes del sorteo y luego registraste el resultado, el
+      sistema calculará cuántos números acertaste ese día. Con el tiempo, podrás ver tu
+      porcentaje de precisión por juego.
+    </p>
+
+    <!-- Tabla de referencia: reglas de cada juego -->
+    <h3 class="text-base font-semibold text-white mb-3 mt-6 border-t border-gray-700 pt-4">Reglas de cada juego (referencia rápida)</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs sm:text-sm text-gray-300 border-collapse">
+        <thead>
+          <tr class="bg-gray-700 text-white">
+            <th class="p-2 text-left rounded-tl-lg">Juego</th>
+            <th class="p-2 text-left">Números principales</th>
+            <th class="p-2 text-left">Bola especial</th>
+            <th class="p-2 text-left rounded-tr-lg">Sorteos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-red-400">Powerball</td>
+            <td class="p-2">5 números (1–69)</td>
+            <td class="p-2">Powerball (1–26)</td>
+            <td class="p-2">Lun, Mié, Sáb</td>
+          </tr>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-yellow-400">Mega Millions</td>
+            <td class="p-2">5 números (1–70)</td>
+            <td class="p-2">Mega Ball (1–25)</td>
+            <td class="p-2">Mar, Vie</td>
+          </tr>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-green-400">Millionaire For Life</td>
+            <td class="p-2">5 números (1–58)</td>
+            <td class="p-2">Millionaire Ball (1–5)</td>
+            <td class="p-2">Diario</td>
+          </tr>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-blue-400">Pick 10</td>
+            <td class="p-2">10 números (1–80)</td>
+            <td class="p-2">Ninguna</td>
+            <td class="p-2">Diario</td>
+          </tr>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-purple-400">Take 5 Day</td>
+            <td class="p-2">5 números (1–39)</td>
+            <td class="p-2">Ninguna</td>
+            <td class="p-2">Diario (mañana)</td>
+          </tr>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-indigo-400">Take 5 Eve</td>
+            <td class="p-2">5 números (1–39)</td>
+            <td class="p-2">Ninguna</td>
+            <td class="p-2">Diario (noche)</td>
+          </tr>
+          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-rose-400">Win 4 Day</td>
+            <td class="p-2">4 dígitos (0–9)</td>
+            <td class="p-2">Ninguna</td>
+            <td class="p-2">Diario (mañana)</td>
+          </tr>
+          <tr class="hover:bg-gray-700/50">
+            <td class="p-2 font-semibold text-orange-400">Win 4 Eve</td>
+            <td class="p-2">4 dígitos (0–9)</td>
+            <td class="p-2">Ninguna</td>
+            <td class="p-2">Diario (noche)</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -708,44 +857,54 @@
     </div>
   </section>
 
-<!-- Footer -->
-<footer class="mt-6 sm:mt-12 pb-4 sm:pb-8 text-center w-full bg-gray-900 bg-opacity-50 pt-4 sm:pt-8 border-t border-gray-800">
-  <div class="max-w-4xl mx-auto px-4">
-    <p class="text-gray-400 text-sm mb-2">&copy; 2026 Predicción de Lotería Profesional</p>
-    <div class="text-xs text-gray-500 space-x-4 mb-4">
-      <a href="#aviso-legal" class="hover:text-gray-300">Aviso Legal</a>
-      <span>|</span>
-      <a href="/politica-privacidad.html" class="hover:text-gray-300">Política de Privacidad</a>
-      <span>|</span>
-      <a href="/politica-cookies.html" class="hover:text-gray-300">Política de Cookies</a>
-    </div>
-    <p class="text-gray-500 text-xs mb-4">Última actualización: <span id="lastUpdate"></span></p>
-    <p class="text-gray-500 text-xs mb-4">El uso de este sitio implica tu acuerdo con la <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a>.</p>
+<!-- Footer: navegación y legal (AdSense) -->
+<footer class="w-full max-w-5xl mx-auto mt-8 pt-6 border-t border-gray-700 text-gray-500 text-xs sm:text-sm">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6 text-left px-2">
 
-    <!-- Juego responsable (estilo NY Lottery) -->
-    <div class="footer-responsible-play mt-4 pt-4 border-t border-gray-700 text-left">
-      <p class="text-amber-400/90 text-xs font-semibold uppercase tracking-wide mb-2">Please play responsibly.</p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
-        Must be 18+ to purchase a Lottery ticket and 21+ for Quick Draw where alcohol is served. Gambling problem? Visit <a href="https://nyproblemgamblinghelp.org" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">NYProblemGamblingHelp.org</a>. Call the HOPEline <a href="tel:+18778467369" class="text-cyan-400 hover:underline">1-877-846-7369</a> or text 467369.
+    <!-- Columna 1: Sobre el sitio -->
+    <div>
+      <h4 class="text-gray-300 font-semibold mb-3 text-sm">prediccionloteria.com</h4>
+      <p class="leading-relaxed mb-3">
+        Sitio independiente de análisis estadístico para loterías de EE.UU.
+        Herramienta de entretenimiento. No afiliado a ninguna lotería oficial.
       </p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
-        All New York Lottery transactions are subject to New York State Gaming Commission rules and regulations. New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. This site is not affiliated with the New York State Gaming Commission or any official lottery.
-      </p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
-        The information on this website is believed to be accurate. In the event of a discrepancy between the information displayed on this website and the information in the official records maintained by the New York State Gaming Commission (or other official lottery authorities), the records maintained by the Gaming Commission or the respective authority shall prevail.
-      </p>
+      <p class="text-gray-600">Solo para mayores de 18 años.</p>
     </div>
 
-    <!-- Copyright y aviso legal del sitio -->
-    <div class="footer-legal mt-6 pt-4 border-t border-gray-700 text-left">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">&copy; 2026 Predicción Lotería. Todos los derechos reservados.</p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
-        New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. &copy; 2026 New York State Gaming Commission — All rights reserved. Este sitio no está afiliado con la New York State Gaming Commission ni con ninguna lotería oficial.
-      </p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
-        Predicción Lotería es un servicio independiente de entretenimiento. No estamos afiliados, respaldados ni asociados con Powerball®, Mega Millions®, Millionaire For Life™, Pick 10, Take 5, Win 4 ni con ninguna lotería oficial. Las predicciones son meramente informativas y no garantizan resultados. Solo para mayores de 18 años. Juega con responsabilidad.
-      </p>
+    <!-- Columna 2: Navegación -->
+    <div>
+      <h4 class="text-gray-300 font-semibold mb-3 text-sm">Navegación</h4>
+      <ul class="space-y-2">
+        <li><a href="/" class="hover:text-cyan-400 transition-colors">🏠 Inicio</a></li>
+        <li><a href="#como-funciona" class="hover:text-cyan-400 transition-colors">📖 Cómo funciona</a></li>
+        <li><a href="/faq.html" class="hover:text-cyan-400 transition-colors">❓ Preguntas frecuentes</a></li>
+        <li><a href="/about.html" class="hover:text-cyan-400 transition-colors">ℹ️ Acerca de nosotros</a></li>
+        <li><a href="/contacto.html" class="hover:text-cyan-400 transition-colors">✉️ Contacto</a></li>
+      </ul>
     </div>
+
+    <!-- Columna 3: Legal -->
+    <div>
+      <h4 class="text-gray-300 font-semibold mb-3 text-sm">Legal</h4>
+      <ul class="space-y-2">
+        <li><a href="/politica-privacidad.html" class="hover:text-cyan-400 transition-colors">🔒 Política de Privacidad</a></li>
+        <li><a href="/politica-cookies.html" class="hover:text-cyan-400 transition-colors">🍪 Política de Cookies</a></li>
+        <li><a href="#aviso-legal" class="hover:text-cyan-400 transition-colors">⚖️ Aviso Legal</a></li>
+        <li>
+          <a href="https://www.ncpgambling.org/" target="_blank" rel="noopener noreferrer"
+             class="hover:text-cyan-400 transition-colors">🆘 Juego Responsable</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Disclaimer y copyright -->
+  <div class="border-t border-gray-800 pt-4 pb-6 text-center text-gray-600 text-xs px-2">
+    <p class="mb-2">
+      Las predicciones son únicamente para entretenimiento y no garantizan premios.
+      La lotería es un juego de azar. Juega con responsabilidad.
+    </p>
+    <p>© 2025 prediccionloteria.com — Todos los derechos reservados.</p>
   </div>
 </footer>
 
