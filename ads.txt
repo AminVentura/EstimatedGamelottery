@@ -1,4 +1,3 @@
 # ads.txt para Google AdSense - prediccionloteria.com
 # Más información: https://support.google.com/adsense/answer/12171612
 google.com, pub-8721021745606812, DIRECT, f08c47fec0942fa0
-
