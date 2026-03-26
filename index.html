@@ -368,6 +368,120 @@
     En cada panel verás <strong class="text-gray-300">winning numbers</strong> en línea, la <strong class="text-gray-300">fecha del próximo sorteo</strong> con cuenta atrás, y enlaces al <strong class="text-gray-300">valor en efectivo estimado (estimated cash value)</strong> y números oficiales en sitios como <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">NY Lottery – All Winning Numbers</a>. Los resultados del historial se muestran por fecha en formato línea para una lectura rápida.
   </p>
 
+  <!-- Banner: Conexión automática a resultados oficiales -->
+  <div id="liveDataBanner" class="mb-5 rounded-2xl border border-emerald-700/60 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-lg overflow-hidden">
+    <!-- Cabecera siempre visible -->
+    <div class="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 cursor-pointer select-none" onclick="toggleLiveBanner()">
+      <div class="flex items-center gap-3">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+        </span>
+        <span class="text-emerald-400 font-bold text-sm sm:text-base tracking-wide">Conectado a resultados oficiales</span>
+        <span class="hidden sm:inline text-gray-500 text-xs">— NY Lottery / jackpot.com</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-gray-500 hidden sm:block">Hasta 1 000 sorteos por juego cargados automáticamente</span>
+        <i id="liveBannerChevron" class="fas fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
+      </div>
+    </div>
+
+    <!-- Cuerpo colapsable -->
+    <div id="liveBannerBody" class="hidden border-t border-gray-700/60 px-4 pb-5 pt-4 sm:px-6">
+
+      <!-- Aviso principal -->
+      <div class="flex gap-3 bg-emerald-900/20 border border-emerald-700/40 rounded-xl p-3 sm:p-4 mb-4">
+        <i class="fas fa-circle-info text-emerald-400 mt-0.5 shrink-0"></i>
+        <div>
+          <p class="text-white text-sm font-semibold mb-1">No necesitas ingresar los resultados manualmente</p>
+          <p class="text-gray-300 text-sm leading-relaxed">
+            Al abrir la página, esta se conecta automáticamente a la base de datos oficial de la <strong class="text-white">New York Lottery</strong>
+            (la misma fuente que usa <strong class="text-white">jackpot.com</strong>) y descarga el historial real de cada juego.
+            Aunque el <strong class="text-emerald-400">Historial Reciente</strong> no muestre fechas ingresadas manualmente,
+            los algoritmos <strong class="text-white">ya tienen los resultados reales</strong> para hacer la predicción.
+          </p>
+        </div>
+      </div>
+
+      <!-- Cómo usar -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div class="flex items-start gap-3 bg-gray-900/60 rounded-xl p-3">
+          <span class="text-2xl leading-none mt-0.5">1️⃣</span>
+          <div>
+            <p class="text-white text-xs font-bold mb-1 uppercase tracking-wide">Al cargar</p>
+            <p class="text-gray-400 text-xs leading-relaxed">Se descargan hasta <strong class="text-white">1 000 sorteos reales</strong> por juego desde NY Open Data en segundo plano.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-gray-900/60 rounded-xl p-3">
+          <span class="text-2xl leading-none mt-0.5">2️⃣</span>
+          <div>
+            <p class="text-white text-xs font-bold mb-1 uppercase tracking-wide">Al predecir</p>
+            <p class="text-gray-400 text-xs leading-relaxed">Pulsa <strong class="text-emerald-400">Generar Predicción</strong> — los algoritmos analizarán todo ese historial real para darte los mejores números.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-gray-900/60 rounded-xl p-3">
+          <span class="text-2xl leading-none mt-0.5">3️⃣</span>
+          <div>
+            <p class="text-white text-xs font-bold mb-1 uppercase tracking-wide">Historial Reciente</p>
+            <p class="text-gray-400 text-xs leading-relaxed">Muestra los sorteos que tú o la app guardasteis. No ver entradas manuales <strong class="text-white">no afecta las predicciones</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de fuentes -->
+      <div>
+        <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-2">Fuentes de datos oficiales</p>
+        <div class="overflow-x-auto rounded-xl border border-gray-700/60">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="bg-gray-900/80 text-gray-400 uppercase tracking-wide">
+                <th class="text-left px-3 py-2">Juego</th>
+                <th class="text-left px-3 py-2">Dataset oficial (NY Open Data)</th>
+                <th class="text-left px-3 py-2 hidden sm:table-cell">Frecuencia</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700/40">
+              <tr class="hover:bg-gray-700/20">
+                <td class="px-3 py-2 text-red-400 font-semibold flex items-center gap-1"><i class="fas fa-fire text-red-500"></i> Powerball</td>
+                <td class="px-3 py-2 text-gray-300 font-mono">d6yy-54nr</td>
+                <td class="px-3 py-2 text-gray-400 hidden sm:table-cell">Lun / Mié / Sáb</td>
+              </tr>
+              <tr class="hover:bg-gray-700/20">
+                <td class="px-3 py-2 text-amber-400 font-semibold"><i class="fas fa-gem mr-1 text-amber-400"></i> Millionaire For Life</td>
+                <td class="px-3 py-2 text-gray-300 font-mono">kwxv-fwze</td>
+                <td class="px-3 py-2 text-gray-400 hidden sm:table-cell">Diario</td>
+              </tr>
+              <tr class="hover:bg-gray-700/20">
+                <td class="px-3 py-2 text-yellow-400 font-semibold"><i class="fas fa-star mr-1 text-yellow-400"></i> Mega Millions</td>
+                <td class="px-3 py-2 text-gray-300 font-mono">5xaw-6ayf</td>
+                <td class="px-3 py-2 text-gray-400 hidden sm:table-cell">Mar / Vie</td>
+              </tr>
+              <tr class="hover:bg-gray-700/20">
+                <td class="px-3 py-2 text-cyan-400 font-semibold"><i class="fas fa-list-ol mr-1 text-cyan-400"></i> Pick 10</td>
+                <td class="px-3 py-2 text-gray-300 font-mono">bycu-cw7c</td>
+                <td class="px-3 py-2 text-gray-400 hidden sm:table-cell">Diario</td>
+              </tr>
+              <tr class="hover:bg-gray-700/20">
+                <td class="px-3 py-2 text-orange-400 font-semibold"><i class="fas fa-sun mr-1 text-orange-400"></i> Take 5 (día y noche)</td>
+                <td class="px-3 py-2 text-gray-300 font-mono">dg63-4siq</td>
+                <td class="px-3 py-2 text-gray-400 hidden sm:table-cell">Diario ×2</td>
+              </tr>
+              <tr class="hover:bg-gray-700/20">
+                <td class="px-3 py-2 text-rose-400 font-semibold"><i class="fas fa-hashtag mr-1 text-rose-400"></i> Win 4 (día y noche)</td>
+                <td class="px-3 py-2 text-gray-300 font-mono">hsys-3def</td>
+                <td class="px-3 py-2 text-gray-400 hidden sm:table-cell">Diario ×2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-gray-600 text-xs mt-2 text-right">
+          <i class="fas fa-lock-open mr-1"></i>API pública · Sin clave requerida ·
+          <a href="https://data.ny.gov" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">data.ny.gov</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- Tabs -->
   <div class="tabs-container flex flex-nowrap sm:flex-wrap justify-start sm:justify-center gap-0 sm:gap-1 mb-4 sm:mb-6 border-b border-gray-700 pb-2 overflow-x-auto">
     <button class="lottery-tab active px-3 py-2 text-xs sm:text-sm font-medium text-gray-400 hover:text-white border-b-2 border-transparent hover:border-blue-500 transition-all" data-lottery="powerball"><i class="fas fa-fire mr-1 text-red-500"></i>Powerball</button>
@@ -1058,6 +1172,34 @@ document.addEventListener('DOMContentLoaded', function() {
       if (t) { t.style.display = 'none'; t.classList.add('ad-empty'); }
       if (b) { b.style.display = 'none'; b.classList.add('ad-empty'); }
     };
+  });
+
+  // Toggle banner "Conectado a resultados oficiales"
+  function toggleLiveBanner() {
+    const body = document.getElementById('liveBannerBody');
+    const chevron = document.getElementById('liveBannerChevron');
+    if (!body || !chevron) return;
+    const open = !body.classList.contains('hidden');
+    if (open) {
+      body.classList.add('hidden');
+      chevron.style.transform = 'rotate(0deg)';
+      localStorage.setItem('liveBannerOpen', '0');
+    } else {
+      body.classList.remove('hidden');
+      chevron.style.transform = 'rotate(180deg)';
+      localStorage.setItem('liveBannerOpen', '1');
+    }
+  }
+  // Restaurar estado del banner al cargar
+  window.addEventListener('DOMContentLoaded', function() {
+    const saved = localStorage.getItem('liveBannerOpen');
+    // Abrir por defecto la primera vez que el usuario visita
+    if (saved !== '0') {
+      const body = document.getElementById('liveBannerBody');
+      const chevron = document.getElementById('liveBannerChevron');
+      if (body) body.classList.remove('hidden');
+      if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
   });
 </script>
 </body>

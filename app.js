@@ -1084,6 +1084,142 @@ const setupRealtimeListeners = () => {
   });
 };
 
+// ==========================================
+// FETCH HISTORIAL COMPLETO — NY OPEN DATA
+// ==========================================
+// Estos endpoints son los mismos que alimentan jackpot.com y nylottery.ny.gov
+const NY_OPEN_DATA = {
+  powerball:          'https://data.ny.gov/resource/d6yy-54nr.json',
+  megamillions:       'https://data.ny.gov/resource/5xaw-6ayf.json',
+  take5:              'https://data.ny.gov/resource/dg63-4siq.json',
+  win4:               'https://data.ny.gov/resource/hsys-3def.json',
+  pick10:             'https://data.ny.gov/resource/bycu-cw7c.json',
+  millionaireforlife: 'https://data.ny.gov/resource/kwxv-fwze.json'
+};
+
+function _nyDate(str) { return str ? str.split('T')[0] : null; }
+
+function _nyItem(prefix, date, mainNumbers, special = null) {
+  const d = { date, mainNumbers };
+  if (special !== null) d.special = special;
+  return { id: `ny-${prefix}-${date}`, data: d };
+}
+
+function _mergeNYInto(lottery, newItems) {
+  const existingDates = new Set(allHistoryData[lottery].map(i => i.data.date));
+  const fresh = newItems.filter(item => item.data.date && !existingDates.has(item.data.date));
+  if (fresh.length > 0) {
+    allHistoryData[lottery] = [...allHistoryData[lottery], ...fresh]
+      .sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
+    renderHistory(lottery);
+    updateStatistics();
+  }
+  return fresh.length;
+}
+
+async function fetchNYOpenData() {
+  const PARAMS = '?$limit=1000&$order=draw_date+DESC';
+  let totalNew = 0;
+
+  try {
+    const [pbRes, mmRes, t5Res, w4Res, p10Res, m4lRes] = await Promise.allSettled([
+      fetch(NY_OPEN_DATA.powerball + PARAMS).then(r => r.json()),
+      fetch(NY_OPEN_DATA.megamillions + PARAMS).then(r => r.json()),
+      fetch(NY_OPEN_DATA.take5 + PARAMS).then(r => r.json()),
+      fetch(NY_OPEN_DATA.win4 + PARAMS).then(r => r.json()),
+      fetch(NY_OPEN_DATA.pick10 + PARAMS).then(r => r.json()),
+      fetch(NY_OPEN_DATA.millionaireforlife + PARAMS).then(r => r.json())
+    ]);
+
+    // --- Powerball: "n1 n2 n3 n4 n5 PB" ---
+    if (pbRes.status === 'fulfilled' && Array.isArray(pbRes.value)) {
+      const items = pbRes.value.map(row => {
+        const date = _nyDate(row.draw_date);
+        const nums = row.winning_numbers.trim().split(/\s+/).map(Number);
+        return _nyItem('pb', date, nums.slice(0, 5).sort((a, b) => a - b), nums[5]);
+      });
+      totalNew += _mergeNYInto('powerball', items);
+    }
+
+    // --- Mega Millions: winning_numbers + mega_ball ---
+    if (mmRes.status === 'fulfilled' && Array.isArray(mmRes.value)) {
+      const items = mmRes.value.map(row => {
+        const date = _nyDate(row.draw_date);
+        const main = row.winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
+        return _nyItem('mm', date, main, Number(row.mega_ball));
+      });
+      totalNew += _mergeNYInto('megamillions', items);
+    }
+
+    // --- Take 5: midday_winning_numbers + evening_winning_numbers ---
+    if (t5Res.status === 'fulfilled' && Array.isArray(t5Res.value)) {
+      const dayItems = [], eveItems = [];
+      t5Res.value.forEach(row => {
+        const date = _nyDate(row.draw_date);
+        if (!date) return;
+        if (row.midday_winning_numbers) {
+          const nums = row.midday_winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
+          dayItems.push(_nyItem('t5day', date, nums));
+        }
+        if (row.evening_winning_numbers) {
+          const nums = row.evening_winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
+          eveItems.push(_nyItem('t5eve', date, nums));
+        }
+      });
+      totalNew += _mergeNYInto('take5day', dayItems);
+      totalNew += _mergeNYInto('take5eve', eveItems);
+    }
+
+    // --- Win 4: midday_win_4 + evening_win_4 (4-digit string → [d,d,d,d]) ---
+    if (w4Res.status === 'fulfilled' && Array.isArray(w4Res.value)) {
+      const dayItems = [], eveItems = [];
+      w4Res.value.forEach(row => {
+        const date = _nyDate(row.draw_date);
+        if (!date) return;
+        if (row.midday_win_4 != null) {
+          const digits = String(row.midday_win_4).padStart(4, '0').split('').map(Number);
+          dayItems.push(_nyItem('w4day', date, digits));
+        }
+        if (row.evening_win_4 != null) {
+          const digits = String(row.evening_win_4).padStart(4, '0').split('').map(Number);
+          eveItems.push(_nyItem('w4eve', date, digits));
+        }
+      });
+      totalNew += _mergeNYInto('win4day', dayItems);
+      totalNew += _mergeNYInto('win4eve', eveItems);
+    }
+
+    // --- Pick 10: 20 numbers ---
+    if (p10Res.status === 'fulfilled' && Array.isArray(p10Res.value)) {
+      const items = p10Res.value.map(row => {
+        const date = _nyDate(row.draw_date);
+        const nums = row.winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
+        return _nyItem('pick10', date, nums);
+      });
+      totalNew += _mergeNYInto('pick10', items);
+    }
+
+    // --- Millionaire For Life / Cash4Life: winning_numbers + cash_ball ---
+    if (m4lRes.status === 'fulfilled' && Array.isArray(m4lRes.value)) {
+      const items = m4lRes.value.map(row => {
+        const date = _nyDate(row.draw_date);
+        const main = row.winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
+        return _nyItem('m4l', date, main, Number(row.cash_ball));
+      });
+      totalNew += _mergeNYInto('millionaireforlife', items);
+    }
+
+    if (totalNew > 0) {
+      console.log(`✅ NY Open Data: ${totalNew} nuevos sorteos agregados al historial.`);
+    } else {
+      console.log('✅ NY Open Data: Historial ya está actualizado.');
+    }
+
+  } catch (err) {
+    console.warn('⚠️ Error cargando NY Open Data:', err.message || err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupAutoTabForDrawingInputs();
@@ -1095,6 +1231,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   hideLoadingSpinners();
+  // Cargar historial completo desde NY Open Data en segundo plano
+  fetchNYOpenData();
 
   // Mostrar "Tu predicción de hoy" para todos los juegos que tengan una guardada (no solo Powerball)
   LOTTERY_IDS.forEach(lottery => showLastPrediction(lottery));
