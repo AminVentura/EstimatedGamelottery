@@ -432,3 +432,266 @@ section.collapsible-section:not(.collapsed) .collapsible-content {
     grid-template-columns: repeat(8, 1fr) !important;
   }
 }
+
+/* ============================================================
+   SPORTS BETTING DASHBOARD
+   ============================================================ */
+
+/* ── Mode Toggle Pill ─────────────────────────────────────── */
+.mode-toggle-pill {
+  display: inline-flex;
+  background: rgba(31, 41, 55, 0.95);
+  border: 1px solid rgba(75, 85, 99, 0.8);
+  border-radius: 9999px;
+  padding: 4px;
+  gap: 4px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.mode-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9ca3af;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+.mode-toggle-btn:hover { color: #fff; }
+.mode-toggle-btn.active {
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.45);
+}
+.mode-toggle-btn.active.sports-mode {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.45);
+}
+
+/* ── Sport tabs (NBA / MLB / NFL) ─────────────────────────── */
+.sport-tab {
+  padding: 8px 18px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.sport-tab:hover { color: #fff; }
+.sport-tab.active {
+  color: #fff;
+  border-bottom-color: #10b981;
+}
+
+/* ── View sub-tabs (Props / Live / Standings) ─────────────── */
+.sport-view-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+  background: rgba(31, 41, 55, 0.7);
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.sport-view-tab:hover { color: #fff; border-color: #4b5563; }
+.sport-view-tab.active {
+  color: #fff;
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+/* ── Player Prop Card ─────────────────────────────────────── */
+.player-prop-card {
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid rgba(55, 65, 81, 0.7);
+  border-radius: 14px;
+  padding: 14px 16px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.player-prop-card:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px);
+}
+
+.prop-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.player-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.prop-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+@media (max-width: 400px) {
+  .prop-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.prop-stat-box {
+  background: rgba(31, 41, 55, 0.7);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: center;
+}
+.prop-stat-box p.text-white { font-size: 0.9rem; margin: 2px 0 0; }
+.prop-stat-box p.text-cyan-400 { font-size: 0.9rem; margin: 2px 0 0; }
+.prop-stat-box p.text-purple-400 { font-size: 0.9rem; margin: 2px 0 0; }
+.prop-stat-box p.text-emerald-400,
+.prop-stat-box p.text-red-400 { font-size: 0.9rem; margin: 2px 0 0; }
+
+/* ── Trend dots ───────────────────────────────────────────── */
+.trend-dot {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.trend-dot.over  { background: rgba(6,78,59,0.7);  color: #34d399; border: 1px solid rgba(52,211,153,0.4); }
+.trend-dot.under { background: rgba(127,29,29,0.7); color: #f87171; border: 1px solid rgba(248,113,113,0.4); }
+
+/* ── Probability badge ────────────────────────────────────── */
+.probability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+}
+.probability-badge.prob-high        { background: rgba(6,78,59,0.55);  color: #34d399; border: 1px solid rgba(52,211,153,0.35); }
+.probability-badge.prob-medium-high { background: rgba(5,46,22,0.55);  color: #86efac; border: 1px solid rgba(134,239,172,0.35); }
+.probability-badge.prob-medium      { background: rgba(69,26,3,0.55);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.35); }
+.probability-badge.prob-low         { background: rgba(30,58,138,0.45);color: #93c5fd; border: 1px solid rgba(147,197,253,0.35); }
+
+/* ── Probability bar ──────────────────────────────────────── */
+.prob-bar-track {
+  height: 5px;
+  background: rgba(55, 65, 81, 0.6);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.prob-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+.prob-bar-fill.prob-high        { background: linear-gradient(90deg, #059669, #34d399); }
+.prob-bar-fill.prob-medium-high { background: linear-gradient(90deg, #16a34a, #86efac); }
+.prob-bar-fill.prob-medium      { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.prob-bar-fill.prob-low         { background: linear-gradient(90deg, #1d4ed8, #93c5fd); }
+
+/* ── API status badge ─────────────────────────────────────── */
+.api-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #6b7280;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(55, 65, 81, 0.7);
+  border-radius: 9999px;
+  padding: 4px 10px;
+}
+.live-dot {
+  position: relative;
+  display: inline-flex;
+  width: 8px;
+  height: 8px;
+}
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #10b981;
+  animation: ping 1.2s ease-in-out infinite;
+  opacity: 0.7;
+}
+.live-dot::after {
+  content: '';
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+@keyframes ping {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.7); opacity: 0; }
+}
+
+/* ── Live source cards ────────────────────────────────────── */
+.live-source-card {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(55, 65, 81, 0.6);
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.live-source-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+
+/* ── API key form ─────────────────────────────────────────── */
+.api-key-form {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+/* ── Sports section animation ─────────────────────────────── */
+#sports-dashboard { animation: fadeInUp 0.3s ease; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive adjustments for sport tabs ─────────────────── */
+@media (max-width: 640px) {
+  .mode-toggle-btn { padding: 7px 14px; font-size: 0.78rem; }
+  .sport-tab       { padding: 7px 12px; font-size: 0.75rem; }
+  .sport-view-tab  { padding: 5px 11px; font-size: 0.73rem; }
+  .player-prop-card { padding: 12px 13px; }
+}
