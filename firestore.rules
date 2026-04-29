@@ -110,8 +110,8 @@ service cloud.firestore {
       allow delete: if isSignedIn() && request.auth.uid == userId;
     }
 
-    // ── Sports Feedback ──────────────────────────────────────────────────
-    // Doc ID must be {uid}_{predId}. One vote per user per prediction.
+    // ── Sports Feedback Votes ────────────────────────────────────────────
+    // Doc ID = {uid}_{predId} — enforces one vote per user per prediction.
     match /sportsVotes/{voteId} {
       allow read: if true;
       allow create: if isSignedIn()
@@ -122,14 +122,34 @@ service cloud.firestore {
         && request.resource.data.predId is string
         && request.resource.data.predId.size() <= 64
         && request.resource.data.sport is string;
-      allow update: if false; // votes are immutable
+      allow update: if false;
       allow delete: if false;
     }
 
-    // ── Global Accuracy Aggregate (written by Cloud Function trigger) ────
+    // ── Global Accuracy Aggregate ────────────────────────────────────────
     match /sportsAccuracy/{docId} {
       allow read: if true;
-      allow write: if false; // only Cloud Function writes here
+      allow write: if false; // Cloud Function trigger only
+    }
+
+    // ── Standings (ESPN cache, updated by scheduled Cloud Function) ──────
+    match /standings/{sport} {
+      allow read: if true;
+      allow write: if false; // Cloud Function only
+    }
+
+    // ── Odds Cache (Cloud Function writes, clients read via callable) ────
+    match /cache_odds/{sport} {
+      allow read: if false; // clients use getSportsOdds callable, not direct reads
+      allow write: if false;
+    }
+
+    // ── User Plans & Rate Limiting ───────────────────────────────────────
+    match /users/{uid} {
+      allow read:   if isSignedIn() && request.auth.uid == uid;
+      allow create: if false; // Cloud Function creates these
+      allow update: if false; // Cloud Function updates these
+      allow delete: if false;
     }
   }
 }

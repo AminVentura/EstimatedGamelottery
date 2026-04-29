@@ -1219,50 +1219,79 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Bridge for sports-dashboard.js (non-module IIFE) ────────────────────
     const _getSportsOdds = httpsCallable(functions, 'getSportsOdds');
+    const _getStandings  = httpsCallable(functions, 'getStandings');
+    const _getUserPlan   = httpsCallable(functions, 'getUserPlan');
 
     window.firebaseServices = {
-      // Calls the getSportsOdds Cloud Function (API key stays server-side)
+      // Calls getSportsOdds Cloud Function; returns odds array or null on error/quota.
+      // Passes rate-limit errors up as { error, code } so UI can show upgrade modal.
       callSportsOdds: async function (sport) {
         try {
           const result = await _getSportsOdds({ sport });
-          return result.data && result.data.odds ? result.data.odds : null;
+          const d = result.data;
+          if (d && d.remaining !== undefined) {
+            window._sportsQuotaRemaining = d.remaining;
+          }
+          return d && d.odds ? d.odds : null;
         } catch (e) {
+          if (e.code === 'functions/resource-exhausted') {
+            return { __rateLimited: true, message: e.message };
+          }
           console.warn('[Sports] Cloud Function error:', e.message);
           return null;
         }
       },
 
-      // Saves a user vote to Firestore; prevents duplicates via doc ID
+      // Fetches standings from Firestore cache (written by scheduled function)
+      getStandings: async function (sport) {
+        try {
+          const result = await _getStandings({ sport });
+          return result.data || { teams: [], updatedAt: null };
+        } catch (e) {
+          console.warn('[Sports] getStandings error:', e.message);
+          return { teams: [], updatedAt: null };
+        }
+      },
+
+      // Returns { planType, remaining } for the current user
+      getUserPlan: async function () {
+        try {
+          const result = await _getUserPlan({});
+          return result.data || { planType: 'free', remaining: 5 };
+        } catch (e) {
+          return { planType: 'free', remaining: 5 };
+        }
+      },
+
+      // Saves a user vote; prevents duplicates via Firestore doc ID
       saveSportsFeedback: async function (predId, sport, vote) {
         if (!userId) return;
-        const docId  = userId + '_' + predId;
+        const docId   = userId + '_' + predId;
         const voteRef = doc(db, 'sportsVotes', docId);
         try {
           await setDoc(voteRef, {
             uid:       userId,
             predId:    predId,
             sport:     sport,
-            vote:      vote,       // 'yes' | 'no'
+            vote:      vote,
             createdAt: serverTimestamp(),
             date:      new Date().toISOString().slice(0, 10),
-          }, { merge: false }); // merge:false → throws if doc exists (duplicate guard)
-        } catch (e) {
-          // Firestore security rule blocks overwrite → silently ignore duplicate
-        }
+          }, { merge: false });
+        } catch (e) { /* duplicate silently ignored */ }
       },
 
       // Real-time listener on the global accuracy aggregate
       watchGlobalAccuracy: function (callback) {
         const globalRef = doc(db, 'sportsAccuracy', 'global');
-        return onSnapshot(globalRef, (snap) => {
-          if (snap.exists()) {
-            callback(snap.data());
-          } else {
-            callback({ yes: 0, no: 0 });
-          }
-        }, () => callback({ yes: 0, no: 0 }));
+        return onSnapshot(globalRef,
+          (snap) => callback(snap.exists() ? snap.data() : { yes: 0, no: 0 }),
+          ()      => callback({ yes: 0, no: 0 })
+        );
       },
     };
+
+    // Expose UID for rate-limit UI
+    window._sportsUserId = userId;
 
     // Kick off global accuracy widget
     window.firebaseServices.watchGlobalAccuracy(function (data) {

@@ -172,10 +172,11 @@
       var ck = 'odds_' + sport;
       var cached = this._getCached(ck);
       if (cached) return cached;
-      // Delegate to the Cloud Function via the bridge exposed by app.js
       if (!window.firebaseServices || !window.firebaseServices.callSportsOdds) return null;
       var data = await window.firebaseServices.callSportsOdds(sport);
-      if (data) this._setCache(ck, data);
+      if (!data) return null;
+      if (data.__rateLimited) return data; // pass error object up to renderProps
+      this._setCache(ck, data);
       return data;
     },
   };
@@ -352,6 +353,54 @@
       el._t = setTimeout(function () { el.style.display = 'none'; }, 4000);
     },
 
+    showRateLimitModal: function (message) {
+      var existing = document.getElementById('sd_quota_modal');
+      if (existing) { existing.style.display = 'flex'; return; }
+      var modal = document.createElement('div');
+      modal.id = 'sd_quota_modal';
+      modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-end;sm:align-items:center;justify-content:center;padding:0 0 0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)';
+      modal.innerHTML = [
+        '<div style="background:#0f172a;border:1px solid rgba(234,179,8,0.4);border-radius:20px 20px 0 0;padding:28px 24px 32px;max-width:420px;width:100%;box-shadow:0 -20px 60px rgba(0,0,0,0.6)">',
+        '  <div style="width:48px;height:4px;background:#374151;border-radius:2px;margin:0 auto 20px;"></div>',
+        '  <div style="text-align:center;margin-bottom:20px">',
+        '    <div style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,rgba(234,179,8,0.2),rgba(245,158,11,0.1));border:1px solid rgba(234,179,8,0.4);margin-bottom:14px">',
+        '      <i class="fas fa-bolt" style="color:#fbbf24;font-size:1.5rem"></i>',
+        '    </div>',
+        '    <h3 style="color:white;font-size:1.1rem;font-weight:900;margin:0 0 8px">Límite de consultas gratuitas</h3>',
+        '    <p style="color:#9ca3af;font-size:0.85rem;line-height:1.5;margin:0">' + (message || 'Has alcanzado tu límite gratuito. Actualiza a Pro para consultas ilimitadas.') + '</p>',
+        '  </div>',
+        '  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">',
+        '    <div style="display:flex;align-items:center;gap:10px;background:#1f2937;border-radius:12px;padding:12px;border:1px solid #374151">',
+        '      <i class="fas fa-infinity" style="color:#fbbf24;flex-shrink:0"></i>',
+        '      <div><p style="color:white;font-size:0.85rem;margin:0;font-weight:600">Pro: Consultas ilimitadas</p><p style="color:#6b7280;font-size:0.75rem;margin:0">Sin restricciones de cuota por hora</p></div>',
+        '    </div>',
+        '    <div style="display:flex;align-items:center;gap:10px;background:#1f2937;border-radius:12px;padding:12px;border:1px solid #374151">',
+        '      <i class="fas fa-shield-alt" style="color:#818cf8;flex-shrink:0"></i>',
+        '      <div><p style="color:white;font-size:0.85rem;margin:0;font-weight:600">Historial cifrado AES-256-GCM</p><p style="color:#6b7280;font-size:0.75rem;margin:0">Tus apuestas guardadas de forma segura</p></div>',
+        '    </div>',
+        '    <div style="display:flex;align-items:center;gap:10px;background:#1f2937;border-radius:12px;padding:12px;border:1px solid #374151">',
+        '      <i class="fas fa-dollar-sign" style="color:#34d399;flex-shrink:0"></i>',
+        '      <div><p style="color:white;font-size:0.85rem;margin:0;font-weight:600">Bono exclusivo en DraftKings</p><p style="color:#6b7280;font-size:0.75rem;margin:0">Hasta $1,000 en bono de bienvenida</p></div>',
+        '    </div>',
+        '  </div>',
+        '  <button onclick="SportsDashboard.activatePremium()" style="width:100%;background:linear-gradient(90deg,#d97706,#b45309);color:white;font-weight:800;padding:14px;border-radius:12px;border:none;cursor:pointer;font-size:0.95rem;margin-bottom:10px">',
+        '    <i class="fas fa-crown" style="margin-right:6px"></i>Activar Pro · $4.99/mes',
+        '  </button>',
+        '  <a href="' + DK_LINK + '" target="_blank" rel="noopener noreferrer sponsored"',
+        '     style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:linear-gradient(90deg,#15803d,#16a34a);color:white;font-weight:700;padding:12px;border-radius:12px;border:none;cursor:pointer;font-size:0.85rem;text-decoration:none;margin-bottom:10px">',
+        '    <i class="fas fa-dollar-sign"></i>Desbloquear bono en DraftKings<i class="fas fa-external-link-alt" style="font-size:0.65rem;margin-left:4px"></i>',
+        '  </a>',
+        '  <button onclick="document.getElementById(\'sd_quota_modal\').style.display=\'none\'" style="width:100%;background:transparent;color:#6b7280;border:none;cursor:pointer;padding:8px;font-size:0.85rem">',
+        '    Continuar en modo gratuito (datos estadísticos)',
+        '  </button>',
+        '</div>',
+      ].join('');
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+      document.body.appendChild(modal);
+    },
+
     refreshParlayBadges: function () {
       var cnt = ParlayAgent.legs.length;
       document.querySelectorAll('[data-parlay-id]').forEach(function (btn) {
@@ -482,6 +531,12 @@
       var odds = await DataAgent.fetchOdds(sport);
       var self = this;
 
+      // Rate limit hit → show upgrade modal and proceed with static data
+      if (odds && odds.__rateLimited) {
+        UIAgent.showRateLimitModal(odds.message);
+        odds = null;
+      }
+
       var gameLinesHtml = '';
       if (odds && odds.length > 0) {
         gameLinesHtml = [
@@ -527,15 +582,21 @@
         '</div>',
       ].join('');
 
+      var remaining = window._sportsQuotaRemaining != null ? window._sportsQuotaRemaining : '?';
       container.innerHTML = [
         accuracyHtml,
         gameLinesHtml,
         '<div class="mb-4 flex flex-wrap items-start justify-between gap-3">',
         '  <div>',
         '    <h3 class="text-white font-bold text-base sm:text-lg"><i class="' + data.icon + ' mr-2 ' + (sport === 'NBA' ? 'text-orange-400' : sport === 'MLB' ? 'text-blue-400' : 'text-green-400') + '"></i>' + sport + ' — ' + data.metric + ' Props</h3>',
-        '    <p class="text-gray-500 text-xs mt-0.5">Rendimiento histórico vs. línea · Probabilidad de superar la apuesta · Ordenado por probabilidad</p>',
+        '    <p class="text-gray-500 text-xs mt-0.5">Probabilidad estadística vs. línea · Ordenado por probabilidad · Cuotas vía servidor seguro</p>',
         '  </div>',
-        '  <div class="api-status-badge"><span class="live-dot"></span>' + (window.ODDS_API_KEY || localStorage.getItem('odds_api_key') ? 'Live Data' : 'Demo Data') + '</div>',
+        '  <div class="flex items-center gap-2">',
+        '    <div class="api-status-badge"><span class="live-dot"></span>API Segura</div>',
+        '    <div class="text-xs text-gray-500 bg-gray-900/80 rounded-lg px-2 py-1 border border-gray-700">',
+        '      <i class="fas fa-bolt text-yellow-500 mr-1"></i>' + remaining + ' consultas restantes',
+        '    </div>',
+        '  </div>',
         '</div>',
         '<div class="space-y-3">' + players.map(function (p) { return self.renderCard(p, sport); }).join('') + '</div>',
         self.renderDkBanner(),
@@ -591,12 +652,36 @@
     },
 
     // ── View: Standings ─────────────────────────────────────────────────
-    renderStandings: function (sport) {
+    renderStandings: async function (sport) {
       var container = document.getElementById('sports-view-content');
       if (!container) return;
-      var rows = STANDINGS[sport] || [];
+
+      // Loading skeleton
+      container.innerHTML = '<div class="text-center py-10 text-gray-500">' +
+        '<i class="fas fa-circle-notch fa-spin text-2xl mb-2 block text-emerald-500"></i>' +
+        '<p class="text-sm">Cargando clasificación…</p></div>';
+
+      // Try Firestore (updated hourly by Cloud Function from ESPN)
+      var live = { teams: [], updatedAt: null };
+      if (window.firebaseServices && window.firebaseServices.getStandings) {
+        live = await window.firebaseServices.getStandings(sport);
+      }
+
+      // Fall back to static seed data if Firestore has nothing yet
+      var rows = (live.teams && live.teams.length > 0) ? live.teams : (STANDINGS[sport] || []);
+      var isLive = live.teams && live.teams.length > 0;
+
+      var updatedLabel = isLive
+        ? '<span class="text-emerald-500">ESPN · actualizado automáticamente</span>'
+        : '<span class="text-gray-600">Datos de muestra · ESPN se actualiza cada 2h</span>';
+
       container.innerHTML = [
-        '<h3 class="text-white font-bold text-base mb-3"><i class="fas fa-trophy mr-2 text-yellow-400"></i>Clasificación — ' + sport + '</h3>',
+        '<div class="flex items-center justify-between mb-3">',
+        '  <h3 class="text-white font-bold text-base"><i class="fas fa-trophy mr-2 text-yellow-400"></i>Clasificación — ' + sport + '</h3>',
+        '  <span class="text-xs ' + (isLive ? 'text-emerald-400' : 'text-gray-500') + '">' +
+          (isLive ? '<span class="live-dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-right:4px"></span>En vivo' : 'Demo') +
+        '</span>',
+        '</div>',
         '<div class="overflow-x-auto rounded-xl border border-gray-700/60">',
         '  <table class="w-full text-sm">',
         '    <thead><tr class="bg-gray-900/80 text-gray-400 text-xs uppercase tracking-wide">',
@@ -610,18 +695,18 @@
         rows.map(function (t, i) {
           return '<tr class="hover:bg-gray-800/50 transition-colors">' +
             '<td class="px-4 py-3 text-gray-500 font-mono text-xs">' + (i + 1) + '</td>' +
-            '<td class="px-4 py-3 text-white font-medium">' + t.team + '</td>' +
-            '<td class="px-4 py-3 text-center text-emerald-400 font-bold">' + t.w + '</td>' +
-            '<td class="px-4 py-3 text-center text-red-400">' + t.l + '</td>' +
-            '<td class="px-4 py-3 text-center text-cyan-400 font-mono">' + t.pct + '</td>' +
-            '<td class="px-4 py-3 text-center text-gray-400">' + t.gb + '</td>' +
-            '<td class="px-4 py-3 text-center text-yellow-400 font-semibold text-xs">' + t.conf + '</td>' +
+            '<td class="px-4 py-3 text-white font-medium">' + (t.team || '?') + '</td>' +
+            '<td class="px-4 py-3 text-center text-emerald-400 font-bold">' + (t.w || 0) + '</td>' +
+            '<td class="px-4 py-3 text-center text-red-400">' + (t.l || 0) + '</td>' +
+            '<td class="px-4 py-3 text-center text-cyan-400 font-mono">' + (t.pct || '—') + '</td>' +
+            '<td class="px-4 py-3 text-center text-gray-400">' + (t.gb || '—') + '</td>' +
+            '<td class="px-4 py-3 text-center text-yellow-400 font-semibold text-xs">' + (t.conf || '—') + '</td>' +
             '</tr>';
         }).join(''),
         '    </tbody>',
         '  </table>',
         '</div>',
-        '<p class="text-gray-600 text-xs mt-2 text-right"><i class="fas fa-info-circle mr-1"></i>Datos de muestra · Conecta API para datos reales</p>',
+        '<p class="text-xs mt-2 text-right"><i class="fas fa-satellite-dish mr-1"></i>' + updatedLabel + '</p>',
       ].join('');
     },
 
