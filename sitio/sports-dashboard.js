@@ -16,9 +16,8 @@
   'use strict';
 
   // ── CONSTANTS ────────────────────────────────────────────────────────────
-  var DK_LINK       = 'https://sportsbook.draftkings.com/r/sb/aminventura17/US-NY-SB/US-NY';
-  var ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
-  var CACHE_TTL     = 30 * 60 * 1000;
+  var DK_LINK   = 'https://sportsbook.draftkings.com/r/sb/aminventura17/US-NY-SB/US-NY';
+  var CACHE_TTL = 30 * 60 * 1000;
 
   // ── DEMO DATA ─────────────────────────────────────────────────────────────
   // Each player includes: avg, line, last5[], opponentRank, isHome, lineDelta, hot
@@ -157,11 +156,10 @@
   };
 
   // ════════════════════════════════════════════════════════════════════════
-  // DATA AGENT — The Odds API with 30-min cache
+  // DATA AGENT — routes through Cloud Function proxy (key never on client)
   // ════════════════════════════════════════════════════════════════════════
   var DataAgent = {
     _cache: {},
-    _map: { NBA: 'basketball_nba', MLB: 'baseball_mlb', NFL: 'americanfootball_nfl' },
 
     _getCached: function (key) {
       var c = this._cache[key];
@@ -171,21 +169,14 @@
     _setCache: function (key, data) { this._cache[key] = { data: data, ts: Date.now() }; },
 
     fetchOdds: async function (sport) {
-      var apiKey = window.ODDS_API_KEY || localStorage.getItem('odds_api_key');
-      if (!apiKey) return null;
       var ck = 'odds_' + sport;
       var cached = this._getCached(ck);
       if (cached) return cached;
-      try {
-        var url = ODDS_API_BASE + '/sports/' + this._map[sport] +
-          '/odds/?apiKey=' + apiKey +
-          '&regions=us&markets=h2h,spreads&bookmakers=draftkings,fanduel&oddsFormat=american';
-        var res = await fetch(url);
-        if (!res.ok) return null;
-        var data = await res.json();
-        this._setCache(ck, data);
-        return data;
-      } catch (e) { return null; }
+      // Delegate to the Cloud Function via the bridge exposed by app.js
+      if (!window.firebaseServices || !window.firebaseServices.callSportsOdds) return null;
+      var data = await window.firebaseServices.callSportsOdds(sport);
+      if (data) this._setCache(ck, data);
+      return data;
     },
   };
 
@@ -256,11 +247,20 @@
       }
       return this._data;
     },
-    record: function (sport, isYes) {
+    record: function (sport, playerId, isYes) {
+      // Local counters (instant UI update)
       var d = this.getData();
       if (!d[sport]) d[sport] = { yes: 0, no: 0 };
       if (isYes) d[sport].yes++; else d[sport].no++;
       StorageAgent.set('sports_accuracy', d);
+      // Persist to Firestore (duplicate prevention via doc ID in Cloud rules)
+      if (window.firebaseServices && window.firebaseServices.saveSportsFeedback) {
+        window.firebaseServices.saveSportsFeedback(
+          playerId,
+          sport,
+          isYes ? 'yes' : 'no'
+        );
+      }
     },
     getPct: function (sport) {
       var d = this.getData()[sport] || { yes: 0, no: 0 };
@@ -573,45 +573,21 @@
     renderLive: function () {
       var container = document.getElementById('sports-view-content');
       if (!container) return;
-      var activeKey = window.ODDS_API_KEY || localStorage.getItem('odds_api_key') || '';
-      var parts = [
+      container.innerHTML = [
         '<div class="text-center py-8">',
         '  <div class="text-5xl mb-4">📡</div>',
-        '  <h3 class="text-white font-bold text-lg mb-2">Resultados en Vivo</h3>',
-      ];
-      if (activeKey) {
-        parts = parts.concat([
-          '  <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-950/60 border border-green-700/50 text-green-300 text-sm font-semibold mb-4">',
-          '    <span class="live-dot"></span>API Conectada — cuotas en tiempo real activas',
-          '  </div>',
-          '  <p class="text-gray-400 text-sm mb-5 max-w-sm mx-auto">Las cuotas de <strong class="text-yellow-400">DraftKings</strong> y <strong class="text-yellow-400">FanDuel</strong> se actualizan automáticamente cada 30 minutos. Visita la pestaña <strong class="text-cyan-400">Props</strong> para ver las predicciones con cuotas en vivo.</p>',
-          '  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-md mx-auto">',
-          '    <div class="live-source-card"><i class="fas fa-tv text-blue-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">ESPN</p><p class="text-gray-500 text-xs">Scores &amp; live stats</p></div>',
-          '    <div class="live-source-card"><i class="fas fa-mobile-alt text-green-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">The Score</p><p class="text-gray-500 text-xs">Notificaciones push</p></div>',
-          '    <div class="live-source-card"><i class="fas fa-chart-line text-purple-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">Action Network</p><p class="text-gray-500 text-xs">Tracking de dinero sharp</p></div>',
-          '  </div>',
-        ]);
-      } else {
-        parts = parts.concat([
-          '  <p class="text-gray-400 text-sm mb-5 max-w-sm mx-auto">Para cuotas en tiempo real, conecta con <strong class="text-yellow-400">The Odds API</strong>. Las predicciones actuales usan historial estadístico de la temporada.</p>',
-          '  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-md mx-auto mb-6">',
-          '    <div class="live-source-card"><i class="fas fa-tv text-blue-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">ESPN</p><p class="text-gray-500 text-xs">Scores &amp; live stats</p></div>',
-          '    <div class="live-source-card"><i class="fas fa-mobile-alt text-green-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">The Score</p><p class="text-gray-500 text-xs">Notificaciones push</p></div>',
-          '    <div class="live-source-card"><i class="fas fa-chart-line text-purple-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">Action Network</p><p class="text-gray-500 text-xs">Tracking de dinero sharp</p></div>',
-          '  </div>',
-          '  <div class="api-key-form max-w-sm mx-auto text-left">',
-          '    <label class="block text-gray-400 text-xs mb-1.5">Tu clave The Odds API (se guarda localmente):</label>',
-          '    <div class="flex gap-2">',
-          '      <input id="odds-api-key-input" type="password" placeholder="Pegar API key aquí…"',
-          '        class="flex-1 px-3 py-2 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-cyan-500 focus:outline-none text-sm font-mono">',
-          '      <button onclick="SportsDashboard.saveApiKey()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm font-semibold transition-colors">Guardar</button>',
-          '    </div>',
-          '    <p class="text-gray-600 text-xs mt-1.5"><i class="fas fa-lock mr-1"></i>Solo en localStorage, nunca se envía a nuestros servidores.</p>',
-          '  </div>',
-        ]);
-      }
-      parts.push('</div>');
-      container.innerHTML = parts.join('');
+        '  <h3 class="text-white font-bold text-lg mb-2">Cuotas en Tiempo Real</h3>',
+        '  <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-950/60 border border-green-700/50 text-green-300 text-sm font-semibold mb-4">',
+        '    <span class="live-dot"></span>API Conectada — cuotas seguras vía servidor',
+        '  </div>',
+        '  <p class="text-gray-400 text-sm mb-5 max-w-sm mx-auto">Las cuotas de <strong class="text-yellow-400">DraftKings</strong> y <strong class="text-yellow-400">FanDuel</strong> se obtienen de forma segura desde nuestro servidor. Visita <strong class="text-cyan-400">Player Props</strong> para ver predicciones con cuotas en vivo.</p>',
+        '  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-md mx-auto">',
+        '    <div class="live-source-card"><i class="fas fa-tv text-blue-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">ESPN</p><p class="text-gray-500 text-xs">Scores &amp; live stats</p></div>',
+        '    <div class="live-source-card"><i class="fas fa-mobile-alt text-green-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">The Score</p><p class="text-gray-500 text-xs">Notificaciones push</p></div>',
+        '    <div class="live-source-card"><i class="fas fa-chart-line text-purple-400 text-lg mb-1.5 block"></i><p class="text-white font-semibold text-sm">Action Network</p><p class="text-gray-500 text-xs">Tracking de dinero sharp</p></div>',
+        '  </div>',
+        '</div>',
+      ].join('');
     },
 
     // ── View: Standings ─────────────────────────────────────────────────
@@ -720,9 +696,6 @@
     },
 
     init: function () {
-      var savedKey = localStorage.getItem('odds_api_key');
-      if (savedKey) window.ODDS_API_KEY = savedKey;
-
       var tabsEl = document.getElementById('sport-tabs');
       if (tabsEl) {
         var sport = this.state.sport;
@@ -800,7 +773,7 @@
   // ACTION HANDLERS
   // ════════════════════════════════════════════════════════════════════════
   function recordFeedback(sport, playerId, isYes) {
-    FeedbackAgent.record(sport, isYes);
+    FeedbackAgent.record(sport, playerId, isYes);
     UIAgent.refreshAccuracyRow();
     var card = document.querySelector('[data-prop-id="' + playerId + '"]');
     if (card) {
@@ -854,14 +827,6 @@
       if (OrchestratorAgent.state.view === 'parlay') UIAgent.renderParlay();
     },
     clearParlay:      function ()        { ParlayAgent.clear(); },
-    saveApiKey:       function () {
-      var input = document.getElementById('odds-api-key-input');
-      if (!input || !input.value.trim()) return;
-      localStorage.setItem('odds_api_key', input.value.trim());
-      window.ODDS_API_KEY = input.value.trim();
-      var btn = input.nextElementSibling;
-      if (btn) { btn.textContent = '✓ Guardado'; setTimeout(function () { btn.textContent = 'Guardar'; }, 2000); }
-    },
     activatePremium:  function ()        { OrchestratorAgent.activatePremium(); },
     closePremiumModal:function ()        { OrchestratorAgent.closePremiumModal(); },
   };

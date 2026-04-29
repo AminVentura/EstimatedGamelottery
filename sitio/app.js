@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBtNNiANCMdMILI5qiL9fF5aWhjfknUMWQ",
@@ -480,9 +482,7 @@ const paths = {
   take5day: `artifacts/${appId}/public/data/take5day_drawings`,
   take5eve: `artifacts/${appId}/public/data/take5eve_drawings`,
   win4day: `artifacts/${appId}/public/data/win4day_drawings`,
-  win4eve: `artifacts/${appId}/public/data/win4eve_drawings`,
-  comments: `artifacts/${appId}/public/data/lotto_comments`,
-  stats: `artifacts/${appId}/public/data/user_stats`
+  win4eve: `artifacts/${appId}/public/data/win4eve_drawings`
 };
 
 let showAll = Object.fromEntries(LOTTERY_IDS.map(id => [id, false]));
@@ -499,8 +499,6 @@ let allHistoryData = Object.fromEntries(LOTTERY_IDS.map(id => {
 
 const domElements = {
   message: document.getElementById('messageBox'),
-  comments: document.getElementById('commentsList'),
-  loadingComments: document.getElementById('loadingComments'),
   tabs: Object.fromEntries(LOTTERY_IDS.map(lottery => {
     const cfg = LOTTERY_CONFIG[lottery];
     return [
@@ -550,7 +548,6 @@ const hideLoadingSpinners = () => {
   Object.values(domElements.tabs).forEach(tab => {
     if (tab && tab.loading) tab.loading.style.display = 'none';
   });
-  if (domElements.loadingComments) domElements.loadingComments.style.display = 'none';
 };
 
 const getSpecialBallClass = (lottery) => ({
@@ -973,22 +970,6 @@ const setupEventListeners = () => {
     });
   });
 
-  const postBtn = document.getElementById('postCommentBtn');
-  if (postBtn) {
-    postBtn.onclick = async () => {
-      const input = document.getElementById('commentInput');
-      const text = (input && input.value || '').trim();
-      if (!text) return showMessage('Escribe algo.', 'bg-red-500 text-white');
-      try {
-        await addDoc(collection(db, paths.comments), { text, userId, createdAt: new Date() });
-        showMessage('Comentario publicado.', 'bg-pink-600 text-white');
-        if (input) input.value = '';
-      } catch (e) {
-        showMessage('Error al comentar.', 'bg-red-500 text-white');
-      }
-    };
-  }
-
   LOTTERY_IDS.forEach(lottery => {
     const cfg = LOTTERY_CONFIG[lottery];
     const btn = document.getElementById(`verMasBtn_${cfg.verMasId}`);
@@ -1005,8 +986,7 @@ const setupEventListeners = () => {
 const setupRealtimeListeners = () => {
   if (!userId || !db) return;
 
-  // Solo escuchar colecciones de sorteos actuales. Excluir explícitamente cash4life (descontinuada).
-  const drawingKeys = LOTTERY_IDS.filter(id => id !== 'cash4life' && paths[id] && !paths[id].includes('comments') && !paths[id].includes('stats'));
+  const drawingKeys = LOTTERY_IDS.filter(id => paths[id]);
   drawingKeys.forEach(key => {
     if (paths[key]) {
       onSnapshot(
@@ -1055,31 +1035,6 @@ const setupRealtimeListeners = () => {
           }
         }
       );
-    }
-  });
-
-  onSnapshot(
-    query(collection(db, paths.comments), orderBy("createdAt", "desc")),
-    (snapshot) => {
-    if (domElements.loadingComments) domElements.loadingComments.style.display = 'none';
-    if (domElements.comments) domElements.comments.innerHTML = '';
-    snapshot.docs.forEach(docSnap => {
-      const c = docSnap.data();
-      const div = document.createElement('div');
-      div.className = 'p-3 bg-gray-900 rounded-lg border border-gray-700 mb-2';
-      div.innerHTML = `
-        <div class="flex justify-between items-center mb-1">
-          <span class="text-xs text-blue-400 font-bold">${(c.userId || 'Anónimo').toString().split('-')[0]}...</span>
-          <span class="text-[10px] text-gray-500">${c.createdAt ? (c.createdAt.seconds ? new Date(c.createdAt.seconds * 1000).toLocaleDateString() : (c.createdAt.toDate ? c.createdAt.toDate().toLocaleDateString() : '')) : ''}</span>
-        </div>
-        <p class="text-gray-300 text-sm">${(c.text || '').replace(/</g, '&lt;')}</p>
-      `;
-      if (domElements.comments) domElements.comments.appendChild(div);
-    });
-  },
-  (err) => {
-    if (err && err.code === 'permission-denied') {
-      console.warn('[Firestore] Sin permiso para comentarios.');
     }
   });
 };
@@ -1242,8 +1197,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const app = initializeApp(firebaseConfig);
+    const appCheckMeta = document.querySelector('meta[name="firebase-appcheck-recaptcha-site-key"]');
+    const appCheckKey = (appCheckMeta && appCheckMeta.getAttribute('content') || '').trim();
+    if (appCheckKey) {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(appCheckKey),
+        isTokenAutoRefreshEnabled: true
+      });
+    }
     auth = getAuth(app);
-    db = getFirestore(app);
+    db   = getFirestore(app);
+    const functions = getFunctions(app, 'us-central1');
 
     const userCredential = await signInAnonymously(auth);
     userId = userCredential.user.uid;
@@ -1252,6 +1216,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('friendlyUserId', friendlyId);
     const userIdDisplay = document.getElementById('userIdDisplay');
     if (userIdDisplay) userIdDisplay.textContent = friendlyId;
+
+    // ── Bridge for sports-dashboard.js (non-module IIFE) ────────────────────
+    const _getSportsOdds = httpsCallable(functions, 'getSportsOdds');
+
+    window.firebaseServices = {
+      // Calls the getSportsOdds Cloud Function (API key stays server-side)
+      callSportsOdds: async function (sport) {
+        try {
+          const result = await _getSportsOdds({ sport });
+          return result.data && result.data.odds ? result.data.odds : null;
+        } catch (e) {
+          console.warn('[Sports] Cloud Function error:', e.message);
+          return null;
+        }
+      },
+
+      // Saves a user vote to Firestore; prevents duplicates via doc ID
+      saveSportsFeedback: async function (predId, sport, vote) {
+        if (!userId) return;
+        const docId  = userId + '_' + predId;
+        const voteRef = doc(db, 'sportsVotes', docId);
+        try {
+          await setDoc(voteRef, {
+            uid:       userId,
+            predId:    predId,
+            sport:     sport,
+            vote:      vote,       // 'yes' | 'no'
+            createdAt: serverTimestamp(),
+            date:      new Date().toISOString().slice(0, 10),
+          }, { merge: false }); // merge:false → throws if doc exists (duplicate guard)
+        } catch (e) {
+          // Firestore security rule blocks overwrite → silently ignore duplicate
+        }
+      },
+
+      // Real-time listener on the global accuracy aggregate
+      watchGlobalAccuracy: function (callback) {
+        const globalRef = doc(db, 'sportsAccuracy', 'global');
+        return onSnapshot(globalRef, (snap) => {
+          if (snap.exists()) {
+            callback(snap.data());
+          } else {
+            callback({ yes: 0, no: 0 });
+          }
+        }, () => callback({ yes: 0, no: 0 }));
+      },
+    };
+
+    // Kick off global accuracy widget
+    window.firebaseServices.watchGlobalAccuracy(function (data) {
+      const yes   = data.yes  || 0;
+      const no    = data.no   || 0;
+      const total = yes + no;
+      const pct   = total > 0 ? Math.round((yes / total) * 100) : null;
+      _updateAccuracyWidget(pct, total);
+    });
 
     setupRealtimeListeners();
 
@@ -1280,6 +1300,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideLoadingSpinners();
   }
 });
+
+// Updates the Global Accuracy Widget in the HTML with live Firestore data
+// Updates the Global Accuracy Widget in the HTML with live Firestore data
+function _updateAccuracyWidget(pct, total) {
+  const pctEl       = document.getElementById('ga-widget-pct');
+  const pctInlineEl = document.getElementById('ga-widget-pct-inline');
+  const barEl       = document.getElementById('ga-widget-bar');
+  const votesEl     = document.getElementById('ga-widget-votes');
+  const circleEl    = document.getElementById('ga-widget-circle');
+  if (!pctEl) return;
+
+  if (pct === null) {
+    pctEl.textContent    = '--';
+    if (pctInlineEl) pctInlineEl.textContent = '--';
+    if (votesEl)     votesEl.textContent      = 'Sé el primero en votar';
+    return;
+  }
+
+  if (votesEl) votesEl.textContent = total.toLocaleString() + ' predicciones evaluadas';
+
+  // Animate from current displayed value to new pct
+  const current = parseInt(pctEl.textContent) || 0;
+  const step    = pct > current ? 1 : -1;
+  let   cur     = current;
+  const dash    = 251; // 2π × r=40
+  const interval = setInterval(function () {
+    if (cur === pct) { clearInterval(interval); return; }
+    cur += step;
+    pctEl.textContent = cur;
+    if (pctInlineEl) pctInlineEl.textContent = cur;
+    if (barEl)    barEl.style.width               = cur + '%';
+    if (circleEl) circleEl.style.strokeDashoffset = dash - (dash * cur / 100);
+  }, 20);
+}
 
 function updateStatistics() {
   const totalDrawings = LOTTERY_IDS.reduce((sum, id) => sum + (allHistoryData[id]?.length || 0), 0);

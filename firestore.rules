@@ -1,87 +1,135 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // 1. Función para validar si el usuario está conectado
+
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // 2. Validar sorteo: mainNumbers (list o string) y fecha; tamaño según juego
-    function hasDrawingFields() {
-      return request.resource.data.keys().hasAll(['mainNumbers', 'date'])
-             && request.resource.data.date is string
-             && (request.resource.data.mainNumbers is list || request.resource.data.mainNumbers is string);
+    function drawingKeysOk() {
+      return request.resource.data.keys().hasOnly(['mainNumbers', 'date', 'userId', 'createdAt', 'special']);
     }
+
+    function dateStringOk() {
+      return request.resource.data.date is string
+             && request.resource.data.date.size() == 10
+             && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function mainNumbersSizeOk() {
+      return (request.resource.data.mainNumbers is string
+              && request.resource.data.mainNumbers.size() > 0
+              && request.resource.data.mainNumbers.size() <= 220)
+             || (request.resource.data.mainNumbers is list
+                 && request.resource.data.mainNumbers.size() > 0
+                 && request.resource.data.mainNumbers.size() <= 25);
+    }
+
+    function hasDrawingFields() {
+      return drawingKeysOk()
+             && request.resource.data.keys().hasAll(['mainNumbers', 'date', 'userId', 'createdAt'])
+             && dateStringOk()
+             && request.resource.data.createdAt is timestamp
+             && request.resource.data.userId is string
+             && request.resource.data.userId == request.auth.uid
+             && mainNumbersSizeOk()
+             && (request.resource.data.special == null
+                 || request.resource.data.special is int);
+    }
+
     function isValidDrawing() {
       return isSignedIn() && hasDrawingFields();
     }
 
-    // 3. Función para validar que el usuario es dueño del dato (para borrar)
     function isOwner() {
       return isSignedIn() && resource.data.userId == request.auth.uid;
     }
 
-    // --- REGLAS PARA POWERBALL ---
+    function userStatsWriteOk(userId) {
+      return isSignedIn()
+             && request.auth.uid == userId
+             && request.resource.data.keys().size() <= 48;
+    }
+
     match /artifacts/EstimatedGamelottery-app/public/data/powerball_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
 
-    // --- REGLAS PARA CASH 4 LIFE ---
-    match /artifacts/EstimatedGamelottery-app/public/data/cash4life_drawings/{docId} {
+    match /artifacts/EstimatedGamelottery-app/public/data/millionaireforlife_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
 
-    // --- REGLAS PARA MEGA MILLIONS ---
     match /artifacts/EstimatedGamelottery-app/public/data/megamillions_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
 
-    // --- REGLAS PARA PICK 10, TAKE 5, WIN 4 ---
     match /artifacts/EstimatedGamelottery-app/public/data/pick10_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
     match /artifacts/EstimatedGamelottery-app/public/data/take5day_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
     match /artifacts/EstimatedGamelottery-app/public/data/take5eve_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
     match /artifacts/EstimatedGamelottery-app/public/data/win4day_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
     match /artifacts/EstimatedGamelottery-app/public/data/win4eve_drawings/{docId} {
       allow read: if true;
       allow create: if isValidDrawing();
+      allow update: if false;
       allow delete: if isOwner();
     }
 
-    // --- REGLAS PARA COMENTARIOS ---
-    match /artifacts/EstimatedGamelottery-app/public/data/lotto_comments/{docId} {
-      allow read: if true;
-      allow create: if isSignedIn() 
-                    && request.resource.data.text is string
-                    && request.resource.data.text.size() < 500;
-    }
-
-    // --- REGLAS PARA ESTADÍSTICAS DE USUARIO ---
     match /artifacts/EstimatedGamelottery-app/public/data/user_stats/{userId} {
       allow read: if true;
-      allow write: if isSignedIn() && request.auth.uid == userId;
+      allow create: if userStatsWriteOk(userId);
+      allow update: if userStatsWriteOk(userId);
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ── Sports Feedback ──────────────────────────────────────────────────
+    // Doc ID must be {uid}_{predId}. One vote per user per prediction.
+    match /sportsVotes/{voteId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && voteId == request.auth.uid + '_' + request.resource.data.predId
+        && request.resource.data.keys().hasOnly(['uid','predId','sport','vote','createdAt','date'])
+        && (request.resource.data.vote == 'yes' || request.resource.data.vote == 'no')
+        && request.resource.data.predId is string
+        && request.resource.data.predId.size() <= 64
+        && request.resource.data.sport is string;
+      allow update: if false; // votes are immutable
+      allow delete: if false;
+    }
+
+    // ── Global Accuracy Aggregate (written by Cloud Function trigger) ────
+    match /sportsAccuracy/{docId} {
+      allow read: if true;
+      allow write: if false; // only Cloud Function writes here
     }
   }
 }
