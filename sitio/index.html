@@ -18,6 +18,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
   <link rel="stylesheet" href="styles.css">
+  <!-- Odds API key available before any script runs -->
+  <script>window.ODDS_API_KEY = '0c5473d7e066977c0fd410e9320e569b';</script>
   <script>window._origWarn=console.warn;</script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -905,15 +907,9 @@
       <p class="text-gray-400 text-sm mt-1">Análisis estadístico de Player Props — NFL · NBA · MLB</p>
     </div>
 
-    <!-- API integration notice -->
-    <div class="mb-4 flex items-start gap-2 p-3 bg-blue-950/40 border border-blue-700/40 rounded-xl text-xs text-gray-400">
-      <i class="fas fa-plug text-blue-400 shrink-0 mt-0.5"></i>
-      <span>
-        <strong class="text-blue-300">Integración API:</strong>
-        Configura <code class="text-yellow-400 bg-gray-900/60 px-1 rounded">window.ODDS_API_KEY</code> con tu clave de
-        <strong class="text-white">The Odds API</strong> para cuotas en tiempo real.
-        Las probabilidades actuales se calculan con historial estadístico de la temporada.
-      </span>
+    <!-- API status banner: shown/hidden by JS based on ODDS_API_KEY -->
+    <div id="sd-api-notice" class="mb-4 flex items-start gap-2 p-3 rounded-xl text-xs" style="display:none">
+      <!-- Filled dynamically by updateApiNoticeBanner() -->
     </div>
 
     <!-- Sport tabs: NBA | MLB | NFL -->
@@ -940,26 +936,164 @@
     <!-- Dynamic content area -->
     <div id="sports-view-content" class="w-full"></div>
 
-    <!-- How it works -->
-    <div class="mt-6 bg-gray-800/60 border border-gray-700/60 rounded-2xl p-4 sm:p-5">
-      <h3 class="text-white font-bold text-sm mb-3 flex items-center gap-2">
-        <i class="fas fa-brain text-purple-400"></i>¿Cómo funciona la Predicción de Probabilidad?
-      </h3>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div class="bg-gray-900/60 rounded-xl p-3">
-          <p class="text-emerald-400 font-bold uppercase tracking-wide mb-1">1 — Promedio de Temporada</p>
-          <p class="text-gray-400 leading-relaxed">Compara el promedio histórico del jugador con la línea de apuesta para calcular una probabilidad base.</p>
+    <!-- ══ GUÍA COMPLETA: Cómo Apostar con el Dashboard ══ -->
+    <div class="mt-6 rounded-2xl overflow-hidden border border-gray-700/60" id="sd-betting-guide">
+
+      <!-- Header colapsable -->
+      <button onclick="toggleBettingGuide()" class="w-full flex items-center justify-between p-4 sm:p-5 bg-gray-800/80 hover:bg-gray-800 transition-colors text-left" aria-expanded="false" id="sd-guide-btn">
+        <span class="flex items-center gap-2 font-bold text-white text-sm">
+          <i class="fas fa-book-open text-green-400"></i>
+          Guía: Cómo Usar el Dashboard y Cómo Apostar
+        </span>
+        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="sd-guide-chevron"></i>
+      </button>
+
+      <div id="sd-guide-content" class="hidden bg-gray-900/60 p-4 sm:p-5">
+
+        <!-- Paso 0: Entender el Dashboard -->
+        <div class="mb-5">
+          <h4 class="text-green-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-map-signs"></i>Secciones del Dashboard
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-user-check text-blue-400 mr-1"></i>Player Props</p>
+              <p class="text-gray-400 leading-relaxed">Predicciones individuales por jugador — puntos, rebotes, yardas, ponches.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-layer-group text-indigo-400 mr-1"></i>Parlay Builder</p>
+              <p class="text-gray-400 leading-relaxed">Combina hasta 6 predicciones. El sistema calcula la probabilidad combinada y las cuotas.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-list-ol text-yellow-400 mr-1"></i>Clasificación</p>
+              <p class="text-gray-400 leading-relaxed">Récords actuales de equipos NBA, MLB y NFL para contexto de forma.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-broadcast-tower text-green-400 mr-1"></i>En Vivo</p>
+              <p class="text-gray-400 leading-relaxed">Cuotas en tiempo real con tu clave de The Odds API y fuentes recomendadas.</p>
+            </div>
+          </div>
         </div>
-        <div class="bg-gray-900/60 rounded-xl p-3">
-          <p class="text-cyan-400 font-bold uppercase tracking-wide mb-1">2 — Forma Reciente</p>
-          <p class="text-gray-400 leading-relaxed">Los últimos 5 partidos actúan como los "números calientes": más peso a la tendencia reciente.</p>
+
+        <!-- Paso 1: Leer una tarjeta -->
+        <div class="mb-5">
+          <h4 class="text-cyan-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-id-card"></i>Cómo leer una tarjeta de Player Prop
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="space-y-2">
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-2xl font-black text-green-400 leading-none w-10 shrink-0">74%</span>
+                <div><p class="text-white font-semibold">Probabilidad (el número grande)</p><p class="text-gray-400">Calculada por el algoritmo: 0–49% baja, 50–67% media, 68%+ alta confianza.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-xs font-black text-green-300 border border-green-700 bg-green-900/50 px-1.5 py-0.5 rounded shrink-0 mt-0.5">OVER</span>
+                <div><p class="text-white font-semibold">OVER / UNDER</p><p class="text-gray-400">El algoritmo predice si el jugador <strong class="text-white">supera (OVER)</strong> o <strong class="text-white">no alcanza (UNDER)</strong> la línea oficial.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-cyan-400 font-black text-sm shrink-0 w-10">26.5</span>
+                <div><p class="text-white font-semibold">Línea (Line)</p><p class="text-gray-400">El número que fija la casa de apuestas (DraftKings/FanDuel). Apostar OVER = el jugador anota más de 26.5 pts.</p></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="flex gap-0.5 shrink-0 mt-0.5">
+                  <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:rgba(6,78,59,0.7);color:#34d399;font-size:0.65rem;align-items:center;justify-content:center;border:1px solid rgba(52,211,153,0.4)">✓</span>
+                  <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:rgba(127,29,29,0.7);color:#f87171;font-size:0.65rem;align-items:center;justify-content:center;border:1px solid rgba(248,113,113,0.4)">✗</span>
+                </span>
+                <div><p class="text-white font-semibold">Dots de tendencia</p><p class="text-gray-400">✓ verde = superó la línea ese partido. ✗ rojo = no la superó. 5 partidos más recientes.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-emerald-400 font-black text-sm shrink-0 w-10">+4.2%</span>
+                <div><p class="text-white font-semibold">Edge %</p><p class="text-gray-400">Diferencia entre el promedio de temporada y la línea. Positivo = ventaja sobre la casa.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-green-400 font-black text-xs shrink-0 w-10">▲ OVER</span>
+                <div><p class="text-white font-semibold">Dinero Sharp</p><p class="text-gray-400">Si la línea subió (▲), los apostadores profesionales pusieron dinero en OVER. Señal de confirmación.</p></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-gray-900/60 rounded-xl p-3">
-          <p class="text-purple-400 font-bold uppercase tracking-wide mb-1">3 — Factores Contextuales</p>
-          <p class="text-gray-400 leading-relaxed">Rango defensivo del rival y ventaja de local ajustan la probabilidad final, como el factor temporal en lotería.</p>
+
+        <!-- Paso 2: Cómo apostar -->
+        <div class="mb-5">
+          <h4 class="text-orange-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-dollar-sign"></i>Cómo hacer tu primera apuesta en DraftKings
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">1</div>
+              <p class="text-white font-semibold mb-1">Elige una predicción</p>
+              <p class="text-gray-400">Busca probabilidad ≥65% con Edge positivo y 4+ dots verdes recientes.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">2</div>
+              <p class="text-white font-semibold mb-1">Pulsa "Apostar en DraftKings"</p>
+              <p class="text-gray-400">El botón verde te lleva a DraftKings con tu referido. Crea cuenta o inicia sesión.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">3</div>
+              <p class="text-white font-semibold mb-1">Busca el Player Prop</p>
+              <p class="text-gray-400">En DraftKings: Más apuestas → Player Props → busca el jugador y selecciona OVER o UNDER.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">4</div>
+              <p class="text-white font-semibold mb-1">Confirma y registra</p>
+              <p class="text-gray-400">Vuelve aquí y pulsa ¿Acertó? SÍ/NO para mejorar la precisión del algoritmo.</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+
+        <!-- Paso 3: Parlay Builder -->
+        <div class="mb-5">
+          <h4 class="text-indigo-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-layer-group"></i>Cómo usar el Parlay Builder
+          </h4>
+          <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <p class="text-indigo-300 font-semibold mb-1.5">¿Qué es un Parlay?</p>
+                <p class="text-gray-400 leading-relaxed">Combinas múltiples apuestas en una sola. Si todas aciertan, la ganancia se multiplica. Si una falla, pierdes todo.</p>
+              </div>
+              <div>
+                <p class="text-indigo-300 font-semibold mb-1.5">Cómo armarlo aquí</p>
+                <p class="text-gray-400 leading-relaxed">Pulsa el ícono <i class="fas fa-plus-circle text-blue-400 mx-1"></i> en cualquier tarjeta de Props. Agrega hasta 6 legs. El sistema muestra la probabilidad combinada y las cuotas americanas.</p>
+              </div>
+              <div>
+                <p class="text-indigo-300 font-semibold mb-1.5">Cuotas Americanas</p>
+                <p class="text-gray-400 leading-relaxed"><strong class="text-white">+300</strong> = apuestas $100 → ganas $300 extra. <strong class="text-white">-150</strong> = debes apostar $150 para ganar $100. Entre más legs, mejores cuotas pero más riesgo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algoritmo -->
+        <div class="mb-4">
+          <h4 class="text-purple-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-brain"></i>Cómo calcula la Probabilidad el Algoritmo
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-emerald-400 font-bold mb-1">① Promedio Temp.</p>
+              <p class="text-gray-400">Base estadística: cuánto supera el jugador su línea en el año (40% del peso).</p>
+            </div>
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-cyan-400 font-bold mb-1">② Forma Reciente</p>
+              <p class="text-gray-400">Últimos 5 partidos: como los "números calientes" en lotería (35% del peso).</p>
+            </div>
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-yellow-400 font-bold mb-1">③ Rival Defensivo</p>
+              <p class="text-gray-400">Rango defensivo del equipo contrario. Peor defensa = más fácil superar la línea (15%).</p>
+            </div>
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-orange-400 font-bold mb-1">④ Local/Visitante</p>
+              <p class="text-gray-400">Jugar en casa da +3% de probabilidad. De visitante, -1% (10% del peso).</p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /guide content -->
+    </div><!-- /betting guide -->
 
     <!-- Sports disclaimer -->
     <div class="mt-4 p-3 bg-amber-950/30 border border-amber-700/30 rounded-xl">
@@ -1063,8 +1197,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- The Odds API key — set before sports-dashboard.js runs -->
-<script>window.ODDS_API_KEY = '0c5473d7e066977c0fd410e9320e569b';</script>
 <!-- Sports Intelligence Dashboard (native Web Crypto — no external deps) -->
 <script src="sports-dashboard.js" defer></script>
 <!-- Scripts de lotería (módulos: no bloquean el parser) -->
@@ -1073,6 +1205,31 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Mode switcher: Lotería ↔ Deportes -->
 <script>
 (function () {
+  function updateApiNoticeBanner() {
+    var el = document.getElementById('sd-api-notice');
+    if (!el) return;
+    if (window.ODDS_API_KEY) {
+      el.style.display = 'flex';
+      el.className = 'mb-4 flex items-start gap-2 p-3 bg-green-950/40 border border-green-700/40 rounded-xl text-xs text-gray-300';
+      el.innerHTML = '<i class="fas fa-check-circle text-green-400 shrink-0 mt-0.5"></i><span><strong class="text-green-300">API Conectada ✓</strong> The Odds API activa — cuotas en tiempo real de DraftKings y FanDuel.</span>';
+    } else {
+      el.style.display = 'flex';
+      el.className = 'mb-4 flex items-start gap-2 p-3 bg-blue-950/40 border border-blue-700/40 rounded-xl text-xs text-gray-400';
+      el.innerHTML = '<i class="fas fa-plug text-blue-400 shrink-0 mt-0.5"></i><span><strong class="text-blue-300">Integración API:</strong> Ve a “En Vivo” para configurar tu clave de The Odds API.</span>';
+    }
+  }
+
+  function toggleBettingGuide() {
+    var content = document.getElementById('sd-guide-content');
+    var chevron = document.getElementById('sd-guide-chevron');
+    var btn     = document.getElementById('sd-guide-btn');
+    if (!content) return;
+    var isHidden = content.classList.contains('hidden');
+    content.classList.toggle('hidden', !isHidden);
+    if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
+    if (btn) btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+  }
+
   function switchAppMode(mode) {
     var lotteryEl  = document.getElementById('lottery-main-content');
     var sportsEl   = document.getElementById('sports-dashboard');
@@ -1087,6 +1244,7 @@ document.addEventListener('DOMContentLoaded', function() {
       btnSports.classList.add('active');
       btnSports.setAttribute('aria-selected', 'true');
       localStorage.setItem('appMode', 'sports');
+      updateApiNoticeBanner();
       if (window.SportsDashboard && SportsDashboard.init) SportsDashboard.init();
     } else {
       sportsEl.classList.add('hidden');
@@ -1098,7 +1256,9 @@ document.addEventListener('DOMContentLoaded', function() {
       localStorage.setItem('appMode', 'lottery');
     }
   }
+
   window.switchAppMode = switchAppMode;
+  window.toggleBettingGuide = toggleBettingGuide;
   document.addEventListener('DOMContentLoaded', function () {
     if (localStorage.getItem('appMode') === 'sports') switchAppMode('sports');
   });
