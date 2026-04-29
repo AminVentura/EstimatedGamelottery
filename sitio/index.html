@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- App Check (reCAPTCHA v3): pega aquí la clave del sitio desde Firebase Console → App Check → tu app web. Déjalo vacío hasta configurar; sin clave no se inicializa App Check. -->
+  <meta name="firebase-appcheck-recaptcha-site-key" content="">
   <title>USA Lottery Predictions | Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4</title>
   <meta name="description" content="Predicciones de lotería USA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4. Guía de uso, números calientes y fríos, estadísticas y precisión por juego. Contenido editorial y herramientas de entretenimiento. Solo mayores de 18 años.">
   <!-- Preload críticos: CSS y fuentes -->
@@ -53,7 +55,7 @@
       "name": "USA Lottery Predictions - Powerball, Mega Millions, Millionaire For Life",
       "description": "AI-powered lottery predictions for all US states: Powerball, Mega Millions, Millionaire For Life. Statistical analysis for entertainment.",
       "inLanguage": "es",
-      "dateModified": "2026-02-07",
+      "dateModified": "2026-04-01",
       "isPartOf": { "@id": "https://www.prediccionloteria.com/#website" }
     }
   ]
@@ -79,6 +81,9 @@
       <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors flex items-center gap-1">
         <i class="fas fa-ticket-alt"></i> Ticket Check
       </a>
+      <a href="/faq.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">FAQ</a>
+      <a href="/about.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Acerca de</a>
+      <a href="/contacto.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Contacto</a>
       <a href="#aviso-legal" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Integridad</a>
     </div>
   </div>
@@ -122,6 +127,26 @@
       </div>
     </div>
   </header>
+
+  <!-- ═══ MODE TOGGLE: Lotería / Deportes ═══ -->
+  <div id="mode-toggle-container" class="flex justify-center mb-4 sm:mb-6">
+    <div class="mode-toggle-pill" role="tablist" aria-label="Seleccionar modo de análisis">
+      <button id="btn-lottery-mode" role="tab" aria-selected="true"
+              class="mode-toggle-btn active"
+              onclick="switchAppMode('lottery')">
+        <i class="fas fa-ticket-alt"></i>
+        <span>Lotería</span>
+      </button>
+      <button id="btn-sports-mode" role="tab" aria-selected="false"
+              class="mode-toggle-btn sports-mode"
+              onclick="switchAppMode('sports')">
+        <i class="fas fa-football-ball"></i>
+        <span>Deportes</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="lottery-main-content">
 
   <!-- ¿Eres ganador? How To Claim A Prize (enlace oficial NY Lottery) -->
   <section class="claim-prize-cta mb-4 sm:mb-6 rounded-xl overflow-hidden border border-cyan-500/30 bg-gradient-to-r from-cyan-900/40 via-blue-900/40 to-purple-900/40 p-4 sm:p-5">
@@ -186,6 +211,20 @@
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
         Este sitio está pensado para mayores de 18 años. La lotería es un juego de azar; recomendamos jugar con moderación y nunca apostar más de lo que puedas permitirte perder. Para dudas sobre privacidad o cookies, consulta nuestras páginas de Política de Privacidad y Política de Cookies enlazadas en el pie de página.
       </p>
+    </div>
+  </section>
+
+  <section class="text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
+    <h2 class="text-lg sm:text-xl font-bold text-white mb-2">Contenido editorial y transparencia</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Para que puedas evaluar mejor cómo funciona esta herramienta, publicamos secciones dedicadas de ayuda y documentación.
+    </p>
+    <div class="flex flex-wrap gap-2 text-sm">
+      <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Preguntas Frecuentes</a>
+      <a href="/about.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Acerca del proyecto</a>
+      <a href="/contacto.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Contacto</a>
+      <a href="/politica-privacidad.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Privacidad</a>
+      <a href="/politica-cookies.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Cookies</a>
     </div>
   </section>
 
@@ -842,9 +881,8 @@
     </div>
   </div>
 
-  <!-- Dashboard & Comments -->
-  <div class="stats-chat-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-    <!-- Stats -->
+  <!-- Estadísticas (chat comunitario eliminado por seguridad: reducía superficie de abuso en Firestore) -->
+  <div class="max-w-2xl mx-auto w-full">
     <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700">
       <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-chart-pie mr-2 text-blue-400"></i>Estadísticas Globales</h2>
       <div class="space-y-4">
@@ -853,18 +891,88 @@
         <div class="flex justify-between bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 text-sm">Precisión Est.</span><span class="text-xl font-bold text-yellow-400" id="avgAccuracy">0%</span></div>
       </div>
     </div>
+  </div>
 
-    <!-- Comments -->
-    <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700 flex flex-col h-full">
-      <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-comments mr-2 text-pink-400"></i>Chat Comunitario</h2>
-      <p class="text-gray-500 text-xs mb-2">Comparte estrategias, resultados o preguntas.</p>
-      <div id="commentsList" class="flex-grow space-y-3 mb-4 max-h-48 overflow-y-auto pr-1"><div id="loadingComments" class="text-center text-gray-500 text-sm">Cargando...</div></div>
-      <div class="mt-auto">
-        <textarea id="commentInput" class="w-full h-16 p-3 rounded-lg bg-gray-900 text-gray-200 border border-gray-600 focus:border-pink-500 focus:outline-none resize-none text-sm mb-2" placeholder="Escribe tu mensaje (estrategia, resultado, pregunta)..."></textarea>
-        <button id="postCommentBtn" class="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-lg text-sm">ENVIAR</button>
+  </div><!-- /#lottery-main-content -->
+
+  <!-- ═══ SPORTS BETTING DASHBOARD ═══ -->
+  <div id="sports-dashboard" class="hidden w-full text-left">
+    <!-- Sports header -->
+    <div class="mb-5 text-center">
+      <h2 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
+        Dashboard de Apuestas Deportivas
+      </h2>
+      <p class="text-gray-400 text-sm mt-1">Análisis estadístico de Player Props — NFL · NBA · MLB</p>
+    </div>
+
+    <!-- API integration notice -->
+    <div class="mb-4 flex items-start gap-2 p-3 bg-blue-950/40 border border-blue-700/40 rounded-xl text-xs text-gray-400">
+      <i class="fas fa-plug text-blue-400 shrink-0 mt-0.5"></i>
+      <span>
+        <strong class="text-blue-300">Integración API:</strong>
+        Configura <code class="text-yellow-400 bg-gray-900/60 px-1 rounded">window.ODDS_API_KEY</code> con tu clave de
+        <strong class="text-white">The Odds API</strong> para cuotas en tiempo real.
+        Las probabilidades actuales se calculan con historial estadístico de la temporada.
+      </span>
+    </div>
+
+    <!-- Sport tabs: NBA | MLB | NFL -->
+    <div class="tabs-container flex flex-nowrap justify-start gap-0 mb-4 border-b border-gray-700 pb-0 overflow-x-auto" role="tablist">
+      <div id="sport-tabs" class="flex"></div>
+    </div>
+
+    <!-- View sub-tabs: Player Props | En Vivo | Clasificación -->
+    <div class="flex flex-wrap gap-2 mb-5">
+      <button class="sport-view-tab active" data-view="props" onclick="SportsDashboard.switchView('props')">
+        <i class="fas fa-user-check"></i>Player Props
+      </button>
+      <button class="sport-view-tab" data-view="live" onclick="SportsDashboard.switchView('live')">
+        <i class="fas fa-broadcast-tower"></i>En Vivo
+      </button>
+      <button class="sport-view-tab" data-view="standings" onclick="SportsDashboard.switchView('standings')">
+        <i class="fas fa-list-ol"></i>Clasificación
+      </button>
+      <button class="sport-view-tab" data-view="parlay" onclick="SportsDashboard.switchView('parlay')">
+        <i class="fas fa-layer-group"></i>Parlay Builder
+      </button>
+    </div>
+
+    <!-- Dynamic content area -->
+    <div id="sports-view-content" class="w-full"></div>
+
+    <!-- How it works -->
+    <div class="mt-6 bg-gray-800/60 border border-gray-700/60 rounded-2xl p-4 sm:p-5">
+      <h3 class="text-white font-bold text-sm mb-3 flex items-center gap-2">
+        <i class="fas fa-brain text-purple-400"></i>¿Cómo funciona la Predicción de Probabilidad?
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="bg-gray-900/60 rounded-xl p-3">
+          <p class="text-emerald-400 font-bold uppercase tracking-wide mb-1">1 — Promedio de Temporada</p>
+          <p class="text-gray-400 leading-relaxed">Compara el promedio histórico del jugador con la línea de apuesta para calcular una probabilidad base.</p>
+        </div>
+        <div class="bg-gray-900/60 rounded-xl p-3">
+          <p class="text-cyan-400 font-bold uppercase tracking-wide mb-1">2 — Forma Reciente</p>
+          <p class="text-gray-400 leading-relaxed">Los últimos 5 partidos actúan como los "números calientes": más peso a la tendencia reciente.</p>
+        </div>
+        <div class="bg-gray-900/60 rounded-xl p-3">
+          <p class="text-purple-400 font-bold uppercase tracking-wide mb-1">3 — Factores Contextuales</p>
+          <p class="text-gray-400 leading-relaxed">Rango defensivo del rival y ventaja de local ajustan la probabilidad final, como el factor temporal en lotería.</p>
+        </div>
       </div>
     </div>
-  </div>
+
+    <!-- Sports disclaimer -->
+    <div class="mt-4 p-3 bg-amber-950/30 border border-amber-700/30 rounded-xl">
+      <p class="text-amber-400/80 text-xs font-semibold uppercase tracking-wide mb-1">
+        <i class="fas fa-exclamation-triangle mr-1"></i>Aviso Legal — Apuestas Deportivas
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed">
+        Las probabilidades mostradas son análisis estadísticos con fines de entretenimiento únicamente. No constituyen asesoramiento financiero ni garantizan resultados. Solo para mayores de 21 años donde sea legal. Juega con responsabilidad.
+        Si tienes un problema con el juego, llama al <strong class="text-amber-400">1-800-522-4700</strong> (NCPG).
+      </p>
+    </div>
+  </div><!-- /#sports-dashboard -->
+
 </div>
 
 <!-- Aviso Legal -->
@@ -887,6 +995,12 @@
       <a href="/politica-privacidad.html" class="hover:text-gray-300">Política de Privacidad</a>
       <span>|</span>
       <a href="/politica-cookies.html" class="hover:text-gray-300">Política de Cookies</a>
+      <span>|</span>
+      <a href="/faq.html" class="hover:text-gray-300">FAQ</a>
+      <span>|</span>
+      <a href="/about.html" class="hover:text-gray-300">Acerca de</a>
+      <span>|</span>
+      <a href="/contacto.html" class="hover:text-gray-300">Contacto</a>
     </div>
     <p class="text-gray-500 text-xs mb-4">Última actualización: <span id="lastUpdate"></span></p>
     <p class="text-gray-500 text-xs mb-4">El uso de este sitio implica tu acuerdo con la <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a>.</p>
@@ -949,9 +1063,47 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Scripts (módulos: no bloquean el parser) -->
+<!-- The Odds API key — set before sports-dashboard.js runs -->
+<script>window.ODDS_API_KEY = '0c5473d7e066977c0fd410e9320e569b';</script>
+<!-- Sports Intelligence Dashboard (native Web Crypto — no external deps) -->
+<script src="sports-dashboard.js" defer></script>
+<!-- Scripts de lotería (módulos: no bloquean el parser) -->
 <script type="module" src="lottery-algorithms.js"></script>
 <script type="module" src="app.js"></script>
+<!-- Mode switcher: Lotería ↔ Deportes -->
+<script>
+(function () {
+  function switchAppMode(mode) {
+    var lotteryEl  = document.getElementById('lottery-main-content');
+    var sportsEl   = document.getElementById('sports-dashboard');
+    var btnLottery = document.getElementById('btn-lottery-mode');
+    var btnSports  = document.getElementById('btn-sports-mode');
+    if (!lotteryEl || !sportsEl) return;
+    if (mode === 'sports') {
+      lotteryEl.classList.add('hidden');
+      sportsEl.classList.remove('hidden');
+      btnLottery.classList.remove('active');
+      btnLottery.setAttribute('aria-selected', 'false');
+      btnSports.classList.add('active');
+      btnSports.setAttribute('aria-selected', 'true');
+      localStorage.setItem('appMode', 'sports');
+      if (window.SportsDashboard && SportsDashboard.init) SportsDashboard.init();
+    } else {
+      sportsEl.classList.add('hidden');
+      lotteryEl.classList.remove('hidden');
+      btnSports.classList.remove('active');
+      btnSports.setAttribute('aria-selected', 'false');
+      btnLottery.classList.add('active');
+      btnLottery.setAttribute('aria-selected', 'true');
+      localStorage.setItem('appMode', 'lottery');
+    }
+  }
+  window.switchAppMode = switchAppMode;
+  document.addEventListener('DOMContentLoaded', function () {
+    if (localStorage.getItem('appMode') === 'sports') switchAppMode('sports');
+  });
+})();
+</script>
 
 <!-- Expandir / Ocultar texto en secciones colapsables -->
 <script>
