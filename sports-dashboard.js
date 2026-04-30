@@ -668,12 +668,12 @@
       }
 
       // Fall back to static seed data if Firestore has nothing yet
-      var rows = (live.teams && live.teams.length > 0) ? live.teams : (STANDINGS[sport] || []);
-      var isLive = live.teams && live.teams.length > 0;
+      var rows   = (!live.isDemo && live.teams && live.teams.length > 0) ? live.teams : (STANDINGS[sport] || []);
+      var isLive = !live.isDemo && live.teams && live.teams.length > 0;
 
       var updatedLabel = isLive
-        ? '<span class="text-emerald-500">ESPN · actualizado automáticamente</span>'
-        : '<span class="text-gray-600">Datos de muestra · ESPN se actualiza cada 2h</span>';
+        ? '<span class="text-emerald-500">ESPN · ' + (live.updatedAt ? new Date(live.updatedAt).toLocaleTimeString('es-US', {hour:'2-digit',minute:'2-digit'}) : 'recién actualizado') + '</span>'
+        : '<span class="text-gray-500">Demo · <button onclick="window.seedStandings&&window.seedStandings().then(()=>SportsDashboard.switchView(\'standings\'))" class="underline hover:text-emerald-400 transition-colors">Cargar datos ESPN ahora</button></span>';
 
       container.innerHTML = [
         '<div class="flex items-center justify-between mb-3">',

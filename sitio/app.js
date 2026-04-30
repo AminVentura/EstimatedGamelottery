@@ -1218,9 +1218,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (userIdDisplay) userIdDisplay.textContent = friendlyId;
 
     // ── Bridge for sports-dashboard.js (non-module IIFE) ────────────────────
-    const _getSportsOdds = httpsCallable(functions, 'getSportsOdds');
-    const _getStandings  = httpsCallable(functions, 'getStandings');
-    const _getUserPlan   = httpsCallable(functions, 'getUserPlan');
+    const _getSportsOdds  = httpsCallable(functions, 'getSportsOdds');
+    const _getStandings   = httpsCallable(functions, 'getStandings');
+    const _getUserPlan    = httpsCallable(functions, 'getUserPlan');
+    const _seedStandings  = httpsCallable(functions, 'seedStandings');
 
     window.firebaseServices = {
       // Calls getSportsOdds Cloud Function; returns odds array or null on error/quota.
@@ -1292,6 +1293,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Expose UID for rate-limit UI
     window._sportsUserId = userId;
+
+    // ── One-time seed helper (call from browser console) ─────────────────
+    // Usage: await window.seedStandings()
+    window.seedStandings = async function () {
+      console.log('[seedStandings] calling Cloud Function…');
+      try {
+        const r = await _seedStandings({});
+        console.log('[seedStandings] result:', r.data);
+        return r.data;
+      } catch (e) {
+        console.error('[seedStandings] failed:', e.message);
+        throw e;
+      }
+    };
 
     // Kick off global accuracy widget
     window.firebaseServices.watchGlobalAccuracy(function (data) {
