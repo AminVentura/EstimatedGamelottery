@@ -1226,10 +1226,11 @@
       var openDk = function () {
         var msg =
           '<div style="text-align:center;line-height:1.5">' +
-          '<strong style="color:#86efac;font-size:1.05em">¡Jugada Copiada! 🎯</strong><br/>' +
-          'Hemos preparado tu selección de <span style="color:#fde047;font-weight:800">' + sport + '</span> con un ' +
-          '<span style="color:#67e8f9;font-weight:900">' + pct + '%</span> de probabilidad de éxito.<br/>' +
-          'Te estamos redirigiendo a DraftKings para que asegures tu bono. ¡Buena suerte, CEO!</div>';
+          '<strong style="color:#86efac;font-size:1.05em">¡Estrategia Maestra! 🎯</strong><br/>' +
+          'Tu selección de <span style="color:#fde047;font-weight:800">' + sport + '</span> tiene un ' +
+          '<span style="color:#67e8f9;font-weight:900">' + pct + '%</span> de probabilidad según el análisis de hoy.<br/>' +
+          'Hemos copiado los detalles a tu portapapeles.<br/>' +
+          '<span style="color:#a7f3d0">Abriendo DraftKings para asegurar tu bono de bienvenida...</span></div>';
         UIAgent.flashHtml(msg, 5200);
         setTimeout(function () {
           window.open(DK_LINK, '_blank', 'noopener,noreferrer');

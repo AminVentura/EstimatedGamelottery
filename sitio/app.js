@@ -1162,11 +1162,7 @@ async function fetchNYOpenData() {
       totalNew += _mergeNYInto('millionaireforlife', items);
     }
 
-    if (totalNew > 0) {
-      console.log(`✅ NY Open Data: ${totalNew} nuevos sorteos agregados al historial.`);
-    } else {
-      console.log('✅ NY Open Data: Historial ya está actualizado.');
-    }
+    // Sin logs de éxito para mantener consola limpia en producción.
 
   } catch (err) {
     console.warn('⚠️ Error cargando NY Open Data:', err.message || err);
@@ -1189,16 +1185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Mostrar "Tu predicción de hoy" para todos los juegos que tengan una guardada (no solo Powerball)
   LOTTERY_IDS.forEach(lottery => showLastPrediction(lottery));
   
-  // Verificación del sistema al cargar
-  console.log('🎯 Predicción de Lotería: Sistema cargado correctamente.');
-  const today = new Date().toISOString().split('T')[0];
-  const savedPredictions = LOTTERY_IDS.filter(lot => {
-    const key = `prediction_${lot}_${today}`;
-    return localStorage.getItem(key) !== null;
-  });
-  if (savedPredictions.length > 0) {
-    console.log(`✅ Se encontraron ${savedPredictions.length} predicción(es) guardada(s) para hoy:`, savedPredictions.join(', '));
-  }
+  // Sin logs de arranque para mantener consola limpia en producción.
 
   try {
     const app = initializeApp(firebaseConfig);

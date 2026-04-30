@@ -1429,18 +1429,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('load', function() {
     setTimeout(observeAdSlots, 500);
     setTimeout(initAdSense, 1200);
-    // Verificación final del sistema (después de que todo cargue)
-    console.log('🎯 Predicción de Lotería: Página completamente cargada.');
-    const today = new Date().toISOString().split('T')[0];
-    const savedKeys = Object.keys(localStorage).filter(k => k.startsWith('prediction_') && k.includes(today));
-    if (savedKeys.length > 0) {
-      console.log(`✅ Se encontraron ${savedKeys.length} predicción(es) guardada(s) para hoy.`);
-    }
-    if (typeof window.lotteryAlgorithms !== 'undefined') {
-      console.log('✅ Módulo de algoritmos cargado correctamente.');
-    } else {
-      console.warn('⚠️ Módulo de algoritmos no detectado.');
-    }
+    // Sin logs de verificación para mantener consola limpia en producción.
   });
 
   window.addEventListener('DOMContentLoaded', function() {
