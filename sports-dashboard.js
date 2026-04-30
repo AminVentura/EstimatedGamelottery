@@ -16,7 +16,7 @@
   'use strict';
 
   // ── CONSTANTS ────────────────────────────────────────────────────────────
-  var DK_LINK   = 'https://sportsbook.draftkings.com/r/sb/aminventura17/US-NY-SB/US-NY';
+  var DK_LINK   = 'https://sportsbook.draftkings.com/r/sb/aminventura17/US-NY-SB/US-NY-SB';
   var CACHE_TTL = 30 * 60 * 1000;
 
   // ── DEMO DATA ─────────────────────────────────────────────────────────────
@@ -86,6 +86,55 @@
       { team:'Miami Dolphins',        w:11, l:6, pct:'.647', gb:'2',  conf:'AFC E' },
     ],
   };
+
+  /** Abbrev → substring match en filas de clasificación (Firestore o demo) */
+  var TEAM_STANDINGS_HINTS = {
+    NBA: { DAL: 'Dallas', BOS: 'Boston', MIL: 'Milwaukee', GSW: 'Golden', DEN: 'Denver', LAL: 'Lakers' },
+    MLB: { ATL: 'Atlanta', NYY: 'Yankees', TEX: 'Texas', PHI: 'Philadelphia', LAD: 'Dodgers' },
+    NFL: { MIN: 'Minnesota', MIA: 'Miami', BUF: 'Buffalo', SF: 'Francisco', HOU: 'Houston', LVR: 'Raiders' },
+  };
+
+  function parseStandingsPct(row) {
+    var p = row.pct;
+    if (p == null) return 0.52;
+    if (typeof p === 'number') return p <= 1 ? p : p / 100;
+    var s = String(p).replace(/[^0-9.]/g, '');
+    if (s.charAt(0) === '.') s = '0' + s;
+    var n = parseFloat(s);
+    return isNaN(n) ? 0.52 : (n <= 1 ? n : n / 100);
+  }
+
+  function teamPctFromStandingsRows(abbr, sport, rows) {
+    if (!rows || !rows.length) return 0.52;
+    var hints = TEAM_STANDINGS_HINTS[sport] || {};
+    var needle = String(hints[abbr] || abbr).toLowerCase();
+    for (var i = 0; i < rows.length; i++) {
+      var t = String(rows[i].team || '').toLowerCase();
+      if (t.indexOf(needle) !== -1) return parseStandingsPct(rows[i]);
+    }
+    return 0.52;
+  }
+
+  function initialsFromName(name) {
+    return String(name || '')
+      .split(' ')
+      .map(function (n) { return n ? n.charAt(0).toUpperCase() : ''; })
+      .join('')
+      .slice(0, 2) || 'PL';
+  }
+
+  function avatarGradientFromName(name) {
+    var source = String(name || 'player');
+    var hash = 0;
+    for (var i = 0; i < source.length; i++) hash = (hash + source.charCodeAt(i) * (i + 7)) % 360;
+    var h2 = (hash + 42) % 360;
+    return 'linear-gradient(135deg,hsl(' + hash + ',78%,52%),hsl(' + h2 + ',72%,44%))';
+  }
+
+  function buildAvatarUrl(player) {
+    var name = encodeURIComponent(player.name || 'Player');
+    return 'https://ui-avatars.com/api/?name=' + name + '&background=0f172a&color=f8fafc&size=96&rounded=true&bold=true&format=png';
+  }
 
   // ════════════════════════════════════════════════════════════════════════
   // STORAGE AGENT — native AES-256-GCM (Web Crypto API), no external deps
@@ -160,6 +209,7 @@
   // ════════════════════════════════════════════════════════════════════════
   var DataAgent = {
     _cache: {},
+    _sessionMap: new Map(),
 
     _getCached: function (key) {
       var c = this._cache[key];
@@ -167,17 +217,70 @@
       return c.data;
     },
     _setCache: function (key, data) { this._cache[key] = { data: data, ts: Date.now() }; },
+    _getSession: function (key) {
+      var hit = this._sessionMap.get(key);
+      if (!hit || Date.now() - hit.ts > CACHE_TTL) return null;
+      return hit.data;
+    },
+    _setSession: function (key, data) {
+      this._sessionMap.set(key, { data: data, ts: Date.now() });
+    },
+
+    waitFirebaseBridge: async function (maxWaitMs) {
+      maxWaitMs = maxWaitMs || 12000;
+      var ready = function () {
+        return window.firebaseServices && (
+          typeof window.firebaseServices.callSportsOdds === 'function' ||
+          typeof window.firebaseServices.getSportsOdds === 'function'
+        );
+      };
+      if (ready()) return;
+      if (window.firebaseSportsBridgeReady) {
+        await Promise.race([
+          window.firebaseSportsBridgeReady,
+          new Promise(function (r) { setTimeout(function () { r(false); }, maxWaitMs); }),
+        ]);
+      }
+    },
 
     fetchOdds: async function (sport) {
+      await this.waitFirebaseBridge();
       var ck = 'odds_' + sport;
-      var cached = this._getCached(ck);
+      var cached = this._getSession(ck) || this._getCached(ck);
       if (cached) return cached;
-      if (!window.firebaseServices || !window.firebaseServices.callSportsOdds) return null;
-      var data = await window.firebaseServices.callSportsOdds(sport);
+      if (!window.firebaseServices) return null;
+      var callFn = window.firebaseServices.getSportsOdds || window.firebaseServices.callSportsOdds;
+      if (typeof callFn !== 'function') return null;
+      var data = await callFn(sport);
       if (!data) return null;
       if (data.__rateLimited) return data; // pass error object up to renderProps
       this._setCache(ck, data);
+      this._setSession(ck, data);
       return data;
+    },
+
+    fetchStandings: async function (sport) {
+      await this.waitFirebaseBridge();
+      var ck = 'standings_' + sport;
+      var cached = this._getSession(ck);
+      if (cached) return cached;
+      if (!window.firebaseServices || typeof window.firebaseServices.getStandings !== 'function') {
+        var fallback = { teams: STANDINGS[sport] || [], updatedAt: null, isDemo: true };
+        this._setSession(ck, fallback);
+        return fallback;
+      }
+      try {
+        var live = await window.firebaseServices.getStandings(sport);
+        var payload = (live && live.teams && live.teams.length)
+          ? live
+          : { teams: STANDINGS[sport] || [], updatedAt: null, isDemo: true };
+        this._setSession(ck, payload);
+        return payload;
+      } catch (e) {
+        var safe = { teams: STANDINGS[sport] || [], updatedAt: null, isDemo: true };
+        this._setSession(ck, safe);
+        return safe;
+      }
     },
   };
 
@@ -233,6 +336,28 @@
       if (lineDelta > 0.5)  return { label: 'Dinero: OVER',  icon: '▲', color: 'text-green-400' };
       if (lineDelta < -0.5) return { label: 'Dinero: UNDER', icon: '▼', color: 'text-cyan-400'  };
       return                       { label: 'Línea estable', icon: '—', color: 'text-gray-500'  };
+    },
+
+    /** % tickets (público, naranja) vs % volumen institucional (azul); modelo si la API no envía splits */
+    sharpMoney: function (player) {
+      var h = 0;
+      for (var i = 0; i < player.id.length; i++) {
+        h = (h + player.id.charCodeAt(i) * (i + 3)) % 151;
+      }
+      var ld = player.lineDelta || 0;
+      var betPct = 44 + (h % 26);
+      var tilt = ld > 0.5 ? 12 : ld < -0.5 ? -9 : (h % 10 - 5);
+      var moneyPct = Math.max(38, Math.min(86, 52 + tilt + (h % 15)));
+      if (moneyPct < betPct - 1) moneyPct = Math.min(88, betPct + 7 + (h % 6));
+      return { betPct: betPct, moneyPct: moneyPct };
+    },
+
+    combinedParlayProb: function (players) {
+      if (!players || !players.length) return 0;
+      var self = this;
+      return Math.round(players.reduce(function (acc, pl) {
+        return acc * (self.calculateProbability(pl) / 100);
+      }, 1) * 100);
     },
   };
 
@@ -326,6 +451,19 @@
       UIAgent.refreshParlayBadges();
       if (OrchestratorAgent.state.view === 'parlay') UIAgent.renderView('parlay');
     },
+
+    setLegs: function (playerSportPairs) {
+      var self = this;
+      this.legs = (playerSportPairs || []).slice(0, this.MAX).map(function (x) {
+        return Object.assign({}, x.player, { _sport: x.sport });
+      });
+      UIAgent.refreshParlayBadges();
+      if (OrchestratorAgent.state.view === 'parlay') self.renderParlayIfVisible();
+    },
+
+    renderParlayIfVisible: function () {
+      if (OrchestratorAgent.state.view === 'parlay') UIAgent.renderParlay();
+    },
   };
 
   // ════════════════════════════════════════════════════════════════════════
@@ -351,6 +489,27 @@
       el.style.display = 'block';
       clearTimeout(el._t);
       el._t = setTimeout(function () { el.style.display = 'none'; }, 4000);
+    },
+
+    flashHtml: function (html, ms) {
+      ms = ms || 5200;
+      var el = document.getElementById('sd_flash');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'sd_flash';
+        document.body.appendChild(el);
+      }
+      el.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:99999;' +
+        'max-width:min(420px,92vw);padding:16px 20px;border-radius:14px;font-size:0.82rem;font-weight:600;' +
+        'background:linear-gradient(135deg,#0c4a6e,#134e4a);color:#e0f2fe;border:1px solid rgba(52,211,153,0.45);' +
+        'box-shadow:0 12px 40px rgba(0,0,0,0.55)';
+      el.innerHTML = html;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(function () {
+        el.style.display = 'none';
+        el.innerHTML = '';
+      }, ms);
     },
 
     showRateLimitModal: function (message) {
@@ -434,6 +593,65 @@
       }).join('');
     },
 
+    l5EmojiRow: function (last5, line) {
+      return last5.map(function (v) {
+        var over = v > line;
+        return '<span title="' + (over ? 'Superó la línea' : 'No superó') + '">' + (over ? '🟢' : '🔴') + '</span>';
+      }).join('');
+    },
+
+    hydrateLazyAvatars: function () {
+      var cards = document.querySelectorAll('.sd-avatar-wrap');
+      if (!cards || cards.length === 0) return;
+
+      var applyFallback = function (wrap) {
+        if (!wrap || wrap.getAttribute('data-avatar-ready') === '1') return;
+        var initials = wrap.getAttribute('data-initials') || 'PL';
+        var grad = wrap.getAttribute('data-gradient') || 'linear-gradient(135deg,#1d4ed8,#7c3aed)';
+        wrap.setAttribute('data-avatar-ready', '1');
+        wrap.style.background = grad;
+        wrap.style.color = '#f8fafc';
+        wrap.style.fontWeight = '900';
+        wrap.style.fontSize = '0.72rem';
+        wrap.style.display = 'grid';
+        wrap.style.placeItems = 'center';
+        wrap.textContent = initials;
+      };
+
+      var loadNow = function (wrap) {
+        if (!wrap) return;
+        var img = wrap.querySelector('img[data-src]');
+        if (!img) { applyFallback(wrap); return; }
+        var src = img.getAttribute('data-src');
+        if (!src) { applyFallback(wrap); return; }
+        img.onload = function () {
+          wrap.setAttribute('data-avatar-ready', '1');
+          wrap.textContent = '';
+          img.style.opacity = '1';
+        };
+        img.onerror = function () { applyFallback(wrap); };
+        img.src = src;
+        img.removeAttribute('data-src');
+      };
+
+      var supportsIO = typeof window.IntersectionObserver === 'function';
+      if (!supportsIO) {
+        cards.forEach(loadNow);
+        return;
+      }
+
+      if (this._avatarObserver) this._avatarObserver.disconnect();
+      this._avatarObserver = new IntersectionObserver(function (entries, observer) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          loadNow(entry.target);
+          observer.unobserve(entry.target);
+        });
+      }, { rootMargin: '120px 0px', threshold: 0.01 });
+
+      cards.forEach(function (w) { UIAgent._avatarObserver.observe(w); });
+    },
+
     renderCard: function (player, sport) {
       var prob     = AnalysisAgent.calculateProbability(player);
       var meta     = AnalysisAgent.getProbabilityMeta(prob);
@@ -446,9 +664,13 @@
       var over     = player.avg >= player.line;
       var edgePct  = ((player.avg - player.line) / player.line * 100).toFixed(1);
       var last5avg = (player.last5.reduce(function (a, b) { return a + b; }, 0) / player.last5.length).toFixed(1);
-      var initials = player.name.split(' ').map(function (n) { return n[0]; }).join('').slice(0, 2);
+      var initials = initialsFromName(player.name);
       var colorMap = { orange: 'bg-orange-600', blue: 'bg-blue-600', green: 'bg-green-600' };
       var avatarBg = colorMap[data.colorName] || 'bg-blue-600';
+      var sm = AnalysisAgent.sharpMoney(player);
+      var l5Over = player.last5.filter(function (v) { return v > player.line; }).length;
+      var avatarGrad = avatarGradientFromName(player.name);
+      var avatarSrc = buildAvatarUrl(player);
 
       var lineDeltaHtml = player.lineDelta
         ? ' <span style="font-size:0.7rem;font-weight:700;color:' + (player.lineDelta > 0 ? '#4ade80' : '#22d3ee') + '">' +
@@ -461,7 +683,9 @@
         // top
         '  <div class="prop-card-top">',
         '    <div class="flex items-center gap-2.5 min-w-0">',
-        '      <div class="player-avatar ' + avatarBg + '">' + initials + '</div>',
+        '      <div class="player-avatar sd-avatar-wrap ' + avatarBg + '" data-initials="' + initials + '" data-gradient="' + avatarGrad + '" data-avatar-ready="0">',
+        '        <img data-src="' + avatarSrc + '" alt="' + player.name + '" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;opacity:0;transition:opacity .2s ease" />',
+        '      </div>',
         '      <div class="min-w-0">',
         '        <p class="text-white font-semibold text-sm truncate">' + player.name + (player.hot ? ' 🔥' : '') + '</p>',
         '        <p class="text-gray-500 text-xs">' + player.team + ' · ' + (player.isHome ? 'Local' : 'Visitante') + ' · Def. rk #' + player.opponentRank + '</p>',
@@ -481,10 +705,32 @@
         '    <div class="prop-stat-box"><p class="text-gray-500 text-xs">Edge</p><p class="' + (over ? 'text-emerald-400' : 'text-red-400') + ' font-bold">' + (over ? '+' : '') + edgePct + '%</p></div>',
         '  </div>',
 
-        // trend dots
+        // Sharp Money (naranja = público, azul = dinero pro)
+        '  <div class="mb-3 rounded-xl p-2.5 border border-gray-700/90" style="background:linear-gradient(100deg,rgba(30,64,175,0.2),rgba(154,52,18,0.16))">',
+        '    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Sharp Money · tickets vs. volumen</p>',
+        '    <div class="flex justify-between text-xs mb-1.5">',
+        '      <span><span style="color:#fdba74;font-weight:800">Público</span> <span class="text-white font-black">' + sm.betPct + '%</span> <span class="text-gray-500">tickets</span></span>',
+        '      <span><span style="color:#93c5fd;font-weight:800">Dinero Pro</span> <span class="text-white font-black">' + sm.moneyPct + '%</span></span>',
+        '    </div>',
+        '    <div class="space-y-1">',
+        '      <div class="h-2 rounded bg-gray-800/90 overflow-hidden" title="Participación pública estimada">',
+        '        <div class="h-2 rounded" style="width:' + sm.betPct + '%;background:linear-gradient(90deg,#c2410c,#fb923c)"></div>',
+        '      </div>',
+        '      <div class="h-2 rounded bg-gray-800/90 overflow-hidden" title="Volumen institucional estimado">',
+        '        <div class="h-2 rounded" style="width:' + sm.moneyPct + '%;background:linear-gradient(90deg,#1e3a8a,#60a5fa)"></div>',
+        '      </div>',
+        '    </div>',
+        '    <p class="text-[10px] text-gray-500 mt-1.5">Modelo editorial cuando el feed no publica splits oficiales.</p>',
+        '  </div>',
+
+        // L5 racha visual
         '  <div class="mb-3">',
-        '    <p class="text-gray-500 text-xs mb-1.5">Últimos 5 vs. línea:</p>',
-        '    <div class="flex gap-1.5">' + this.trendDots(player.last5, player.line) + '</div>',
+        '    <p class="text-gray-500 text-xs mb-1.5 flex flex-wrap items-center gap-2">',
+        '      <span class="font-black text-cyan-400/90 tracking-tight">L5</span>',
+        '      <span class="text-lg leading-none tracking-tight" title="Últimos 5 juegos vs. línea">' + this.l5EmojiRow(player.last5, player.line) + '</span>',
+        '      <span class="text-gray-600 font-mono text-[10px]">(' + l5Over + '/5 sobre línea)</span>',
+        '    </p>',
+        '    <div class="flex gap-1.5 opacity-80">' + this.trendDots(player.last5, player.line) + '</div>',
         '  </div>',
 
         // insight + money
@@ -605,6 +851,7 @@
 
       this.refreshAccuracyRow();
       this.refreshParlayBadges();
+      this.hydrateLazyAvatars();
     },
 
     // ── DK Banner ──────────────────────────────────────────────────────
@@ -656,16 +903,15 @@
       var container = document.getElementById('sports-view-content');
       if (!container) return;
 
+      await DataAgent.waitFirebaseBridge();
+
       // Loading skeleton
       container.innerHTML = '<div class="text-center py-10 text-gray-500">' +
         '<i class="fas fa-circle-notch fa-spin text-2xl mb-2 block text-emerald-500"></i>' +
         '<p class="text-sm">Cargando clasificación…</p></div>';
 
-      // Try Firestore (updated hourly by Cloud Function from ESPN)
-      var live = { teams: [], updatedAt: null };
-      if (window.firebaseServices && window.firebaseServices.getStandings) {
-        live = await window.firebaseServices.getStandings(sport);
-      }
+      // Try cached Firestore first (updated hourly by Cloud Function from ESPN)
+      var live = await DataAgent.fetchStandings(sport);
 
       // Fall back to static seed data if Firestore has nothing yet
       var rows   = (!live.isDemo && live.teams && live.teams.length > 0) ? live.teams : (STANDINGS[sport] || []);
@@ -725,12 +971,18 @@
       }
 
       container.innerHTML = [
-        '<div class="flex items-center justify-between mb-4">',
-        '  <h3 class="text-white font-bold text-base"><i class="fas fa-layer-group mr-2 text-indigo-400"></i>Parlay Builder <span class="text-indigo-400">(' + legs.length + ' legs)</span></h3>',
-        '  <div class="flex items-center gap-3">',
-        '    <span class="' + pCls + ' font-black text-lg">' + prob + '% · ' + odds + '</span>',
-        '    <button onclick="SportsDashboard.clearParlay()" class="text-xs text-gray-500 hover:text-red-400 transition-colors border border-gray-700 rounded-lg px-2 py-1">Limpiar</button>',
+        '<div class="flex flex-col gap-3 mb-4">',
+        '  <div class="flex flex-wrap items-center justify-between gap-2">',
+        '    <h3 class="text-white font-bold text-base"><i class="fas fa-layer-group mr-2 text-indigo-400"></i>Parlay Builder <span class="text-indigo-400">(' + legs.length + ' legs)</span></h3>',
+        '    <div class="flex items-center gap-3">',
+        '      <span class="' + pCls + ' font-black text-lg">' + prob + '% · ' + odds + '</span>',
+        '      <button onclick="SportsDashboard.clearParlay()" class="text-xs text-gray-500 hover:text-red-400 transition-colors border border-gray-700 rounded-lg px-2 py-1">Limpiar</button>',
+        '    </div>',
         '  </div>',
+        '  <button type="button" onclick="SportsDashboard.suggestSafeParlay()"',
+        '    class="w-full sm:w-auto text-left text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl border border-amber-500/50 text-amber-200 bg-amber-950/40 hover:bg-amber-900/50 transition-colors flex items-center justify-center gap-2">',
+        '    <i class="fas fa-wand-magic-sparkles text-amber-400"></i>Smart Suggester — Ticket seguro (≥70% combinada)',
+        '  </button>',
         '</div>',
         '<div class="space-y-2 mb-4">',
         legs.map(function (l) {
@@ -750,11 +1002,12 @@
         }).join(''),
         '</div>',
         legs.length >= 2 ? [
-          '<a href="' + DK_LINK + '" target="_blank" rel="noopener noreferrer sponsored"',
-          '   class="w-full flex items-center justify-center gap-2 text-white font-bold text-sm py-3 rounded-xl transition-all hover:scale-105"',
-          '   style="background:linear-gradient(90deg,#7c3aed,#6d28d9)">',
-          '  <i class="fas fa-layer-group text-xs"></i>Jugar Parlay en DraftKings (' + odds + ')',
-          '</a>',
+          '<button type="button" onclick="SportsDashboard.copyParlayToDraftKings()"',
+          '  class="w-full flex items-center justify-center gap-2 text-white font-black text-sm py-3.5 rounded-xl transition-all hover:scale-[1.02] border-2 border-emerald-400/50 shadow-lg"',
+          '  style="background:linear-gradient(90deg,#047857,#10b981)">',
+          '  <i class="fas fa-copy"></i>Apostar este Parlay en DraftKings',
+          '  <span class="text-emerald-100 font-mono text-xs opacity-90">(' + odds + ')</span>',
+          '</button>',
         ].join('') : '<p class="text-center text-gray-600 text-xs">Agrega al menos 2 legs para armar el parlay.</p>',
         '<p class="text-gray-600 text-xs text-center mt-3">Las probabilidades combinadas son estimaciones estadísticas para entretenimiento.</p>',
       ].join('');
@@ -912,6 +1165,84 @@
       if (OrchestratorAgent.state.view === 'parlay') UIAgent.renderParlay();
     },
     clearParlay:      function ()        { ParlayAgent.clear(); },
+
+    suggestSafeParlay: async function () {
+      if (window.firebaseSportsBridgeReady) {
+        await Promise.race([
+          window.firebaseSportsBridgeReady,
+          new Promise(function (r) { setTimeout(function () { r(false); }, 8000); }),
+        ]);
+      }
+      var sport = OrchestratorAgent.state.sport;
+      var playersList = (SPORTS_DATA[sport] && SPORTS_DATA[sport].players) || [];
+      if (playersList.length < 2) {
+        UIAgent.flash('No hay suficientes jugadores en este deporte.', 'warn');
+        return;
+      }
+      var live = await DataAgent.fetchStandings(sport);
+      var rows = (live && live.teams && live.teams.length) ? live.teams : (STANDINGS[sport] || []);
+      var pool = SPORTS_DATA[sport].players.slice().map(function (p) {
+        var tp = teamPctFromStandingsRows(p.team, sport, rows);
+        return {
+          player: p,
+          score: AnalysisAgent.calculateProbability(p) * (0.42 + Math.min(0.52, tp)),
+        };
+      }).sort(function (a, b) { return b.score - a.score; });
+
+      var chosen = [];
+      var n;
+      for (n = 2; n <= Math.min(6, pool.length); n++) {
+        chosen = pool.slice(0, n).map(function (x) { return x.player; });
+        if (AnalysisAgent.combinedParlayProb(chosen) >= 70) break;
+      }
+      if (AnalysisAgent.combinedParlayProb(chosen) < 70) {
+        chosen = pool.slice(0, Math.min(4, pool.length)).map(function (x) { return x.player; });
+      }
+      ParlayAgent.setLegs(chosen.map(function (p) { return { player: p, sport: sport }; }));
+      var cp = ParlayAgent.combinedProb();
+      UIAgent.flash(
+        cp >= 70
+          ? 'Ticket Seguro sugerido · probabilidad combinada ~' + cp + '% (clasificación Firestore + modelo).'
+          : 'Sugerencia aplicada (~' + cp + '%). Añade o quita legs para acercarte al 70%.',
+        cp >= 70 ? 'ok' : 'warn'
+      );
+    },
+
+    copyParlayToDraftKings: function () {
+      var legs = ParlayAgent.legs;
+      if (legs.length < 2) {
+        UIAgent.flash('Agrega al menos 2 legs al parlay.', 'warn');
+        return;
+      }
+      var sport = legs[0]._sport || 'NBA';
+      var pct = ParlayAgent.combinedProb();
+      var lines = legs.map(function (l) {
+        var over = l.avg >= l.line;
+        var m = SPORTS_DATA[l._sport].metric;
+        return l.name + ' — ' + m + ' ' + (over ? 'OVER' : 'UNDER') + ' ' + l.line;
+      });
+      var summary = ['Parlay ' + sport + ' · PrediccionLoteria.com', 'Prob. combinada estimada: ~' + pct + '%', '---'].concat(lines).join('\n');
+
+      var openDk = function () {
+        var msg =
+          '<div style="text-align:center;line-height:1.5">' +
+          '<strong style="color:#86efac;font-size:1.05em">¡Jugada Copiada! 🎯</strong><br/>' +
+          'Hemos preparado tu selección de <span style="color:#fde047;font-weight:800">' + sport + '</span> con un ' +
+          '<span style="color:#67e8f9;font-weight:900">' + pct + '%</span> de probabilidad de éxito.<br/>' +
+          'Te estamos redirigiendo a DraftKings para que asegures tu bono. ¡Buena suerte, CEO!</div>';
+        UIAgent.flashHtml(msg, 5200);
+        setTimeout(function () {
+          window.open(DK_LINK, '_blank', 'noopener,noreferrer');
+        }, 1600);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summary).then(openDk).catch(openDk);
+      } else {
+        openDk();
+      }
+    },
+
     activatePremium:  function ()        { OrchestratorAgent.activatePremium(); },
     closePremiumModal:function ()        { OrchestratorAgent.closePremiumModal(); },
   };

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- CSP en Firebase Hosting: firebase.json → hosting.headers (connect-src incluye https://ep1.adtrafficquality.google). -->
+  <!-- App Check: clave reCAPTCHA v3 desde Firebase Console → App Check. Vacío = no se inicializa App Check. -->
+  <meta name="firebase-appcheck-recaptcha-site-key" content="">
   <title>USA Lottery Predictions | Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4</title>
   <meta name="description" content="Predicciones de lotería USA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4. Guía de uso, números calientes y fríos, estadísticas y precisión por juego. Contenido editorial y herramientas de entretenimiento. Solo mayores de 18 años.">
   <!-- Preload críticos: CSS y fuentes -->
@@ -54,7 +57,7 @@
       "name": "USA Lottery Predictions - Powerball, Mega Millions, Millionaire For Life",
       "description": "AI-powered lottery predictions for all US states: Powerball, Mega Millions, Millionaire For Life. Statistical analysis for entertainment.",
       "inLanguage": "es",
-      "dateModified": "2026-02-07",
+      "dateModified": "2026-04-01",
       "isPartOf": { "@id": "https://www.prediccionloteria.com/#website" }
     }
   ]
@@ -137,6 +140,22 @@
       </div>
     </div>
   </header>
+
+  <!-- ═══ MODE TOGGLE: Lotería / Deportes ═══ -->
+  <div class="flex items-center justify-center mb-5">
+    <div class="flex rounded-xl overflow-hidden border border-gray-700 bg-gray-800/80 p-0.5 gap-0.5 shadow-lg">
+      <button data-mode-toggle="lottery"
+              class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow">
+        <i class="fas fa-ticket-alt text-xs"></i>Lotería
+      </button>
+      <button data-mode-toggle="sports"
+              class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-transparent text-gray-400 hover:text-white">
+        <i class="fas fa-football text-xs"></i>Deportes
+      </button>
+    </div>
+  </div>
+
+  <div id="lotteryMainContent">
 
   <!-- ¿Eres ganador? How To Claim A Prize (enlace oficial NY Lottery) -->
   <section class="claim-prize-cta mb-4 sm:mb-6 rounded-xl overflow-hidden border border-cyan-500/30 bg-gradient-to-r from-cyan-900/40 via-blue-900/40 to-purple-900/40 p-4 sm:p-5">
@@ -1013,9 +1032,7 @@
     </div>
   </div>
 
-  <!-- Dashboard & Comments -->
-  <div class="stats-chat-grid grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-    <!-- Stats -->
+  <div class="max-w-2xl mx-auto w-full">
     <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700">
       <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-chart-pie mr-2 text-blue-400"></i>Estadísticas Globales</h2>
       <div class="space-y-4">
@@ -1024,18 +1041,22 @@
         <div class="flex justify-between bg-gray-900 p-3 rounded-lg"><span class="text-gray-400 text-sm">Precisión Est.</span><span class="text-xl font-bold text-yellow-400" id="avgAccuracy">0%</span></div>
       </div>
     </div>
+  </div>
 
-    <!-- Comments -->
-    <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700 flex flex-col h-full">
-      <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-comments mr-2 text-pink-400"></i>Chat Comunitario</h2>
-      <p class="text-gray-500 text-xs mb-2">Comparte estrategias, resultados o preguntas.</p>
-      <div id="commentsList" class="flex-grow space-y-3 mb-4 max-h-48 overflow-y-auto pr-1"><div id="loadingComments" class="text-center text-gray-500 text-sm">Cargando...</div></div>
-      <div class="mt-auto">
-        <textarea id="commentInput" class="w-full h-16 p-3 rounded-lg bg-gray-900 text-gray-200 border border-gray-600 focus:border-pink-500 focus:outline-none resize-none text-sm mb-2" placeholder="Escribe tu mensaje (estrategia, resultado, pregunta)..."></textarea>
-        <button id="postCommentBtn" class="w-full py-2 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-lg text-sm">ENVIAR</button>
+  </div><!-- /lotteryMainContent -->
+
+  <!-- ═══ SPORTS INTELLIGENCE DASHBOARD ═══ -->
+  <div id="sportsDashboard" class="hidden w-full text-left">
+    <div id="sportsContent" class="w-full">
+      <div class="flex items-center justify-center py-10 text-gray-500 text-sm">
+        <div class="text-center">
+          <i class="fas fa-football text-3xl mb-3 opacity-20"></i>
+          <p>Iniciando Sports Intelligence...</p>
+        </div>
       </div>
     </div>
   </div>
+
 </div>
 
 <!-- Aviso Legal -->
@@ -1110,7 +1131,11 @@ function googleTranslateElementInit() {
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
 
-<!-- Scripts (módulos: no bloquean el parser) -->
+<!-- CryptoJS: cifrado AES-256 para apuestas Premium -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<!-- Sports Intelligence Dashboard -->
+<script src="sports-dashboard.js"></script>
+<!-- Scripts de lotería (módulos: no bloquean el parser) -->
 <script type="module" src="lottery-algorithms.js"></script>
 <script type="module" src="app.js"></script>
 

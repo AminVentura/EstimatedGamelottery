@@ -1,6 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBtNNiANCMdMILI5qiL9fF5aWhjfknUMWQ",
@@ -12,6 +14,11 @@ const firebaseConfig = {
 };
 
 const appId = "EstimatedGamelottery-app";
+let _resolveFirebaseSportsBridge;
+window.firebaseSportsBridgeReady = new Promise((resolve) => {
+  _resolveFirebaseSportsBridge = resolve;
+});
+
 let auth, userId, db;
 let totalPredictions = 0;
 
@@ -480,9 +487,7 @@ const paths = {
   take5day: `artifacts/${appId}/public/data/take5day_drawings`,
   take5eve: `artifacts/${appId}/public/data/take5eve_drawings`,
   win4day: `artifacts/${appId}/public/data/win4day_drawings`,
-  win4eve: `artifacts/${appId}/public/data/win4eve_drawings`,
-  comments: `artifacts/${appId}/public/data/lotto_comments`,
-  stats: `artifacts/${appId}/public/data/user_stats`
+  win4eve: `artifacts/${appId}/public/data/win4eve_drawings`
 };
 
 let showAll = Object.fromEntries(LOTTERY_IDS.map(id => [id, false]));
@@ -499,8 +504,6 @@ let allHistoryData = Object.fromEntries(LOTTERY_IDS.map(id => {
 
 const domElements = {
   message: document.getElementById('messageBox'),
-  comments: document.getElementById('commentsList'),
-  loadingComments: document.getElementById('loadingComments'),
   tabs: Object.fromEntries(LOTTERY_IDS.map(lottery => {
     const cfg = LOTTERY_CONFIG[lottery];
     return [
@@ -550,7 +553,6 @@ const hideLoadingSpinners = () => {
   Object.values(domElements.tabs).forEach(tab => {
     if (tab && tab.loading) tab.loading.style.display = 'none';
   });
-  if (domElements.loadingComments) domElements.loadingComments.style.display = 'none';
 };
 
 const getSpecialBallClass = (lottery) => ({
@@ -973,22 +975,6 @@ const setupEventListeners = () => {
     });
   });
 
-  const postBtn = document.getElementById('postCommentBtn');
-  if (postBtn) {
-    postBtn.onclick = async () => {
-      const input = document.getElementById('commentInput');
-      const text = (input && input.value || '').trim();
-      if (!text) return showMessage('Escribe algo.', 'bg-red-500 text-white');
-      try {
-        await addDoc(collection(db, paths.comments), { text, userId, createdAt: new Date() });
-        showMessage('Comentario publicado.', 'bg-pink-600 text-white');
-        if (input) input.value = '';
-      } catch (e) {
-        showMessage('Error al comentar.', 'bg-red-500 text-white');
-      }
-    };
-  }
-
   LOTTERY_IDS.forEach(lottery => {
     const cfg = LOTTERY_CONFIG[lottery];
     const btn = document.getElementById(`verMasBtn_${cfg.verMasId}`);
@@ -1005,8 +991,7 @@ const setupEventListeners = () => {
 const setupRealtimeListeners = () => {
   if (!userId || !db) return;
 
-  // Solo escuchar colecciones de sorteos actuales. Excluir explícitamente cash4life (descontinuada).
-  const drawingKeys = LOTTERY_IDS.filter(id => id !== 'cash4life' && paths[id] && !paths[id].includes('comments') && !paths[id].includes('stats'));
+  const drawingKeys = LOTTERY_IDS.filter(id => paths[id]);
   drawingKeys.forEach(key => {
     if (paths[key]) {
       onSnapshot(
@@ -1055,31 +1040,6 @@ const setupRealtimeListeners = () => {
           }
         }
       );
-    }
-  });
-
-  onSnapshot(
-    query(collection(db, paths.comments), orderBy("createdAt", "desc")),
-    (snapshot) => {
-    if (domElements.loadingComments) domElements.loadingComments.style.display = 'none';
-    if (domElements.comments) domElements.comments.innerHTML = '';
-    snapshot.docs.forEach(docSnap => {
-      const c = docSnap.data();
-      const div = document.createElement('div');
-      div.className = 'p-3 bg-gray-900 rounded-lg border border-gray-700 mb-2';
-      div.innerHTML = `
-        <div class="flex justify-between items-center mb-1">
-          <span class="text-xs text-blue-400 font-bold">${(c.userId || 'Anónimo').toString().split('-')[0]}...</span>
-          <span class="text-[10px] text-gray-500">${c.createdAt ? (c.createdAt.seconds ? new Date(c.createdAt.seconds * 1000).toLocaleDateString() : (c.createdAt.toDate ? c.createdAt.toDate().toLocaleDateString() : '')) : ''}</span>
-        </div>
-        <p class="text-gray-300 text-sm">${(c.text || '').replace(/</g, '&lt;')}</p>
-      `;
-      if (domElements.comments) domElements.comments.appendChild(div);
-    });
-  },
-  (err) => {
-    if (err && err.code === 'permission-denied') {
-      console.warn('[Firestore] Sin permiso para comentarios.');
     }
   });
 };
@@ -1250,8 +1210,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const app = initializeApp(firebaseConfig);
+    const appCheckMeta = document.querySelector('meta[name="firebase-appcheck-recaptcha-site-key"]');
+    const appCheckKey = (appCheckMeta && appCheckMeta.getAttribute('content') || '').trim();
+    if (appCheckKey) {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(appCheckKey),
+        isTokenAutoRefreshEnabled: true
+      });
+    }
     auth = getAuth(app);
     db = getFirestore(app);
+    const functions = getFunctions(app, 'us-central1');
 
     const userCredential = await signInAnonymously(auth);
     userId = userCredential.user.uid;
@@ -1260,6 +1229,97 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('friendlyUserId', friendlyId);
     const userIdDisplay = document.getElementById('userIdDisplay');
     if (userIdDisplay) userIdDisplay.textContent = friendlyId;
+
+    const _getSportsOdds = httpsCallable(functions, 'getSportsOdds');
+    const _getStandings = httpsCallable(functions, 'getStandings');
+    const _getUserPlan = httpsCallable(functions, 'getUserPlan');
+    const _seedStandings = httpsCallable(functions, 'seedStandings');
+
+    window.firebaseServices = {
+      callSportsOdds: async function (sport) {
+        try {
+          const result = await _getSportsOdds({ sport });
+          const d = result.data;
+          if (d && d.remaining !== undefined) {
+            window._sportsQuotaRemaining = d.remaining;
+          }
+          return d && d.odds ? d.odds : null;
+        } catch (e) {
+          if (e.code === 'functions/resource-exhausted') {
+            return { __rateLimited: true, message: e.message };
+          }
+          console.warn('[Sports] Cloud Function error:', e.message);
+          return null;
+        }
+      },
+      getStandings: async function (sport) {
+        try {
+          const result = await _getStandings({ sport });
+          return result.data || { teams: [], updatedAt: null };
+        } catch (e) {
+          console.warn('[Sports] getStandings error:', e.message);
+          return { teams: [], updatedAt: null };
+        }
+      },
+      getUserPlan: async function () {
+        try {
+          const result = await _getUserPlan({});
+          return result.data || { planType: 'free', remaining: 5 };
+        } catch (e) {
+          return { planType: 'free', remaining: 5 };
+        }
+      },
+      saveSportsFeedback: async function (predId, sport, vote) {
+        if (!userId) return;
+        const docId = userId + '_' + predId;
+        const voteRef = doc(db, 'sportsVotes', docId);
+        try {
+          await setDoc(voteRef, {
+            uid: userId,
+            predId,
+            sport,
+            vote,
+            createdAt: serverTimestamp(),
+            date: new Date().toISOString().slice(0, 10),
+          }, { merge: false });
+        } catch (e) { /* duplicate */ }
+      },
+      watchGlobalAccuracy: function (callback) {
+        const globalRef = doc(db, 'sportsAccuracy', 'global');
+        return onSnapshot(globalRef,
+          (snap) => callback(snap.exists() ? snap.data() : { yes: 0, no: 0 }),
+          () => callback({ yes: 0, no: 0 })
+        );
+      },
+    };
+    window.firebaseServices.getSportsOdds = window.firebaseServices.callSportsOdds;
+    window._sportsUserId = userId;
+    window.seedStandings = async function () {
+      console.log('[seedStandings] calling Cloud Function…');
+      try {
+        const r = await _seedStandings({});
+        console.log('[seedStandings] result:', r.data);
+        return r.data;
+      } catch (e) {
+        console.error('[seedStandings] failed:', e.message);
+        throw e;
+      }
+    };
+    window.firebaseServices.seedStandings = window.seedStandings;
+
+    window.firebaseServices.watchGlobalAccuracy(function (data) {
+      const yes = data.yes || 0;
+      const no = data.no || 0;
+      const total = yes + no;
+      const pct = total > 0 ? Math.round((yes / total) * 100) : null;
+      if (typeof _updateAccuracyWidget === 'function') {
+        _updateAccuracyWidget(pct, total);
+      }
+    });
+
+    if (typeof _resolveFirebaseSportsBridge === 'function') {
+      _resolveFirebaseSportsBridge(true);
+    }
 
     setupRealtimeListeners();
 
@@ -1278,6 +1338,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   } catch (e) {
     console.error("Firebase Error:", e);
+    if (typeof _resolveFirebaseSportsBridge === 'function') {
+      _resolveFirebaseSportsBridge(false);
+    }
     showMessage('Modo Offline: No se pudo conectar.', 'bg-red-500 text-white');
     // Aun así mostrar historial seed cuando Firebase falla
     LOTTERY_IDS.forEach(lottery => {

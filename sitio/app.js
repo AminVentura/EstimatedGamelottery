@@ -14,6 +14,11 @@ const firebaseConfig = {
 };
 
 const appId = "EstimatedGamelottery-app";
+let _resolveFirebaseSportsBridge;
+window.firebaseSportsBridgeReady = new Promise(function (resolve) {
+  _resolveFirebaseSportsBridge = resolve;
+});
+
 let auth, userId, db;
 let totalPredictions = 0;
 
@@ -1223,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const _getUserPlan    = httpsCallable(functions, 'getUserPlan');
     const _seedStandings  = httpsCallable(functions, 'seedStandings');
 
-    window.firebaseServices = {
+    var _sportsBridge = {
       // Calls getSportsOdds Cloud Function; returns odds array or null on error/quota.
       // Passes rate-limit errors up as { error, code } so UI can show upgrade modal.
       callSportsOdds: async function (sport) {
@@ -1290,6 +1295,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         );
       },
     };
+    _sportsBridge.getSportsOdds = _sportsBridge.callSportsOdds;
+    window.firebaseServices = _sportsBridge;
 
     // Expose UID for rate-limit UI
     window._sportsUserId = userId;
@@ -1307,6 +1314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw e;
       }
     };
+    window.firebaseServices.seedStandings = window.seedStandings;
 
     // Kick off global accuracy widget
     window.firebaseServices.watchGlobalAccuracy(function (data) {
@@ -1316,6 +1324,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       const pct   = total > 0 ? Math.round((yes / total) * 100) : null;
       _updateAccuracyWidget(pct, total);
     });
+
+    if (typeof _resolveFirebaseSportsBridge === 'function') {
+      _resolveFirebaseSportsBridge(true);
+    }
 
     setupRealtimeListeners();
 
@@ -1334,6 +1346,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   } catch (e) {
     console.error("Firebase Error:", e);
+    if (typeof _resolveFirebaseSportsBridge === 'function') {
+      _resolveFirebaseSportsBridge(false);
+    }
     showMessage('Modo Offline: No se pudo conectar.', 'bg-red-500 text-white');
     // Aun así mostrar historial seed cuando Firebase falla
     LOTTERY_IDS.forEach(lottery => {
