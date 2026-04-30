@@ -1296,7 +1296,14 @@ document.addEventListener('DOMContentLoaded', function() {
       btnSports.setAttribute('aria-selected', 'true');
       localStorage.setItem('appMode', 'sports');
       updateApiNoticeBanner();
-      if (window.SportsDashboard && SportsDashboard.init) SportsDashboard.init();
+      if (window.SportsDashboard && SportsDashboard.init) {
+        if (!window.__sportsDashboardBooted) {
+          SportsDashboard.init();
+          window.__sportsDashboardBooted = true;
+        } else if (SportsDashboard.switchView) {
+          SportsDashboard.switchView('props');
+        }
+      }
     } else {
       sportsEl.classList.add('hidden');
       lotteryEl.classList.remove('hidden');
@@ -1381,15 +1388,29 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(s);
     window.__adsbygoogle = true;
   }
+  window.__adsState = window.__adsState || { initStarted: false, initializedSlots: {} };
+  function pushAdSlotOnce(containerId) {
+    var el = document.getElementById(containerId);
+    if (!el || el.offsetParent === null) return;
+    if (window.__adsState.initializedSlots[containerId]) return;
+    if (el.querySelector('iframe')) {
+      window.__adsState.initializedSlots[containerId] = true;
+      return;
+    }
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      window.__adsState.initializedSlots[containerId] = true;
+    } catch (e) {}
+  }
   function initAdSense() {
     if (localStorage.getItem('cookieConsent') !== '1') return;
+    if (window.__adsState.initStarted) return;
+    window.__adsState.initStarted = true;
     loadAdSenseScript(function() {
       if (typeof adsbygoogle === 'undefined') return;
       try {
-        var topAd = document.getElementById('ad-top-container');
-        var bottomAd = document.getElementById('ad-bottom-container');
-        if (topAd && topAd.offsetParent !== null) (adsbygoogle = window.adsbygoogle || []).push({});
-        if (bottomAd && bottomAd.offsetParent !== null) (adsbygoogle = window.adsbygoogle || []).push({});
+        pushAdSlotOnce('ad-top-container');
+        pushAdSlotOnce('ad-bottom-container');
       } catch(e) {}
     });
   }

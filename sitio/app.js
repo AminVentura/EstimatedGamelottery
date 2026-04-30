@@ -1221,14 +1221,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       callSportsOdds: async function (sport) {
         try {
           const result = await _getSportsOdds({ sport });
-          const d = result.data;
+          const d = result.data || {};
           if (d && d.remaining !== undefined) {
             window._sportsQuotaRemaining = d.remaining;
+          }
+          if (d.rateLimited) {
+            return {
+              __rateLimited: true,
+              message: d.message,
+              retryAfterSec: d.retryAfterSec || 60,
+              odds: Array.isArray(d.odds) ? d.odds : [],
+              cached: !!d.cached,
+              stale: !!d.stale,
+            };
           }
           return d && d.odds ? d.odds : null;
         } catch (e) {
           if (e.code === 'functions/resource-exhausted') {
-            return { __rateLimited: true, message: e.message };
+            return { __rateLimited: true, message: e.message, retryAfterSec: 60, odds: [] };
           }
           console.warn('[Sports] Cloud Function error:', e.message);
           return null;

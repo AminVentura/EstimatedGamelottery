@@ -210,6 +210,8 @@
   var DataAgent = {
     _cache: {},
     _sessionMap: new Map(),
+    _inFlight: new Map(),
+    _cooldownUntil: new Map(),
 
     _getCached: function (key) {
       var c = this._cache[key];
@@ -224,6 +226,12 @@
     },
     _setSession: function (key, data) {
       this._sessionMap.set(key, { data: data, ts: Date.now() });
+    },
+    _isCoolingDown: function (key) {
+      return Date.now() < (this._cooldownUntil.get(key) || 0);
+    },
+    _setCooldown: function (key, ms) {
+      this._cooldownUntil.set(key, Date.now() + ms);
     },
 
     waitFirebaseBridge: async function (maxWaitMs) {
@@ -246,17 +254,40 @@
     fetchOdds: async function (sport) {
       await this.waitFirebaseBridge();
       var ck = 'odds_' + sport;
+      if (this._isCoolingDown(ck)) {
+        var warm = this._getSession(ck) || this._getCached(ck);
+        return warm || { __rateLimited: true, message: 'Cooldown activo. Reintenta en unos segundos.' };
+      }
       var cached = this._getSession(ck) || this._getCached(ck);
       if (cached) return cached;
+      if (this._inFlight.has(ck)) return this._inFlight.get(ck);
       if (!window.firebaseServices) return null;
       var callFn = window.firebaseServices.getSportsOdds || window.firebaseServices.callSportsOdds;
       if (typeof callFn !== 'function') return null;
-      var data = await callFn(sport);
-      if (!data) return null;
-      if (data.__rateLimited) return data; // pass error object up to renderProps
-      this._setCache(ck, data);
-      this._setSession(ck, data);
-      return data;
+      var self = this;
+      var req = (async function () {
+        var data = await callFn(sport);
+        if (!data) {
+          self._setCooldown(ck, 15000);
+          return null;
+        }
+        if (data.__rateLimited) {
+          self._setCooldown(ck, (data.retryAfterSec || 60) * 1000);
+          if (Array.isArray(data.odds) && data.odds.length > 0) {
+            self._setCache(ck, data.odds);
+            self._setSession(ck, data.odds);
+            return data.odds;
+          }
+          return data;
+        }
+        self._setCache(ck, data);
+        self._setSession(ck, data);
+        return data;
+      })().finally(function () {
+        self._inFlight.delete(ck);
+      });
+      this._inFlight.set(ck, req);
+      return req;
     },
 
     fetchStandings: async function (sport) {
@@ -1172,6 +1203,9 @@
           window.firebaseSportsBridgeReady,
           new Promise(function (r) { setTimeout(function () { r(false); }, 8000); }),
         ]);
+      }
+      if (DataAgent._isCoolingDown('odds_' + OrchestratorAgent.state.sport)) {
+        UIAgent.flash('Límite temporal activo: usando ventana de espera para evitar bloqueos.', 'warn');
       }
       var sport = OrchestratorAgent.state.sport;
       var playersList = (SPORTS_DATA[sport] && SPORTS_DATA[sport].players) || [];

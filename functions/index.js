@@ -167,7 +167,29 @@ exports.getSportsOdds = onCall(
       const msg = allowed.isPro
         ? 'Límite de seguridad alcanzado. Inténtalo en unos minutos.'
         : `¡Has usado tus ${allowed.limit} consultas gratis esta hora! Actualiza a Pro para consultas ilimitadas.`;
-      throw new HttpsError('resource-exhausted', msg);
+      const cacheRefLimit = db.doc('cache_odds/' + sport);
+      const cacheSnapLimit = await cacheRefLimit.get();
+      let cachedOdds = [];
+      let staleMs = null;
+      if (cacheSnapLimit.exists) {
+        const c = cacheSnapLimit.data();
+        const cachedAtMs = c.cachedAt ? c.cachedAt.toMillis() : 0;
+        if (Array.isArray(c.data) && c.data.length > 0) {
+          cachedOdds = c.data;
+          staleMs = cachedAtMs ? (Date.now() - cachedAtMs) : null;
+        }
+      }
+      // Return 200 to avoid noisy 429 client console errors.
+      return {
+        odds: cachedOdds,
+        cached: cachedOdds.length > 0,
+        stale: staleMs != null ? staleMs > CACHE_TTL_MS : false,
+        staleMs,
+        rateLimited: true,
+        message: msg,
+        remaining: 0,
+        retryAfterSec: 60,
+      };
     }
     console.log(`[getSportsOdds] rate ok: ${allowed.count}/${allowed.limit}`);
 
