@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeFirestore, getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const firebaseConfig = {
@@ -18,6 +18,8 @@ let _resolveFirebaseSportsBridge;
 window.firebaseSportsBridgeReady = new Promise((resolve) => {
   _resolveFirebaseSportsBridge = resolve;
 });
+window.firebaseServices = window.firebaseServices || {};
+console.log('✅ Bridge Firebase Services Vinculado');
 
 let auth, userId, db;
 let totalPredictions = 0;
@@ -35,6 +37,7 @@ const LOTTERY_CONFIG = {
 };
 
 const LOTTERY_IDS = Object.keys(LOTTERY_CONFIG);
+const INSIGHT_SUPPORTED_GAMES = new Set(['powerball', 'megamillions']);
 
 // Próximo sorteo: días de la semana (0=Dom, 1=Lun, ..., 6=Sab) y hora en ET (22:59 = 10:59 PM)
 // Powerball: Lun, Mié, Sáb 10:59 PM ET. Mega Millions: Mar, Vie 11:00 PM ET. Millionaire For Life: diario 11:15 PM ET (10:15 PM Central).
@@ -653,6 +656,102 @@ function saveUserPrediction(lottery, mainNumbers, specialNumber) {
   localStorage.setItem(key, JSON.stringify(prediction));
 }
 
+function formatLotteryPlayText(mainNumbers, specialNumber) {
+  const nums = Array.isArray(mainNumbers) ? mainNumbers.join(' - ') : 'N/D';
+  return specialNumber != null ? `${nums} + ${specialNumber}` : nums;
+}
+
+function normalizeAgentConfidence(value) {
+  let n = Number(value);
+  if (!Number.isFinite(n)) return 6;
+  if (n > 10) n = n / 10;
+  return Math.max(1, Math.min(10, Math.round(n)));
+}
+
+function buildLocalLotteryInsight(lottery, mainNumbers, specialNumber) {
+  return {
+    play: formatLotteryPlayText(mainNumbers, specialNumber),
+    wisdom: `Ajustada con tendencia reciente de ${lottery.toUpperCase()} y balance de frecuencias.`,
+    confidence: 6,
+  };
+}
+
+function renderLotteryAgentPanel(lottery, insight) {
+  const panel = document.getElementById('lotteryAgentInsightPanel');
+  if (!panel) return;
+  const playEl   = document.getElementById('lotteryAgentPlay');
+  const wisdomEl = document.getElementById('lotteryAgentWisdom');
+  const confEl   = document.getElementById('lotteryAgentConfidence');
+  const confBar  = document.getElementById('lotteryAgentConfBar');
+  const gameEl   = document.getElementById('lotteryAgentGame');
+  const tsEl     = document.getElementById('lotteryAgentTimestamp');
+  if (!playEl || !wisdomEl || !confEl || !gameEl) return;
+
+  const safeInsight = insight || {
+    play: 'No disponible',
+    wisdom: 'Sin datos del agente en este momento.',
+    confidence: 5,
+  };
+  const conf    = normalizeAgentConfidence(safeInsight.confidence);
+  const confPct = conf * 10;
+
+  playEl.textContent   = safeInsight.play    || 'No disponible';
+  wisdomEl.textContent = safeInsight.wisdom  || 'Sin sabiduría disponible.';
+  confEl.textContent   = `${conf}/10`;
+  gameEl.textContent   = (lottery || '').toUpperCase();
+
+  if (tsEl) {
+    const now = new Date();
+    tsEl.textContent = 'Hoy ' + now.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  if (confBar) {
+    confBar.style.width = '0%';
+    requestAnimationFrame(() => {
+      confBar.style.width = confPct + '%';
+      if (conf >= 8) {
+        confBar.className = 'h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-green-500 to-teal-400';
+      } else if (conf >= 6) {
+        confBar.className = 'h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 to-teal-400';
+      } else {
+        confBar.className = 'h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-yellow-500 to-orange-400';
+      }
+    });
+  }
+
+  panel.classList.remove('hidden');
+}
+
+async function refreshLotteryAgentInsight(lottery, fallbackInsight) {
+  let insight = fallbackInsight || null;
+  if (INSIGHT_SUPPORTED_GAMES.has(lottery) && window.firebaseServices && typeof window.firebaseServices.getLotteryAgentInsight === 'function') {
+    try {
+      const remote = await window.firebaseServices.getLotteryAgentInsight(lottery);
+      if (remote) {
+        insight = {
+          play: remote.play || remote.jugada || remote.pick || (remote.mainNumbers ? formatLotteryPlayText(remote.mainNumbers, remote.special) : null),
+          wisdom: remote.wisdom || remote.explanation || remote.reason || remote.summary,
+          confidence: remote.confidence || remote.confidence10 || remote.score,
+        };
+      }
+    } catch (_) {
+      // silent fallback
+    }
+  }
+  if (!insight) {
+    const saved = localStorage.getItem(`prediction_${lottery}_${new Date().toISOString().split('T')[0]}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        insight = buildLocalLotteryInsight(lottery, parsed.mainNumbers || [], parsed.special ?? null);
+      } catch (_) {
+        insight = null;
+      }
+    }
+  }
+  renderLotteryAgentPanel(lottery, insight);
+}
+
 function updatePrecisionDisplay() {
   LOTTERY_IDS.forEach(lot => {
     const p = localStorage.getItem(`precision_${lot}`) || 0;
@@ -821,6 +920,7 @@ const setupEventListeners = () => {
       if (section) section.classList.remove('hidden');
       // Mostrar última predicción guardada para este juego
       setTimeout(() => showLastPrediction(lottery), 100);
+      refreshLotteryAgentInsight(lottery);
     });
   });
 
@@ -928,7 +1028,12 @@ const setupEventListeners = () => {
               container.lastElementChild.appendChild(hint);
             }
           });
-          if (combos.length > 0) saveUserPrediction(lottery, combos[0].mainNumbers, combos[0].special ?? null);
+          if (combos.length > 0) {
+            saveUserPrediction(lottery, combos[0].mainNumbers, combos[0].special ?? null);
+            refreshLotteryAgentInsight(lottery, buildLocalLotteryInsight(lottery, combos[0].mainNumbers, combos[0].special ?? null));
+          } else {
+            refreshLotteryAgentInsight(lottery);
+          }
           totalPredictions += combos.length;
           const totalPredEl = document.getElementById('totalPredictions');
           if (totalPredEl) totalPredEl.textContent = totalPredictions;
@@ -1196,6 +1301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Mostrar "Tu predicción de hoy" para todos los juegos que tengan una guardada (no solo Powerball)
   LOTTERY_IDS.forEach(lottery => showLastPrediction(lottery));
+  refreshLotteryAgentInsight('powerball');
   
   // Verificación del sistema al cargar
   console.log('🎯 Predicción de Lotería: Sistema cargado correctamente.');
@@ -1219,11 +1325,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
     auth = getAuth(app);
+    initializeFirestore(app, {
+      experimentalForceLongPolling: true,
+      experimentalAutoDetectLongPolling: false
+    });
     db = getFirestore(app);
     const functions = getFunctions(app, 'us-central1');
 
     const userCredential = await signInAnonymously(auth);
     userId = userCredential.user.uid;
+    const waitForAuthAndWarmTokens = async function () {
+      if (!auth.currentUser) return;
+      // Warm token to avoid first-call unauthenticated races in callable headers.
+      await auth.currentUser.getIdToken(true);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    };
+    const isTransientUnauth = function (error) {
+      const code = (error && error.code) ? String(error.code) : '';
+      const msg = (error && error.message) ? String(error.message) : '';
+      return code === 'functions/unauthenticated'
+        || code === 'unauthenticated'
+        || /Unauthenticated/i.test(msg);
+    };
+    const runCallableWithAuthRetry = async function (callable, payload, opts) {
+      const options = opts || {};
+      const maxRetries = Number(options.maxRetries || 2);
+      const retryDelayMs = Number(options.retryDelayMs || 350);
+      await waitForAuthAndWarmTokens();
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          return await callable(payload || {});
+        } catch (error) {
+          if (!isTransientUnauth(error) || attempt >= maxRetries) throw error;
+          await waitForAuthAndWarmTokens();
+          await new Promise((resolve) => setTimeout(resolve, retryDelayMs * (attempt + 1)));
+        }
+      }
+      return callable(payload || {});
+    };
 
     const friendlyId = localStorage.getItem('friendlyUserId') || generateFriendlyId();
     localStorage.setItem('friendlyUserId', friendlyId);
@@ -1231,14 +1370,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (userIdDisplay) userIdDisplay.textContent = friendlyId;
 
     const _getSportsOdds = httpsCallable(functions, 'getSportsOdds');
+    const _getSportsEvents = httpsCallable(functions, 'getSportsEvents');
     const _getStandings = httpsCallable(functions, 'getStandings');
+    const _getAgentPrediction = httpsCallable(functions, 'getAgentPrediction');
+    const _getMlbAgentPrediction = httpsCallable(functions, 'getMlbAgentPrediction');
+    const _getMLBAgentPrediction = httpsCallable(functions, 'getMLBAgentPrediction');
+    const _getLotteryAgentInsight = httpsCallable(functions, 'getLotteryAgentInsight');
     const _getUserPlan = httpsCallable(functions, 'getUserPlan');
     const _seedStandings = httpsCallable(functions, 'seedStandings');
+    const _createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
+    const _createCustomerPortalSession = httpsCallable(functions, 'createCustomerPortalSession');
 
     window.firebaseServices = {
       callSportsOdds: async function (sport) {
         try {
-          const result = await _getSportsOdds({ sport });
+          const result = await runCallableWithAuthRetry(
+            _getSportsOdds,
+            { sport },
+            { maxRetries: 3, retryDelayMs: 400 }
+          );
           const d = result.data;
           if (d && d.remaining !== undefined) {
             window._sportsQuotaRemaining = d.remaining;
@@ -1248,25 +1398,119 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (e.code === 'functions/resource-exhausted') {
             return { __rateLimited: true, message: e.message };
           }
+          if (isTransientUnauth(e)) return null;
           console.warn('[Sports] Cloud Function error:', e.message);
           return null;
         }
       },
       getStandings: async function (sport) {
         try {
-          const result = await _getStandings({ sport });
+          const result = await runCallableWithAuthRetry(
+            _getStandings,
+            { sport },
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
           return result.data || { teams: [], updatedAt: null };
         } catch (e) {
           console.warn('[Sports] getStandings error:', e.message);
           return { teams: [], updatedAt: null };
         }
       },
+      getSportsEvents: async function (sport) {
+        try {
+          const result = await runCallableWithAuthRetry(
+            _getSportsEvents,
+            { sport },
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
+          return result.data || { sport, source: 'empty', events: [] };
+        } catch (e) {
+          console.warn('[Sports] getSportsEvents error:', e.message);
+          return { sport, source: 'error', events: [] };
+        }
+      },
+      getAgentPrediction: async function (payload) {
+        var safePayload = payload || {};
+        try {
+          const result = await runCallableWithAuthRetry(
+            _getAgentPrediction,
+            safePayload,
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
+          var data = result && result.data ? result.data : null;
+          if (data && typeof data === 'object') {
+            if (Array.isArray(data.parlays) && data.parlays.length) return data;
+            if (data.prediction != null || data.agentPlay || data.topPlay) return data;
+          }
+        } catch (e) {
+          // fallback below
+        }
+        return {
+          source: 'mock',
+          generatedAt: 'fallback',
+          parlays: []
+        };
+      },
+      getMlbAgentPrediction: async function (payload) {
+        const safePayload = payload || {};
+        try {
+          const result = await runCallableWithAuthRetry(
+            _getMlbAgentPrediction,
+            safePayload,
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
+          return result && result.data ? result.data : null;
+        } catch (_) {
+          try {
+            const result = await runCallableWithAuthRetry(
+              _getMLBAgentPrediction,
+              safePayload,
+              { maxRetries: 1, retryDelayMs: 250 }
+            );
+            return result && result.data ? result.data : null;
+          } catch (_) {
+            return null;
+          }
+        }
+      },
+      getLotteryAgentInsight: async function (gameType) {
+        try {
+          const result = await runCallableWithAuthRetry(
+            _getLotteryAgentInsight,
+            { gameType },
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
+          return result && result.data ? result.data : null;
+        } catch (_) {
+          return null;
+        }
+      },
       getUserPlan: async function () {
         try {
-          const result = await _getUserPlan({});
+          const result = await runCallableWithAuthRetry(
+            _getUserPlan,
+            {},
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
           return result.data || { planType: 'free', remaining: 5 };
         } catch (e) {
           return { planType: 'free', remaining: 5 };
+        }
+      },
+      createProCheckoutSession: async function () {
+        try {
+          const result = await _createCheckoutSession({});
+          return result.data || null;
+        } catch (e) {
+          throw new Error((e && e.message) ? e.message : 'No se pudo iniciar el checkout.');
+        }
+      },
+      createCustomerPortalSession: async function () {
+        try {
+          const result = await _createCustomerPortalSession({});
+          return result.data || null;
+        } catch (e) {
+          throw new Error((e && e.message) ? e.message : 'No se pudo abrir el portal de facturación.');
         }
       },
       saveSportsFeedback: async function (predId, sport, vote) {

@@ -1,0 +1,36 @@
+{
+  "name": "PrediccionLoteria.com — USA Lottery AI",
+  "short_name": "PredLoteria",
+  "description": "Predicciones de lotería USA con IA: Powerball, Mega Millions, Millionaire For Life, Take 5, Win 4.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#0891b2",
+  "lang": "es",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
+  "categories": ["entertainment", "utilities"],
+  "icons": [
+    {
+      "src": "/logo-adsense.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Powerball",
+      "short_name": "PB",
+      "url": "/?game=powerball",
+      "description": "Predicción Powerball del día"
+    },
+    {
+      "name": "Mega Millions",
+      "short_name": "MM",
+      "url": "/?game=megamillions",
+      "description": "Predicción Mega Millions del día"
+    }
+  ]
+}
