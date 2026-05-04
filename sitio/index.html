@@ -975,6 +975,69 @@
 
 </div><!-- /.main container -->
 
+<!-- ══════════════════════════════════════════════════════════
+     PREMIUM MODAL  (global, outside main container)
+══════════════════════════════════════════════════════════ -->
+<div id="sports-premium-modal"
+     class="premium-modal-overlay hidden"
+     role="dialog" aria-modal="true" aria-labelledby="premium-modal-title"
+     onclick="if(event.target===this) SportsDashboard.hidePremiumModal()">
+  <div class="premium-modal">
+    <button class="premium-modal-close" onclick="SportsDashboard.hidePremiumModal()" aria-label="Cerrar">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 shadow-lg shadow-violet-500/30 mb-3">
+        <i class="fas fa-crown text-white text-xl"></i>
+      </div>
+      <h2 id="premium-modal-title" class="text-white font-black text-xl mb-1">Sports Intelligence Premium</h2>
+      <p class="text-gray-400 text-sm">Guarda tus picks y alimenta la red de inteligencia global</p>
+    </div>
+
+    <!-- Features -->
+    <ul class="premium-feature-list mb-5">
+      <li><i class="fas fa-bookmark feat-icon"></i><span><strong class="text-white">Historial ilimitado de picks</strong> — guardado cifrado con AES-256 en Firebase</span></li>
+      <li><i class="fas fa-lock-open feat-icon"></i><span><strong class="text-white">Picks cifrados</strong> — solo tú puedes descifrar tu historial personal</span></li>
+      <li><i class="fas fa-database feat-icon"></i><span><strong class="text-white">Contribuye a la red global</strong> — tus reportes mejoran la precisión del algoritmo para todos</span></li>
+      <li><i class="fas fa-chart-line feat-icon"></i><span><strong class="text-white">Efectividad en tiempo real</strong> — ve tu % de aciertos vs. el promedio de la comunidad</span></li>
+      <li><i class="fas fa-bolt feat-icon"></i><span><strong class="text-white">Cuotas automáticas</strong> — integración prioritaria con The Odds API DK/FD NY</span></li>
+    </ul>
+
+    <!-- Promo code entry -->
+    <div class="mb-4">
+      <label class="block text-gray-400 text-xs font-semibold uppercase tracking-wide mb-1.5">
+        <i class="fas fa-ticket-alt mr-1 text-violet-400"></i>Código de acceso
+      </label>
+      <div class="flex gap-2">
+        <input id="premium-code-input" type="text" placeholder="Ej: JAVI2024"
+          class="flex-1 px-3 py-2.5 rounded-lg bg-gray-800 text-white border border-gray-700
+                 focus:border-violet-500 focus:outline-none text-sm font-mono uppercase tracking-widest">
+        <button onclick="SportsDashboard.activatePremium()"
+          class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-700 hover:from-violet-500 hover:to-indigo-600
+                 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-violet-500/25 whitespace-nowrap">
+          Activar
+        </button>
+      </div>
+      <p id="premium-code-msg" class="text-xs mt-1.5 text-gray-600">Introduce tu código de acceso o contáctanos para obtener uno.</p>
+    </div>
+
+    <!-- DK referral CTA inside modal -->
+    <a href="https://sportsbook.draftkings.com/r/sb/aminventura17/US-NY-SB/US-NY"
+       target="_blank" rel="noopener noreferrer sponsored"
+       class="flex items-center justify-center gap-2 w-full py-3 rounded-xl
+              bg-gradient-to-r from-emerald-600/20 to-green-700/20
+              border border-emerald-600/40 text-emerald-400 text-sm font-semibold
+              hover:border-emerald-500/60 hover:text-white transition-all mb-3">
+      <i class="fas fa-external-link-alt text-xs"></i>
+      Mientras tanto, apuesta con mi enlace en DraftKings NY
+    </a>
+
+    <p class="text-gray-600 text-xs text-center">21+ · Solo donde sea legal · Juega con responsabilidad</p>
+  </div>
+</div>
+
 <!-- Aviso Legal -->
   <section id="aviso-legal" class="aviso-legal mt-8">
     <div class="aviso-legal__inner">
