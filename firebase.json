@@ -22,29 +22,6 @@
     ],
     "headers": [
       {
-        "source": "/ads.txt",
-        "headers": [
-          { "key": "Content-Type",   "value": "text/plain; charset=utf-8" },
-          { "key": "Cache-Control",  "value": "public, max-age=86400" }
-        ]
-      },
-      {
-        "source": "/robots.txt",
-        "headers": [
-          { "key": "Content-Type",   "value": "text/plain; charset=utf-8" },
-          { "key": "Cache-Control",  "value": "public, max-age=3600" },
-          { "key": "X-Robots-Tag",   "value": "noindex, nofollow" }
-        ]
-      },
-      {
-        "source": "/sitemap.xml",
-        "headers": [
-          { "key": "Content-Type",   "value": "application/xml; charset=utf-8" },
-          { "key": "Cache-Control",  "value": "public, max-age=3600" },
-          { "key": "X-Robots-Tag",   "value": "noindex, follow" }
-        ]
-      },
-      {
         "source": "**",
         "headers": [
           { "key": "X-Robots-Tag", "value": "index, follow" },
@@ -56,19 +33,35 @@
           { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; upgrade-insecure-requests; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://translate.google.com https://translate.googleapis.com https://pagead2.googlesyndication.com https://www.google.com https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; connect-src 'self' https://*.google.com https://*.googleapis.com https://*.gstatic.com wss://*.googleapis.com https://data.ny.gov https://*.googlesyndication.com https://*.doubleclick.net https://*.googleadservices.com https://www.recaptcha.net https://recaptcha.google.com https://us-central1-game-lottery-b0e90.cloudfunctions.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://translate.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com https://www.recaptcha.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; worker-src 'none'"
+            "value": "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; upgrade-insecure-requests; img-src 'self' data: https: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://translate.google.com https://translate.googleapis.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://www.google.com https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://*.doubleclick.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; connect-src 'self' https://*.google.com https://googleapis.com https://*.googleapis.com https://*.gstatic.com wss://*.googleapis.com https://data.ny.gov https://*.googlesyndication.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.doubleclick.net https://googleads.g.doubleclick.net https://googleadservices.com https://*.googleadservices.com https://www.recaptcha.net https://recaptcha.google.com https://us-central1-game-lottery-b0e90.cloudfunctions.net https://adtrafficquality.google https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://*.adtrafficquality.google; frame-src https://googleads.g.doubleclick.net https://*.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://translate.google.com https://www.google.com/recaptcha/ https://recaptcha.google.com https://www.recaptcha.net https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google; worker-src 'none'"
           }
         ]
-      }
-    ],
-    "redirects": [
+      },
       {
-        "source": "/**",
-        "destination": "https://www.prediccionloteria.com/:splat",
-        "type": 301,
-        "condition": {
-          "host": "prediccionloteria.com"
-        }
+        "source": "/ads.txt",
+        "headers": [
+          { "key": "Content-Type",   "value": "text/plain; charset=utf-8" },
+          { "key": "Cache-Control",  "value": "public, max-age=86400" },
+          { "key": "X-Robots-Tag",   "value": "noindex" },
+          { "key": "Link",           "value": "<https://www.prediccionloteria.com/ads.txt>; rel=\"canonical\"" }
+        ]
+      },
+      {
+        "source": "/robots.txt",
+        "headers": [
+          { "key": "Content-Type",   "value": "text/plain; charset=utf-8" },
+          { "key": "Cache-Control",  "value": "public, max-age=3600" },
+          { "key": "X-Robots-Tag",   "value": "noindex" },
+          { "key": "Link",           "value": "<https://www.prediccionloteria.com/robots.txt>; rel=\"canonical\"" }
+        ]
+      },
+      {
+        "source": "/sitemap.xml",
+        "headers": [
+          { "key": "Content-Type",   "value": "application/xml; charset=utf-8" },
+          { "key": "Cache-Control",  "value": "public, max-age=3600" },
+          { "key": "X-Robots-Tag",   "value": "noindex, follow" }
+        ]
       }
     ],
     "rewrites": [
