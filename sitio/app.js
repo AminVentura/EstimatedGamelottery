@@ -558,6 +558,8 @@ const hideLoadingSpinners = () => {
   });
 };
 
+const escHtml = (v) => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
 const getSpecialBallClass = (lottery) => ({
   powerball: 'special-ball',
   millionaireforlife: 'millionaire-ball',
@@ -793,12 +795,12 @@ const renderHistory = (lottery) => {
     const entryDiv = document.createElement('div');
     entryDiv.className = 'history-item history-line flex flex-col sm:flex-row sm:items-center justify-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg mb-2 flex-nowrap';
     const specialHtml = hasSpecial && item.data.special != null
-      ? `<span class="history-special-label text-gray-500 text-xs uppercase mr-1">${lottery === 'powerball' ? 'PB' : lottery === 'megamillions' || lottery === 'millionaireforlife' ? 'MB' : 'CB'}</span><div class="lottery-ball ${getSpecialBallClass(lottery)}">${item.data.special}</div>`
+      ? `<span class="history-special-label text-gray-500 text-xs uppercase mr-1">${lottery === 'powerball' ? 'PB' : lottery === 'megamillions' || lottery === 'millionaireforlife' ? 'MB' : 'CB'}</span><div class="lottery-ball ${getSpecialBallClass(lottery)}">${escHtml(item.data.special)}</div>`
       : '';
     entryDiv.innerHTML = `
-      <span class="text-gray-400 text-xs font-mono bg-gray-900 px-2 py-1 rounded shrink-0">${item.data.date}</span>
+      <span class="text-gray-400 text-xs font-mono bg-gray-900 px-2 py-1 rounded shrink-0">${escHtml(item.data.date)}</span>
       <div class="flex gap-1 flex-wrap sm:flex-nowrap items-center justify-start">
-        ${parsed.mainNumbers.map(num => `<div class="lottery-ball lottery-ball-inline">${num}</div>`).join('')}
+        ${parsed.mainNumbers.map(num => `<div class="lottery-ball lottery-ball-inline">${escHtml(num)}</div>`).join('')}
         ${specialHtml}
       </div>
     `;
@@ -1297,9 +1299,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const app = initializeApp(firebaseConfig);
     const appCheckMeta = document.querySelector('meta[name="firebase-appcheck-recaptcha-site-key"]');
     const appCheckKey = (appCheckMeta && appCheckMeta.getAttribute('content') || '').trim();
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
-    }
     if (appCheckKey) {
       initializeAppCheck(app, {
         provider: new ReCaptchaEnterpriseProvider(appCheckKey),
@@ -1500,7 +1499,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       createProCheckoutSession: async function () {
         try {
-          const result = await _createCheckoutSession({});
+          const result = await runCallableWithAuthRetry(
+            _createCheckoutSession,
+            {},
+            { maxRetries: 3, retryDelayMs: 400 }
+          );
           return result.data || null;
         } catch (e) {
           var msg = (e && e.message) ? e.message : 'No se pudo iniciar el checkout.';
@@ -1510,7 +1513,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       createCustomerPortalSession: async function () {
         try {
-          const result = await _createCustomerPortalSession({});
+          const result = await runCallableWithAuthRetry(
+            _createCustomerPortalSession,
+            {},
+            { maxRetries: 3, retryDelayMs: 400 }
+          );
           return result.data || null;
         } catch (e) {
           var msg2 = (e && e.message) ? e.message : 'No se pudo abrir el portal de facturación.';

@@ -4,6 +4,7 @@
  * Este es el punto de entrada de tu aplicación Node.js
  */
 
+const crypto  = require('crypto');
 const express = require('express');
 const cors    = require('cors');           // OPCIÓN C — npm install cors si no está instalado
 const rateLimit = require('express-rate-limit');
@@ -38,13 +39,24 @@ const apiLimiter = rateLimit({
   message: { success: false, error: 'Demasiadas peticiones. Intenta más tarde.' }
 });
 
+const adminLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: 'Límite de peticiones administrativas alcanzado.' }
+});
+
 // Middleware
 app.use('/api', apiLimiter);
 app.use(express.json({ limit: '100kb' }));
-app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(helmet({
-  contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
+  contentSecurityPolicy: {
+    directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] }
+  },
+  crossOriginEmbedderPolicy: true,
+  crossOriginOpenerPolicy: { policy: 'same-origin' },
+  crossOriginResourcePolicy: { policy: 'same-origin' }
 }));
 
 app.use((req, res, next) => {
@@ -61,7 +73,20 @@ function verifyAdminToken(req, res) {
     res.status(503).json({ success: false, error: 'Endpoint administrativo deshabilitado.' });
     return false;
   }
-  if (!providedToken || providedToken !== adminToken) {
+  // Use constant-time comparison to prevent timing attacks.
+  // Both buffers must be the same byte length; pad/truncate to avoid length-leaking.
+  if (!providedToken) {
+    res.status(403).json({ success: false, error: 'No autorizado.' });
+    return false;
+  }
+  const adminBuf    = Buffer.from(adminToken,    'utf8');
+  const providedBuf = Buffer.from(providedToken, 'utf8');
+  // If lengths differ, timingSafeEqual would throw; compare against a fixed-length
+  // HMAC digest so the length itself is not leaked and the call always takes constant time.
+  const hmacKey = Buffer.from(adminToken, 'utf8');
+  const digestAdmin    = crypto.createHmac('sha256', hmacKey).update(adminBuf).digest();
+  const digestProvided = crypto.createHmac('sha256', hmacKey).update(providedBuf).digest();
+  if (!crypto.timingSafeEqual(digestAdmin, digestProvided)) {
     res.status(403).json({ success: false, error: 'No autorizado.' });
     return false;
   }
@@ -78,7 +103,7 @@ app.get('/', (req, res) => {
 });
 
 // Ejemplo de ruta usando Firestore
-app.get('/api/users', async (req, res) => {
+app.get('/api/users', adminLimiter, async (req, res) => {
   try {
     if (!verifyAdminToken(req, res)) return;
 
@@ -112,7 +137,7 @@ app.get('/api/users', async (req, res) => {
  *   specialNumber {number}  Entero requerido
  *   multiplier   {number}   Opcional (default null)
  */
-app.post('/api/drawings', async (req, res) => {
+app.post('/api/drawings', adminLimiter, async (req, res) => {
   try {
     // ── Autenticación ──────────────────────────────────────────────────────────
     if (!verifyAdminToken(req, res)) return;
@@ -194,5 +219,4 @@ app.post('/api/drawings', async (req, res) => {
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`📦 Firebase conectado al proyecto: game-lottery-b0e90`);
 });

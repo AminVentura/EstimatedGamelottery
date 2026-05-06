@@ -700,7 +700,12 @@ exports.getAgentPrediction = onCall(
     if (!DYNAMIC_SPORTS.includes(sport)) {
       throw new HttpsError('invalid-argument', 'Deporte no soportado para predicción: ' + sport);
     }
-    const team = request.data && request.data.team ? String(request.data.team) : null;
+    const rawTeam = request.data && request.data.team ? String(request.data.team).trim() : null;
+    // Limit team name length to prevent oversized strings being stored in Firestore.
+    if (rawTeam && rawTeam.length > 64) {
+      throw new HttpsError('invalid-argument', 'team no puede tener más de 64 caracteres.');
+    }
+    const team = rawTeam || null;
 
     const db = getFirestore();
     const context = buildSeasonContext(sport, new Date());
@@ -779,7 +784,13 @@ exports.initializeUniversalSportsSchema = onCall(
   { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
-    const year = Number((request.data && request.data.year) || getCurrentYear(new Date()));
+    const rawYear = request.data && request.data.year != null
+      ? Number(request.data.year)
+      : getCurrentYear(new Date());
+    if (!Number.isInteger(rawYear) || rawYear < 2000 || rawYear > 2100) {
+      throw new HttpsError('invalid-argument', 'year debe ser un entero entre 2000 y 2100.');
+    }
+    const year = rawYear;
     const db = getFirestore();
     await ensureUniversalSportsSchema(db, year);
     return { ok: true, year };
@@ -790,7 +801,13 @@ exports.analyzeMlbPlayerTrends = onCall(
   { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
-    const year = Number((request.data && request.data.year) || getCurrentYear(new Date()));
+    const rawYear = request.data && request.data.year != null
+      ? Number(request.data.year)
+      : getCurrentYear(new Date());
+    if (!Number.isInteger(rawYear) || rawYear < 2000 || rawYear > 2100) {
+      throw new HttpsError('invalid-argument', 'year debe ser un entero entre 2000 y 2100.');
+    }
+    const year = rawYear;
     const db = getFirestore();
     const result = await refreshMlbPlayerTrendScores(db, year);
     return { ok: true, year, ...result };
@@ -799,9 +816,22 @@ exports.analyzeMlbPlayerTrends = onCall(
 
 async function runMlbPropPrediction(request) {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
-  const year = Number((request.data && request.data.year) || getCurrentYear(new Date()));
+  const rawYear = request.data && request.data.year != null
+    ? Number(request.data.year)
+    : getCurrentYear(new Date());
+  // Validate year is a finite integer in a sane range to prevent path injection.
+  if (!Number.isInteger(rawYear) || rawYear < 2000 || rawYear > 2100) {
+    throw new HttpsError('invalid-argument', 'year debe ser un entero entre 2000 y 2100.');
+  }
+  const year = rawYear;
   const playerId = String((request.data && request.data.playerId) || '').trim();
   if (!playerId) throw new HttpsError('invalid-argument', 'playerId es requerido.');
+  // Sanitize playerId: allow only alphanumeric characters, hyphens, and underscores.
+  // This prevents path-traversal attacks where a crafted ID containing '/' could
+  // resolve to an unintended Firestore collection or document.
+  if (!/^[a-zA-Z0-9_-]{1,128}$/.test(playerId)) {
+    throw new HttpsError('invalid-argument', 'playerId contiene caracteres no permitidos.');
+  }
   const customLines = request.data && request.data.lines && typeof request.data.lines === 'object'
     ? request.data.lines
     : {};
@@ -966,7 +996,9 @@ exports.getSportsOdds = onCall(
       return { odds: data, cached: false, remaining: allowed.limit - allowed.count };
     } catch (err) {
       if (err instanceof HttpsError) throw err;
-      throw new HttpsError('internal', 'Error de red: ' + err.message);
+      // Log the full error server-side; never expose internal details to the client.
+      console.error('[getSportsOdds] network error:', err.message);
+      throw new HttpsError('internal', 'Error al obtener las cuotas. Inténtalo más tarde.');
     }
   }
 );
@@ -1048,9 +1080,9 @@ exports.getStandings = onCall(
       console.log(`[getStandings] returning source=${result.source} teams=${result.teams.length}`);
       return result;
     } catch (err) {
-      // Never return 500 — graceful degradation
+      // Never return 500 — graceful degradation. Log internally but never expose err.message to client.
       console.error('[getStandings] ERROR:', err.message, err.stack);
-      return { teams: [], updatedAt: null, source: 'error', isDemo: true, error: err.message };
+      return { teams: [], updatedAt: null, source: 'error', isDemo: true };
     }
   }
 );

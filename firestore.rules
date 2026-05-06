@@ -104,7 +104,7 @@ service cloud.firestore {
     }
 
     match /artifacts/EstimatedGamelottery-app/public/data/user_stats/{userId} {
-      allow read: if true;
+      allow read: if isSignedIn() && request.auth.uid == userId;
       allow create: if userStatsWriteOk(userId);
       allow update: if userStatsWriteOk(userId);
       allow delete: if isSignedIn() && request.auth.uid == userId;
@@ -113,7 +113,7 @@ service cloud.firestore {
     // ── Sports Feedback Votes ────────────────────────────────────────────
     // Doc ID = {uid}_{predId} — enforces one vote per user per prediction.
     match /sportsVotes/{voteId} {
-      allow read: if true;
+      allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
       allow create: if isSignedIn()
         && request.resource.data.uid == request.auth.uid
         && voteId == request.auth.uid + '_' + request.resource.data.predId
@@ -121,7 +121,11 @@ service cloud.firestore {
         && (request.resource.data.vote == 'yes' || request.resource.data.vote == 'no')
         && request.resource.data.predId is string
         && request.resource.data.predId.size() <= 64
-        && request.resource.data.sport is string;
+        && request.resource.data.sport is string
+        && request.resource.data.sport.size() <= 32
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.date is string
+        && request.resource.data.date.size() == 10;
       allow update: if false;
       allow delete: if false;
     }
