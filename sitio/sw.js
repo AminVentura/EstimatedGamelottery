@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'plv1-cache-v2';
+const CACHE_NAME = 'plv1-cache-v3';
 const PRECACHE = [
   '/',
   '/styles.css',
@@ -30,10 +30,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
-  // Never cache Firebase Functions or API calls
-  if (url.hostname.includes('cloudfunctions.net') ||
-      url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('firebaseio.com')) return;
+  // Only handle same-origin requests. Cross-origin resources (CDN, Firebase,
+  // ads, analytics) must bypass the SW so the browser applies CSP correctly
+  // and the SW's fetch() does not conflict with connect-src restrictions.
+  if (url.origin !== self.location.origin) return;
   e.respondWith(
     caches.match(e.request)
       .then(cached => cached || fetch(e.request).then(res => {
