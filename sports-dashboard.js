@@ -18,6 +18,100 @@
   // ── CONSTANTS ────────────────────────────────────────────────────────────
   var DK_LINK   = 'https://sportsbook.draftkings.com/r/sb/aminventura17/US-NY-SB/US-NY-SB';
   var CACHE_TTL = 30 * 60 * 1000;
+  var SPORT_MARKETS = {
+    NBA: [
+      // Juego completo
+      { key: 'h2h', label: 'Moneyline (Ganador)', unit: 'ML' },
+      { key: 'spreads', label: 'Spread (Hándicap)', unit: 'pts' },
+      { key: 'totals', label: 'Total de Puntos', unit: 'pts' },
+      // Primera mitad
+      { key: 'nba_h1_spreads', label: '1ra Mitad - Spread', unit: 'pts' },
+      { key: 'nba_h1_totals', label: '1ra Mitad - Total Puntos', unit: 'pts' },
+      // Primer cuarto
+      { key: 'nba_q1_spreads', label: '1er Cuarto - Spread', unit: 'pts' },
+      { key: 'nba_q1_totals', label: '1er Cuarto - Total Puntos', unit: 'pts' },
+      // Totales por equipo
+      { key: 'nba_team_totals', label: 'Total Puntos por Equipo', unit: 'pts' },
+      // Props de jugadores
+      { key: 'player_points', label: 'Puntos del Jugador', unit: 'pts' },
+      { key: 'player_rebounds', label: 'Rebotes del Jugador', unit: 'reb' },
+      { key: 'player_assists', label: 'Asistencias del Jugador', unit: 'ast' },
+      { key: 'player_pra', label: 'Puntos + Rebotes + Asistencias', unit: 'PRA' },
+      { key: 'player_points_rebounds', label: 'Puntos + Rebotes (Combo)', unit: 'PR' },
+      { key: 'player_points_assists', label: 'Puntos + Asistencias (Combo)', unit: 'PA' },
+      { key: 'player_rebounds_assists', label: 'Rebotes + Asistencias (Combo)', unit: 'RA' },
+      { key: 'player_threes', label: 'Triples Anotados', unit: '3PM' },
+      { key: 'player_steals', label: 'Robos del Jugador', unit: 'STL' },
+      { key: 'player_blocks', label: 'Bloqueos del Jugador', unit: 'BLK' },
+      { key: 'player_turnovers', label: 'Pérdidas de Balón', unit: 'TO' },
+      { key: 'player_double_double', label: 'Doble-Doble', unit: 'hit' },
+      { key: 'player_triple_double', label: 'Triple-Doble', unit: 'hit' },
+    ],
+    MLB: [
+      // Juego completo
+      { key: 'h2h', label: 'Moneyline (Ganador)', unit: 'ML' },
+      { key: 'spreads', label: 'Run Line (Hándicap)', unit: 'RL' },
+      { key: 'totals', label: 'Total de Carreras', unit: 'R' },
+      // Primeras 5 entradas
+      { key: 'mlb_f5_h2h', label: 'Primeras 5 Entradas - Moneyline', unit: 'ML' },
+      { key: 'mlb_f5_spreads', label: 'Primeras 5 Entradas - Run Line', unit: 'RL' },
+      { key: 'mlb_f5_totals', label: 'Primeras 5 Entradas - Total Carreras', unit: 'R' },
+      // Totales por equipo
+      { key: 'mlb_team_totals', label: 'Total Carreras por Equipo', unit: 'R' },
+      // 1er inning
+      { key: 'mlb_first_inning_run', label: 'Carrera en 1er Inning (SI/NO)', unit: 'R' },
+      // Props de bateadores
+      { key: 'batter_hits', label: 'Hits del Bateador', unit: 'H' },
+      { key: 'batter_total_bases', label: 'Bases Totales del Bateador', unit: 'TB' },
+      { key: 'batter_home_runs', label: 'Home Runs del Bateador', unit: 'HR' },
+      { key: 'batter_rbis', label: 'Carreras Impulsadas (RBI)', unit: 'RBI' },
+      { key: 'batter_runs_scored', label: 'Carreras Anotadas', unit: 'R' },
+      { key: 'batter_walks', label: 'Bases por Bolas (BB)', unit: 'BB' },
+      { key: 'batter_hits_runs_rbis', label: 'Hits + Carreras + RBI (Combo)', unit: 'HRR' },
+      { key: 'batter_hits_total_bases', label: 'Hits + Bases Totales (Combo)', unit: 'HTB' },
+      { key: 'anytime_home_run', label: 'Home Run en Cualquier Momento', unit: 'HR' },
+      // Props de lanzadores
+      { key: 'pitcher_strikeouts', label: 'Ponches del Lanzador (K)', unit: 'K' },
+      { key: 'pitcher_outs_recorded', label: 'Outs Registrados por Lanzador', unit: 'outs' },
+      { key: 'pitcher_earned_runs', label: 'Carreras Limpias Permitidas', unit: 'ER' },
+      { key: 'pitcher_walks', label: 'Bases por Bolas Permitidas', unit: 'BB' },
+      { key: 'pitcher_hits_allowed', label: 'Hits Permitidos por Lanzador', unit: 'H' },
+      { key: 'pitcher_total_bases_allowed', label: 'Bases Totales Permitidas', unit: 'TB' },
+      { key: 'pitcher_win', label: 'Lanzador Registra Victoria', unit: 'hit' },
+      { key: 'pitcher_no_decision', label: 'Sin Decisión para el Lanzador', unit: 'hit' },
+      { key: 'pitcher_walks_hits', label: 'BB + Hits Permitidos (WHIP parcial)', unit: 'WHIP' },
+      { key: 'pitcher_k_outs_combo', label: 'Ponches + Outs (Combo)', unit: 'KO' },
+    ],
+    NFL: [
+      { key: 'nfl_receiving_yards', label: 'Yardas Recepción', unit: 'yds' },
+      { key: 'nfl_td_anytime', label: 'Touchdown en cualquier momento', unit: 'TD' },
+      { key: 'nfl_touchdown_any_moment', label: 'Touchdown Any Moment', unit: 'TD' }
+    ],
+    TENNIS: [
+      // Partido completo
+      { key: 'h2h', label: 'Moneyline (Ganador del Partido)', unit: 'ML' },
+      { key: 'spreads', label: 'Hándicap de Games', unit: 'games' },
+      { key: 'totals', label: 'Total de Games', unit: 'games' },
+      // Sets
+      { key: 'tennis_set_winner', label: 'Ganador del Set', unit: 'hit' },
+      { key: 'tennis_total_sets', label: 'Total de Sets del Partido', unit: 'sets' },
+      { key: 'tennis_correct_score', label: 'Marcador Exacto de Sets (ej. 2-0, 2-1)', unit: 'hit' },
+      // Props de jugador
+      { key: 'tennis_total_aces', label: 'Total de Aces del Jugador', unit: 'aces' },
+      { key: 'tennis_double_faults', label: 'Dobles Faltas del Jugador', unit: 'DF' },
+      { key: 'tennis_games_won', label: 'Games Ganados por el Jugador', unit: 'games' },
+      { key: 'tennis_break_points', label: 'Break Points Convertidos', unit: 'BP' },
+      { key: 'tennis_tiebreaks', label: 'Tiebreaks en el Partido', unit: 'TB' },
+      // Especiales
+      { key: 'tennis_first_set_winner', label: 'Ganador del Primer Set', unit: 'hit' },
+      { key: 'tennis_to_win_set', label: 'Jugador Gana al Menos un Set', unit: 'hit' },
+      { key: 'tennis_retirement', label: 'Retiro o Abandono en el Partido', unit: 'hit' },
+    ]
+  };
+  var MARKET_KEY_ALIASES = {
+    nfl_td_any_moment: 'nfl_td_anytime',
+    nfl_td_anytime: 'nfl_td_anytime'
+  };
 
   // ── DEMO DATA ─────────────────────────────────────────────────────────────
   // Each player includes: avg, line, last5[], opponentRank, isHome, lineDelta, hot
@@ -44,6 +138,11 @@
         { id:'zw_k',  name:'Zack Wheeler',    team:'PHI', avg:8.3,  line:7.5,  last5:[9,7,10,8,8],   opponentRank:6,  isHome:true,  lineDelta: 0,   hot:false },
         { id:'js_tb', name:'Juan Soto',       team:'NYY', avg:2.1,  line:1.5,  last5:[3,2,2,1,3],    opponentRank:19, isHome:true,  lineDelta:+0.5, hot:true  },
         { id:'ff_h',  name:'Freddie Freeman', team:'LAD', avg:1.3,  line:1.5,  last5:[1,2,1,1,2],    opponentRank:11, isHome:false, lineDelta: 0,   hot:false },
+        // Bateadores adicionales
+        { id:'aa_hr',  name:'Aaron Judge',      team:'NYY', avg:0.85, line:0.5,  last5:[1,1,0,1,2],   opponentRank:15, isHome:true,  lineDelta:+0.5, hot:true,  metric:'Home Runs', unit:'HR' },
+        { id:'mtr_rbi',name:'Mike Trout',        team:'LAA', avg:1.8,  line:1.5,  last5:[2,1,3,1,2],   opponentRank:9,  isHome:false, lineDelta: 0,   hot:false, metric:'RBI', unit:'RBI' },
+        { id:'co_tb',  name:'Corey Seager',      team:'TEX', avg:2.4,  line:2.5,  last5:[3,2,2,3,1],   opponentRank:7,  isHome:true,  lineDelta:-0.5, hot:false, metric:'Total Bases', unit:'TB' },
+        { id:'ra_h',   name:'Ronald Acuña Jr.',  team:'ATL', avg:1.4,  line:1.5,  last5:[2,1,1,2,1],   opponentRank:20, isHome:true,  lineDelta: 0,   hot:true,  metric:'Hits', unit:'H' },
       ]
     },
     NFL: {
@@ -56,6 +155,18 @@
         { id:'cm_yds', name:'Christian McCaffrey', team:'SF',  avg:92.1,  line:85.5,  last5:[101,88,96,79,104], opponentRank:6,  isHome:false, lineDelta:+2.5, hot:true  },
         { id:'sd_rec', name:'Stefon Diggs',         team:'HOU', avg:71.4,  line:68.0,  last5:[77,64,82,58,76],   opponentRank:5,  isHome:true,  lineDelta: 0,   hot:false },
         { id:'da_yds', name:'Davante Adams',        team:'LVR', avg:68.5,  line:65.5,  last5:[73,61,79,58,71],   opponentRank:14, isHome:true,  lineDelta:-2.5, hot:false },
+      ]
+    },
+    TENNIS: {
+      icon: 'fas fa-circle', colorName: 'yellow',
+      metric: 'Aces', unit: 'aces',
+      players: [
+        { id:'nd_ace', name:'Novak Djokovic',    team:'SRB', avg:9.2,  line:8.5,  last5:[11,8,9,10,8],  opponentRank:3,  isHome:false, lineDelta:+0.5, hot:true  },
+        { id:'ca_ace', name:'Carlos Alcaraz',    team:'ESP', avg:8.1,  line:7.5,  last5:[9,8,10,6,8],   opponentRank:5,  isHome:false, lineDelta: 0,   hot:true  },
+        { id:'js_ace', name:'Jannik Sinner',     team:'ITA', avg:7.4,  line:7.5,  last5:[8,7,9,6,7],    opponentRank:2,  isHome:false, lineDelta:-0.5, hot:false },
+        { id:'ar_ace', name:'Alexander Zverev',  team:'GER', avg:6.8,  line:6.5,  last5:[7,8,6,7,6],    opponentRank:8,  isHome:false, lineDelta: 0,   hot:false },
+        { id:'ga_ace', name:'Grigor Dimitrov',   team:'BUL', avg:6.1,  line:6.5,  last5:[6,7,5,7,5],    opponentRank:12, isHome:false, lineDelta:-0.5, hot:false },
+        { id:'sh_ace', name:'Aryna Sabalenka',   team:'BLR', avg:5.8,  line:5.5,  last5:[6,5,7,5,6],    opponentRank:4,  isHome:false, lineDelta:+0.5, hot:true  },
       ]
     }
   };
@@ -85,6 +196,71 @@
       { team:'Philadelphia Eagles',   w:11, l:6, pct:'.647', gb:'1',  conf:'NFC E' },
       { team:'Miami Dolphins',        w:11, l:6, pct:'.647', gb:'2',  conf:'AFC E' },
     ],
+    TENNIS: [
+      { team:'Novak Djokovic (SRB)',  w:42, l:8,  pct:'.840', gb:'—', conf:'ATP 1' },
+      { team:'Carlos Alcaraz (ESP)',  w:38, l:10, pct:'.792', gb:'4', conf:'ATP 2' },
+      { team:'Jannik Sinner (ITA)',   w:37, l:11, pct:'.771', gb:'5', conf:'ATP 3' },
+      { team:'Alexander Zverev (GER)',w:33, l:15, pct:'.688', gb:'9', conf:'ATP 4' },
+      { team:'Grigor Dimitrov (BUL)', w:28, l:20, pct:'.583', gb:'14',conf:'ATP 5' },
+      { team:'Aryna Sabalenka (BLR)', w:35, l:10, pct:'.778', gb:'—', conf:'WTA 1' },
+    ],
+  };
+
+  var PARLAY_HUB_MOCK = {
+    generatedAt: 'demo',
+    parlays: [
+      {
+        id: 'duelo-de-ases',
+        title: 'Duelo de Ases',
+        sport: 'MLB',
+        startsAt: Date.now() + (25 * 60 * 1000),
+        popularity: 96,
+        confidence: 74,
+        tags: ['Popular', 'Pitcher Focus'],
+        propsByCategory: {
+          Pitcher: [
+            { label: 'G. Cole O 7.5 K', edge: '+8.2%' },
+            { label: 'S. Strider O 6.5 K', edge: '+7.5%' }
+          ],
+          Batter: [
+            { label: 'J. Soto O 1.5 TB', edge: '+6.0%' }
+          ],
+          Game: [
+            { label: 'NYY vs BOS O 8.0 Runs', edge: '+4.9%' }
+          ]
+        },
+        javiStats: [
+          'Últimas 10 aperturas: 7/10 por encima de la línea',
+          'Bullpen rival top-10 en ERA permitió tráfico temprano',
+          'Clima favorable al over (+8 mph hacia RF)'
+        ]
+      },
+      {
+        id: 'cruz-control',
+        title: 'Cruz Control',
+        sport: 'NFL',
+        startsAt: Date.now() + (65 * 60 * 1000),
+        popularity: 88,
+        confidence: 69,
+        tags: ['Next to start', 'QB + RB'],
+        propsByCategory: {
+          'NFL QB': [
+            { label: 'J. Allen O 274.5 Pass Yds', edge: '+5.8%' }
+          ],
+          'NFL RB': [
+            { label: 'C. McCaffrey O 84.5 Rush+Rec', edge: '+6.6%' }
+          ],
+          Game: [
+            { label: 'BUF @ SF O 47.5', edge: '+4.1%' }
+          ]
+        },
+        javiStats: [
+          'Defensa rival permite 7.2 yds por intento en play-action',
+          'RB con 78% de snaps en red zone en últimos 3 juegos',
+          'Correlación histórica positiva entre ritmo y over total'
+        ]
+      }
+    ]
   };
 
   /** Abbrev → substring match en filas de clasificación (Firestore o demo) */
@@ -92,6 +268,7 @@
     NBA: { DAL: 'Dallas', BOS: 'Boston', MIL: 'Milwaukee', GSW: 'Golden', DEN: 'Denver', LAL: 'Lakers' },
     MLB: { ATL: 'Atlanta', NYY: 'Yankees', TEX: 'Texas', PHI: 'Philadelphia', LAD: 'Dodgers' },
     NFL: { MIN: 'Minnesota', MIA: 'Miami', BUF: 'Buffalo', SF: 'Francisco', HOU: 'Houston', LVR: 'Raiders' },
+    TENNIS: { SRB: 'Djokovic', ESP: 'Alcaraz', ITA: 'Sinner', GER: 'Zverev', BUL: 'Dimitrov', BLR: 'Sabalenka' },
   };
 
   function parseStandingsPct(row) {
@@ -115,6 +292,107 @@
     return 0.52;
   }
 
+  function asParlayHubTimestamp(value, fallbackMs) {
+    if (typeof value === 'number' && isFinite(value)) return value;
+    if (typeof value === 'string') {
+      var parsed = Date.parse(value);
+      if (!isNaN(parsed)) return parsed;
+    }
+    return Date.now() + (fallbackMs || 0);
+  }
+
+  function formatParlayHubStart(ts) {
+    var date = new Date(ts);
+    return date.toLocaleTimeString('es-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function minutesToStart(ts) {
+    return Math.max(0, Math.round((ts - Date.now()) / 60000));
+  }
+
+  function clamp01(value) {
+    return Math.max(0, Math.min(1, value));
+  }
+
+  function parseNumericSafe(value, fallback) {
+    var n = Number(value);
+    return isNaN(n) ? fallback : n;
+  }
+
+  function normalizeConfidence10(value) {
+    var n = Number(value);
+    if (!isFinite(n)) return 6;
+    if (n > 10) n = n / 10;
+    return Math.max(1, Math.min(10, Math.round(n)));
+  }
+
+  function buildAgentPlayFallbackFromParlay(parlay) {
+    if (!parlay) {
+      return {
+        title: 'No hay jugada confirmada',
+        explanation: 'Usando selección local mientras llega la predicción del agente.',
+        confidence10: 6,
+      };
+    }
+    var firstCat = Object.keys(parlay.propsByCategory || {})[0];
+    var firstList = firstCat ? (parlay.propsByCategory[firstCat] || []) : [];
+    var firstPick = firstList[0];
+    var pickText = firstPick && (firstPick.label || firstPick) ? (firstPick.label || firstPick) : parlay.title;
+    return {
+      title: pickText,
+      explanation: 'Selección destacada basada en el parlay con mayor tracción actual.',
+      confidence10: normalizeConfidence10(parlay.confidence || 60),
+    };
+  }
+
+  function inferDivisionRank(row) {
+    if (!row) return null;
+    if (row.divisionRank != null) return parseNumericSafe(row.divisionRank, null);
+    if (row.divRank != null) return parseNumericSafe(row.divRank, null);
+    if (row.rank != null) return parseNumericSafe(row.rank, null);
+    if (row.conf != null) {
+      var match = String(row.conf).match(/(\d+)/);
+      if (match) return parseNumericSafe(match[1], null);
+    }
+    return null;
+  }
+
+  var PowerRankingUtils = {
+    getPct: function (row) {
+      var wins = parseNumericSafe(row && row.w, 0);
+      var losses = parseNumericSafe(row && row.l, 0);
+      var total = wins + losses;
+      if (total > 0) return wins / total;
+      return parseStandingsPct(row || {});
+    },
+    getMov: function (row) {
+      var rawDiff = parseNumericSafe(
+        row && (row.pointDifferential != null ? row.pointDifferential : row.pointDiff),
+        0
+      );
+      return clamp01(rawDiff / 10);
+    },
+    getSos: function (row) {
+      if (!row) return 0.45;
+      if (row.sos != null) return clamp01(parseNumericSafe(row.sos, 0.45));
+      var rank = inferDivisionRank(row);
+      return rank != null ? (rank <= 2 ? 0.85 : 0.45) : 0.45;
+    },
+    getRating: function (row) {
+      var pct = this.getPct(row);
+      var sos = this.getSos(row);
+      var mov = this.getMov(row);
+      var powerScore = (pct * 0.5) + (sos * 0.3) + (mov * 0.2);
+      return Math.max(1, Math.min(100, Math.round(powerScore * 100)));
+    },
+    getTierMeta: function (rating) {
+      if (rating >= 90) return { label: 'Elite', cls: 'text-blue-400' };
+      if (rating >= 75) return { label: 'Fuerte', cls: 'text-green-400' };
+      if (rating >= 50) return { label: 'Promedio', cls: 'text-yellow-400' };
+      return { label: 'Débil', cls: 'text-red-400' };
+    },
+  };
+
   function initialsFromName(name) {
     return String(name || '')
       .split(' ')
@@ -134,6 +412,120 @@
   function buildAvatarUrl(player) {
     var name = encodeURIComponent(player.name || 'Player');
     return 'https://ui-avatars.com/api/?name=' + name + '&background=0f172a&color=f8fafc&size=96&rounded=true&bold=true&format=png';
+  }
+
+  function round1(v) { return Math.round(v * 10) / 10; }
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function seedFromText(text) {
+    var s = String(text || '');
+    var h = 0;
+    for (var i = 0; i < s.length; i++) h = (h + s.charCodeAt(i) * (i + 3)) % 997;
+    return h;
+  }
+  function normalizeMarketKey(sport, key) {
+    var normalized = MARKET_KEY_ALIASES[key] || key;
+    var catalog = SPORT_MARKETS[sport] || [];
+    var exists = catalog.some(function (m) { return m.key === normalized; });
+    return exists ? normalized : (catalog[0] ? catalog[0].key : normalized);
+  }
+  function getSelectedMarket(sport) {
+    var selected = OrchestratorAgent.state.marketBySport[sport];
+    var key = normalizeMarketKey(sport, selected);
+    var catalog = SPORT_MARKETS[sport] || [];
+    return catalog.find(function (m) { return m.key === key; }) || { key: key, label: SPORTS_DATA[sport].metric, unit: SPORTS_DATA[sport].unit };
+  }
+  function deriveLast10(last5, line, seed, binaryMode) {
+    var src = Array.isArray(last5) && last5.length ? last5 : [line, line, line, line, line];
+    var out = [];
+    for (var i = 0; i < 10; i++) {
+      var base = src[i % src.length];
+      var wobble = ((seed + i * 17) % 5) - 2;
+      var next = binaryMode ? (base > line ? 1 : (wobble > 0 ? 1 : 0)) : round1(Math.max(0, base + wobble * 0.35));
+      out.push(next);
+    }
+    return out;
+  }
+  function transformPlayerForMarket(player, sport, market) {
+    var seed = seedFromText(player.id + '_' + market.key);
+    var p = Object.assign({}, player);
+    var baseLast5 = Array.isArray(player.last5) && player.last5.length ? player.last5.slice() : [player.line || 0, player.line || 0, player.line || 0, player.line || 0, player.line || 0];
+    if (market.key === 'nba_pra') {
+      var add = 10 + (seed % 7);
+      p.last5 = baseLast5.map(function (v) { return round1(v + add); });
+      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+      p.line = round1((player.line || p.avg) + add - 1.5);
+    } else if (market.key === 'nba_race_20') {
+      p.last5 = baseLast5.map(function (v) { return v >= 20 ? 1 : 0; });
+      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+      p.line = 0.5;
+    } else if (market.key === 'mlb_total_bases') {
+      p.last5 = baseLast5.map(function (v) { return round1(clamp((v / 3.8) + ((seed % 3) - 1) * 0.2, 0, 6)); });
+      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+      p.line = round1(clamp(p.avg - 0.3, 0.5, 4.5));
+    } else if (market.key === 'mlb_first_hr') {
+      p.last5 = baseLast5.map(function (v, i) { return (((seed + i * 13) % 100) < clamp(v * 8, 10, 45)) ? 1 : 0; });
+      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+      p.line = 0.5;
+    } else if (market.key === 'nfl_td_anytime' || market.key === 'nfl_touchdown_any_moment') {
+      p.last5 = baseLast5.map(function (v, i) { return (((seed + i * 19) % 100) < clamp(v * 0.65, 20, 80)) ? 1 : 0; });
+      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+      p.line = 0.5;
+    }
+    p.marketKey = market.key;
+    p.marketLabel = market.label;
+    p.marketUnit = market.unit;
+    p.last10 = deriveLast10(p.last5, p.line, seed, p.line <= 1);
+    return p;
+  }
+
+  function buildMlbPlayersFromEvents(events, market) {
+    if (!Array.isArray(events) || events.length === 0) return [];
+    var map = {
+      mlb_strikeouts: { bucket: 'pitcherProps', market: 'strikeouts', unit: 'K' },
+      mlb_earned_runs: { bucket: 'pitcherProps', market: 'earned_runs', unit: 'ER' },
+      mlb_hits: { bucket: 'batterProps', market: 'hits', unit: 'H' },
+      mlb_total_bases: { bucket: 'batterProps', market: 'total_bases', unit: 'TB' },
+      mlb_first_inning_run: { bucket: 'gameProps', market: 'first_inning_run', unit: 'R' },
+      mlb_run_line: { bucket: 'gameProps', market: 'run_line_home', unit: 'RL' },
+      mlb_total_runs: { bucket: 'gameProps', market: 'total_runs', unit: 'R' },
+    };
+    var target = map[market.key];
+    if (!target) return [];
+
+    var rows = [];
+    events.forEach(function (ev) {
+      var props = Array.isArray(ev[target.bucket]) ? ev[target.bucket] : [];
+      props.forEach(function (prop, idx) {
+        if (prop.market !== target.market) return;
+        var title = prop.player || (((ev.teams && ev.teams.away) || 'AWY') + ' vs ' + ((ev.teams && ev.teams.home) || 'HOME'));
+        var line = Number(prop.line);
+        var parsedLine = isNaN(line) ? 0.5 : line;
+        var simulatedLast5 = [
+          round1(Math.max(0, parsedLine - 1)),
+          round1(Math.max(0, parsedLine + 0.5)),
+          round1(Math.max(0, parsedLine + 1)),
+          round1(Math.max(0, parsedLine - 0.5)),
+          round1(Math.max(0, parsedLine + 0.2)),
+        ];
+        var avg = round1(simulatedLast5.reduce(function (a, b) { return a + b; }, 0) / simulatedLast5.length);
+        rows.push({
+          id: String(ev.eventId || ev.id || 'ev') + '_' + target.market + '_' + idx,
+          name: title,
+          team: (ev.teams && (ev.teams.home || ev.teams.away)) || 'MLB',
+          avg: avg,
+          line: parsedLine,
+          last5: simulatedLast5,
+          opponentRank: 15,
+          isHome: true,
+          lineDelta: 0,
+          hot: avg > parsedLine,
+          marketKey: market.key,
+          marketLabel: market.label,
+          marketUnit: target.unit,
+        });
+      });
+    });
+    return rows;
   }
 
   // ════════════════════════════════════════════════════════════════════════
@@ -282,6 +674,97 @@
         return safe;
       }
     },
+    fetchSportsEvents: async function (sport) {
+      await this.waitFirebaseBridge();
+      var ck = 'sports_events_' + sport;
+      var cached = this._getSession(ck);
+      if (cached) return cached;
+      if (!window.firebaseServices || typeof window.firebaseServices.getSportsEvents !== 'function') {
+        return { sport: sport, source: 'none', events: [] };
+      }
+      try {
+        var payload = await window.firebaseServices.getSportsEvents(sport);
+        this._setSession(ck, payload);
+        return payload;
+      } catch (_) {
+        return { sport: sport, source: 'error', events: [] };
+      }
+    },
+    fetchAgentPrediction: async function (payload) {
+      await this.waitFirebaseBridge();
+      var ck = 'agent_prediction_' + JSON.stringify(payload || {});
+      var cached = this._getSession(ck);
+      if (cached) return cached;
+      var output = null;
+      var requestedSport = String(payload && payload.sport ? payload.sport : '').toUpperCase();
+      var isSupportedPredictionSport = requestedSport === 'MLB' || requestedSport === 'NFL';
+      var mlbPlayerId = payload && payload.playerId != null ? String(payload.playerId).trim() : '';
+      if (
+        mlbPlayerId &&
+        payload &&
+        payload.source === 'parlayhub' &&
+        requestedSport === 'MLB' &&
+        window.firebaseServices &&
+        typeof window.firebaseServices.getMlbAgentPrediction === 'function'
+      ) {
+        try {
+          output = await window.firebaseServices.getMlbAgentPrediction(payload || {});
+        } catch (_) {
+          output = null;
+        }
+      }
+      if (!output && isSupportedPredictionSport && window.firebaseServices && typeof window.firebaseServices.getAgentPrediction === 'function') {
+        try {
+          output = await window.firebaseServices.getAgentPrediction(payload || {});
+        } catch (_) {
+          output = null;
+        }
+      }
+      var rawParlays = output && Array.isArray(output.parlays) ? output.parlays : [];
+      var safeParlays = rawParlays.map(function (row, idx) {
+        var startsAt = asParlayHubTimestamp(row.startsAt || row.startTime || row.kickoffAt, (idx + 1) * 45 * 60000);
+        return {
+          id: row.id || ('agent_' + idx),
+          title: row.title || row.name || ('Parlay #' + (idx + 1)),
+          sport: row.sport || 'MLB',
+          startsAt: startsAt,
+          popularity: parseNumericSafe(row.popularity, 70),
+          confidence: parseNumericSafe(row.confidence, 60),
+          tags: Array.isArray(row.tags) ? row.tags : [],
+          propsByCategory: row.propsByCategory || row.props || {},
+          javiStats: Array.isArray(row.javiStats) ? row.javiStats : [],
+        };
+      });
+      var agentPlayFromBackend = null;
+      if (output && output.prediction && typeof output.prediction === 'object') {
+        var pred = output.prediction;
+        var cRaw = pred.confidence;
+        var c10 = typeof cRaw === 'number' && isFinite(cRaw)
+          ? (cRaw <= 1 ? Math.round(cRaw * 10) : normalizeConfidence10(cRaw))
+          : 6;
+        c10 = Math.max(1, Math.min(10, c10));
+        var titleParts = [];
+        if (pred.sport) titleParts.push(String(pred.sport));
+        if (pred.team) titleParts.push(String(pred.team));
+        if (pred.signal) titleParts.push(String(pred.signal));
+        agentPlayFromBackend = {
+          title: titleParts.length ? titleParts.join(' · ') : 'Señal del agente',
+          explanation: pred.gamesAnalyzed
+            ? ('Modelo stats_history · ' + pred.gamesAnalyzed + ' partidos en la muestra.')
+            : 'Predicción heurística desde stats_history + memoria del agente.',
+          confidence10: c10,
+        };
+      }
+      var normalized = {
+        generatedAt: output && output.generatedAt ? output.generatedAt : 'live',
+        parlays: safeParlays.length ? safeParlays : PARLAY_HUB_MOCK.parlays,
+        agentPlay: output && output.agentPlay
+          ? output.agentPlay
+          : (output && output.topPlay ? output.topPlay : agentPlayFromBackend),
+      };
+      this._setSession(ck, normalized);
+      return normalized;
+    },
   };
 
   // ════════════════════════════════════════════════════════════════════════
@@ -369,7 +852,7 @@
     getData: function () {
       if (!this._data) {
         this._data = StorageAgent.get('sports_accuracy',
-          { NBA: { yes: 0, no: 0 }, MLB: { yes: 0, no: 0 }, NFL: { yes: 0, no: 0 } });
+          { NBA: { yes: 0, no: 0 }, MLB: { yes: 0, no: 0 }, NFL: { yes: 0, no: 0 }, TENNIS: { yes: 0, no: 0 } });
       }
       return this._data;
     },
@@ -574,7 +1057,7 @@
     },
 
     refreshAccuracyRow: function () {
-      ['NBA', 'MLB', 'NFL'].forEach(function (sport) {
+      ['NBA', 'MLB', 'NFL', 'TENNIS'].forEach(function (sport) {
         var pct = FeedbackAgent.getPct(sport);
         var el  = document.getElementById('sd_acc_' + sport);
         if (!el) return;
@@ -598,6 +1081,64 @@
         var over = v > line;
         return '<span title="' + (over ? 'Superó la línea' : 'No superó') + '">' + (over ? '🟢' : '🔴') + '</span>';
       }).join('');
+    },
+    miniTrendSvg: function (last5, line) {
+      if (!Array.isArray(last5) || last5.length === 0 || line == null) {
+        return '<div class="text-[10px] text-gray-600">Sin histórico suficiente</div>';
+      }
+      var points = last5.slice(0, 5);
+      while (points.length < 5) points.push(line);
+      var minV = Math.min.apply(null, points.concat([line]));
+      var maxV = Math.max.apply(null, points.concat([line]));
+      var range = Math.max(1, maxV - minV);
+      var w = 160;
+      var h = 48;
+      var pad = 6;
+      var plotW = w - pad * 2;
+      var plotH = h - pad * 2;
+      var coords = points.map(function (v, i) {
+        var x = pad + (plotW / 4) * i;
+        var y = pad + plotH - ((v - minV) / range) * plotH;
+        return [round1(x), round1(y)];
+      });
+      var polyline = coords.map(function (p) { return p[0] + ',' + p[1]; }).join(' ');
+      var lineY = round1(pad + plotH - ((line - minV) / range) * plotH);
+      return '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full h-12" role="img" aria-label="Últimos 5 vs línea">' +
+        '<line x1="' + pad + '" y1="' + lineY + '" x2="' + (w - pad) + '" y2="' + lineY + '" stroke="rgba(34,211,238,0.65)" stroke-dasharray="3 3" stroke-width="1.2"></line>' +
+        '<polyline points="' + polyline + '" fill="none" stroke="rgba(167,139,250,0.95)" stroke-width="2"></polyline>' +
+        coords.map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.6" fill="#a78bfa"></circle>'; }).join('') +
+        '</svg>';
+    },
+    recentStreakBars: function (series, line) {
+      if (!Array.isArray(series) || series.length === 0) return '<div class="text-[10px] text-gray-600">Sin datos recientes</div>';
+      var last10 = series.slice(-10);
+      var maxV = Math.max.apply(null, last10.concat([line || 1, 1]));
+      return '<div class="flex items-end gap-1 h-10">' + last10.map(function (v) {
+        var over = v > line;
+        var h = Math.max(14, Math.round((v / maxV) * 100));
+        return '<span title="' + v + '" style="height:' + h + '%" class="flex-1 rounded-sm ' + (over ? 'bg-emerald-400/85' : 'bg-gray-600/90') + '"></span>';
+      }).join('') + '</div>';
+    },
+    renderTeamRecentForm: function (rows) {
+      if (!rows || rows.length === 0) return '';
+      return [
+        '<div class="mt-4 rounded-xl border border-gray-700/60 bg-gray-900/50 p-3">',
+        '  <p class="text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Racha Reciente</p>',
+        rows.slice(0, 6).map(function (t) {
+          var pct = parseStandingsPct(t);
+          var form = [];
+          for (var i = 0; i < 10; i++) {
+            var pivot = ((seedFromText(t.team) + i * 11) % 100) / 100;
+            form.push(pivot < pct ? 1 : 0);
+          }
+          var wins = form.reduce(function (a, b) { return a + b; }, 0);
+          return '<div class="mb-2.5 last:mb-0">' +
+            '<div class="flex items-center justify-between text-[11px] mb-1"><span class="text-gray-300 truncate pr-2">' + (t.team || 'Equipo') + '</span><span class="text-gray-500 font-mono">' + wins + '-'+ (10 - wins) + '</span></div>' +
+            '<div class="flex gap-1">' + form.map(function (v) { return '<span class="h-2 flex-1 rounded-sm ' + (v ? 'bg-emerald-400/85' : 'bg-gray-700') + '"></span>'; }).join('') + '</div>' +
+            '</div>';
+        }).join(''),
+        '</div>'
+      ].join('');
     },
 
     hydrateLazyAvatars: function () {
@@ -665,12 +1206,13 @@
       var edgePct  = ((player.avg - player.line) / player.line * 100).toFixed(1);
       var last5avg = (player.last5.reduce(function (a, b) { return a + b; }, 0) / player.last5.length).toFixed(1);
       var initials = initialsFromName(player.name);
-      var colorMap = { orange: 'bg-orange-600', blue: 'bg-blue-600', green: 'bg-green-600' };
+      var colorMap = { orange: 'bg-orange-600', blue: 'bg-blue-600', green: 'bg-green-600', yellow: 'bg-yellow-600' };
       var avatarBg = colorMap[data.colorName] || 'bg-blue-600';
       var sm = AnalysisAgent.sharpMoney(player);
       var l5Over = player.last5.filter(function (v) { return v > player.line; }).length;
       var avatarGrad = avatarGradientFromName(player.name);
       var avatarSrc = buildAvatarUrl(player);
+      var last10 = Array.isArray(player.last10) && player.last10.length ? player.last10 : deriveLast10(player.last5, player.line, seedFromText(player.id), player.line <= 1);
 
       var lineDeltaHtml = player.lineDelta
         ? ' <span style="font-size:0.7rem;font-weight:700;color:' + (player.lineDelta > 0 ? '#4ade80' : '#22d3ee') + '">' +
@@ -684,7 +1226,7 @@
         '  <div class="prop-card-top">',
         '    <div class="flex items-center gap-2.5 min-w-0">',
         '      <div class="player-avatar sd-avatar-wrap ' + avatarBg + '" data-initials="' + initials + '" data-gradient="' + avatarGrad + '" data-avatar-ready="0">',
-        '        <img data-src="' + avatarSrc + '" alt="' + player.name + '" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;opacity:0;transition:opacity .2s ease" />',
+        '        <img data-src="' + avatarSrc + '" alt="' + player.name + '" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;opacity:0;transition:opacity .2s ease" />',
         '      </div>',
         '      <div class="min-w-0">',
         '        <p class="text-white font-semibold text-sm truncate">' + player.name + (player.hot ? ' 🔥' : '') + '</p>',
@@ -732,6 +1274,14 @@
         '    </p>',
         '    <div class="flex gap-1.5 opacity-80">' + this.trendDots(player.last5, player.line) + '</div>',
         '  </div>',
+        '  <div class="mb-3 rounded-xl p-2.5 border border-gray-700/80 bg-gray-900/60">',
+        '    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Historial Visual · L5 vs Línea</p>',
+        this.miniTrendSvg(player.last5, player.line),
+        '  </div>',
+        '  <div class="mb-3 rounded-xl p-2.5 border border-gray-700/80 bg-gray-900/60">',
+        '    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Racha Reciente</p>',
+        this.recentStreakBars(last10, player.line),
+        '  </div>',
 
         // insight + money
         '  <div class="flex items-center justify-between mb-3 text-xs">',
@@ -770,7 +1320,16 @@
       var container = document.getElementById('sports-view-content');
       if (!container) return;
       var data    = SPORTS_DATA[sport];
-      var players = data.players
+      var market = getSelectedMarket(sport);
+      var liveEvents = null;
+      if (sport === 'MLB') {
+        liveEvents = await DataAgent.fetchSportsEvents('MLB');
+      }
+      var sourcePlayers = (sport === 'MLB' && liveEvents && Array.isArray(liveEvents.events) && liveEvents.events.length)
+        ? buildMlbPlayersFromEvents(liveEvents.events, market)
+        : data.players;
+      var players = sourcePlayers
+        .map(function (p) { return transformPlayerForMarket(p, sport, market); })
         .map(function (p) { return Object.assign({}, p, { _prob: AnalysisAgent.calculateProbability(p) }); })
         .sort(function (a, b) { return b._prob - a._prob; });
 
@@ -813,7 +1372,7 @@
 
       var accuracyHtml = [
         '<div class="flex flex-wrap gap-2 mb-4">',
-        ['NBA','MLB','NFL'].map(function (s) {
+        ['NBA','MLB','NFL','TENNIS'].map(function (s) {
           return '<div class="bg-gray-900/80 rounded-xl px-3 py-2 border border-gray-700 text-center">' +
             '<div class="text-gray-500 text-xs uppercase tracking-widest mb-0.5">' + s + '</div>' +
             '<div id="sd_acc_' + s + '" class="text-sm font-black text-gray-500">— %</div>' +
@@ -829,19 +1388,34 @@
       ].join('');
 
       var remaining = window._sportsQuotaRemaining != null ? window._sportsQuotaRemaining : '?';
+      var portalBtn = '';
+      if (OrchestratorAgent.state.isPremium && OrchestratorAgent.state.canManageBilling) {
+        portalBtn = '<button type="button" onclick="SportsDashboard.openCustomerPortal()" title="Facturas, método de pago y suscripción"' +
+          ' class="text-xs font-bold text-cyan-200 bg-cyan-950/60 border border-cyan-600/50 rounded-lg px-2 py-1 hover:bg-cyan-900/70 transition-colors">' +
+          '<i class="fas fa-file-invoice-dollar mr-1"></i>Facturación</button>';
+      }
       container.innerHTML = [
         accuracyHtml,
         gameLinesHtml,
         '<div class="mb-4 flex flex-wrap items-start justify-between gap-3">',
         '  <div>',
-        '    <h3 class="text-white font-bold text-base sm:text-lg"><i class="' + data.icon + ' mr-2 ' + (sport === 'NBA' ? 'text-orange-400' : sport === 'MLB' ? 'text-blue-400' : 'text-green-400') + '"></i>' + sport + ' — ' + data.metric + ' Props</h3>',
+        '    <h3 class="text-white font-bold text-base sm:text-lg"><i class="' + data.icon + ' mr-2 ' + (sport === 'NBA' ? 'text-orange-400' : sport === 'MLB' ? 'text-blue-400' : sport === 'TENNIS' ? 'text-yellow-400' : 'text-green-400') + '"></i>' + sport + ' — ' + market.label + ' Props</h3>',
         '    <p class="text-gray-500 text-xs mt-0.5">Probabilidad estadística vs. línea · Ordenado por probabilidad · Cuotas vía servidor seguro</p>',
+        '    <div class="mt-2 inline-flex items-center gap-2 text-xs">',
+        '      <span class="text-gray-500 uppercase tracking-wider">Mercado</span>',
+        '      <select onchange="SportsDashboard.switchMarket(\'' + sport + '\', this.value)" class="bg-gray-900 text-gray-200 border border-gray-700 rounded-md px-2 py-1 text-xs">',
+        (SPORT_MARKETS[sport] || []).map(function (m) {
+          return '<option value="' + m.key + '"' + (m.key === market.key ? ' selected' : '') + '>' + m.label + '</option>';
+        }).join(''),
+        '      </select>',
+        '    </div>',
         '  </div>',
         '  <div class="flex items-center gap-2">',
         '    <div class="api-status-badge"><span class="live-dot"></span>API Segura</div>',
         '    <div class="text-xs text-gray-500 bg-gray-900/80 rounded-lg px-2 py-1 border border-gray-700">',
         '      <i class="fas fa-bolt text-yellow-500 mr-1"></i>' + remaining + ' consultas restantes',
         '    </div>',
+        portalBtn,
         '  </div>',
         '</div>',
         '<div class="space-y-3">' + players.map(function (p) { return self.renderCard(p, sport); }).join('') + '</div>',
@@ -920,6 +1494,12 @@
       var updatedLabel = isLive
         ? '<span class="text-emerald-500">ESPN · ' + (live.updatedAt ? new Date(live.updatedAt).toLocaleTimeString('es-US', {hour:'2-digit',minute:'2-digit'}) : 'recién actualizado') + '</span>'
         : '<span class="text-gray-500">Demo · <button onclick="window.seedStandings&&window.seedStandings().then(()=>SportsDashboard.switchView(\'standings\'))" class="underline hover:text-emerald-400 transition-colors">Cargar datos ESPN ahora</button></span>';
+      var rankedRows = rows.slice().map(function (row) {
+        var rating = PowerRankingUtils.getRating(row);
+        return Object.assign({}, row, { _rating: rating, _tier: PowerRankingUtils.getTierMeta(rating) });
+      }).sort(function (a, b) {
+        return b._rating - a._rating;
+      });
 
       container.innerHTML = [
         '<div class="flex items-center justify-between mb-3">',
@@ -935,10 +1515,10 @@
         '      <th class="text-left px-4 py-3">Equipo</th>',
         '      <th class="px-4 py-3">W</th><th class="px-4 py-3">L</th>',
         '      <th class="px-4 py-3">PCT</th><th class="px-4 py-3">GB</th>',
-        '      <th class="px-4 py-3">Div.</th>',
+        '      <th class="px-4 py-3">Div.</th><th class="px-4 py-3">Rating</th><th class="px-4 py-3">Estado</th>',
         '    </tr></thead>',
         '    <tbody class="divide-y divide-gray-700/40">',
-        rows.map(function (t, i) {
+        rankedRows.map(function (t, i) {
           return '<tr class="hover:bg-gray-800/50 transition-colors">' +
             '<td class="px-4 py-3 text-gray-500 font-mono text-xs">' + (i + 1) + '</td>' +
             '<td class="px-4 py-3 text-white font-medium">' + (t.team || '?') + '</td>' +
@@ -947,12 +1527,15 @@
             '<td class="px-4 py-3 text-center text-cyan-400 font-mono">' + (t.pct || '—') + '</td>' +
             '<td class="px-4 py-3 text-center text-gray-400">' + (t.gb || '—') + '</td>' +
             '<td class="px-4 py-3 text-center text-yellow-400 font-semibold text-xs">' + (t.conf || '—') + '</td>' +
+            '<td class="px-4 py-3 text-center font-black text-white">' + t._rating + '</td>' +
+            '<td class="px-4 py-3 text-center font-semibold text-xs ' + t._tier.cls + '">' + t._tier.label + '</td>' +
             '</tr>';
         }).join(''),
         '    </tbody>',
         '  </table>',
         '</div>',
         '<p class="text-xs mt-2 text-right"><i class="fas fa-satellite-dish mr-1"></i>' + updatedLabel + '</p>',
+        this.renderTeamRecentForm(rows),
       ].join('');
     },
 
@@ -1012,6 +1595,89 @@
         '<p class="text-gray-600 text-xs text-center mt-3">Las probabilidades combinadas son estimaciones estadísticas para entretenimiento.</p>',
       ].join('');
     },
+    renderParlayHub: async function () {
+      var container = document.getElementById('sports-view-content');
+      if (!container) return;
+      var activeSport = String(OrchestratorAgent.state.sport || '').toUpperCase();
+      var predictionSport = (activeSport === 'MLB' || activeSport === 'NFL') ? activeSport : 'MLB';
+      var payload = await DataAgent.fetchAgentPrediction({ sport: predictionSport, source: 'parlayhub' });
+      var filter = OrchestratorAgent.state.parlayHubFilter || 'popular';
+      var parlays = (payload && Array.isArray(payload.parlays) ? payload.parlays : PARLAY_HUB_MOCK.parlays).slice();
+      parlays = parlays.map(function (p, idx) {
+        return Object.assign({}, p, { startsAt: asParlayHubTimestamp(p.startsAt, (idx + 1) * 40 * 60000) });
+      });
+      if (filter === 'next') parlays.sort(function (a, b) { return a.startsAt - b.startsAt; });
+      else parlays.sort(function (a, b) { return (b.popularity || 0) - (a.popularity || 0); });
+      var agentPlayRaw = payload && payload.agentPlay ? payload.agentPlay : null;
+      var fallbackAgentPlay = buildAgentPlayFallbackFromParlay(parlays[0]);
+      var agentPlay = {
+        title: (agentPlayRaw && (agentPlayRaw.title || agentPlayRaw.play || agentPlayRaw.pick || agentPlayRaw.jugada)) || fallbackAgentPlay.title,
+        explanation: (agentPlayRaw && (agentPlayRaw.explanation || agentPlayRaw.reason || agentPlayRaw.summary || agentPlayRaw.wisdom)) || fallbackAgentPlay.explanation,
+        confidence10: normalizeConfidence10(agentPlayRaw && (agentPlayRaw.confidence10 || agentPlayRaw.confidence || agentPlayRaw.score)),
+      };
+
+      var cards = parlays.map(function (parlay) {
+        var cats = Object.keys(parlay.propsByCategory || {});
+        var catHtml = cats.map(function (cat) {
+          var rows = parlay.propsByCategory[cat] || [];
+          return '<div class="rounded-lg border border-gray-700/70 bg-gray-950/65 p-2">' +
+            '<p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">' + cat + '</p>' +
+            rows.slice(0, 3).map(function (r) {
+              return '<div class="text-xs flex items-center justify-between gap-2 mb-1 last:mb-0">' +
+                '<span class="text-gray-200 truncate">' + (r.label || r) + '</span>' +
+                '<span class="text-emerald-300 font-bold shrink-0">' + (r.edge || '') + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>';
+        }).join('');
+        var mins = minutesToStart(parlay.startsAt);
+        return [
+          '<article class="rounded-2xl border border-gray-700/70 bg-gray-900/80 p-4">',
+          '  <div class="flex items-start justify-between gap-3 mb-3">',
+          '    <div>',
+          '      <p class="text-white font-black text-base">' + parlay.title + '</p>',
+          '      <p class="text-xs text-gray-400 mt-0.5">' + parlay.sport + ' · Inicia ' + formatParlayHubStart(parlay.startsAt) + ' · ' + mins + ' min</p>',
+          '    </div>',
+          '    <div class="text-right">',
+          '      <p class="text-xs text-gray-500 uppercase tracking-widest">Confianza</p>',
+          '      <p class="text-sm font-black text-cyan-300">' + (parlay.confidence || 60) + '%</p>',
+          '    </div>',
+          '  </div>',
+          '  <div class="flex flex-wrap gap-1.5 mb-3">' + (parlay.tags || []).map(function (t) { return '<span class="text-[10px] px-2 py-1 rounded-full border border-indigo-500/50 bg-indigo-500/10 text-indigo-200 font-semibold">' + t + '</span>'; }).join('') + '</div>',
+          '  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">' + catHtml + '</div>',
+          '  <div class="rounded-xl border border-cyan-600/30 bg-cyan-900/10 p-3">',
+          '    <p class="text-[10px] font-black uppercase tracking-widest text-cyan-300 mb-1">Estadísticas de Javi</p>',
+          '    <ul class="text-xs text-gray-300 space-y-1">' + (parlay.javiStats || []).slice(0, 3).map(function (it) { return '<li>• ' + it + '</li>'; }).join('') + '</ul>',
+          '  </div>',
+          '</article>'
+        ].join('');
+      }).join('');
+
+      container.innerHTML = [
+        '<div class="mb-4 flex flex-wrap items-center justify-between gap-2">',
+        '  <h3 class="text-white font-bold text-base sm:text-lg"><i class="fas fa-fire mr-2 text-orange-400"></i>Parlay Hub de Javi</h3>',
+        '  <div class="flex items-center gap-2">',
+        '    <button class="sport-view-tab ' + (filter === 'popular' ? 'active' : '') + '" onclick="SportsDashboard.setParlayHubFilter(\'popular\')">Popular</button>',
+        '    <button class="sport-view-tab ' + (filter === 'next' ? 'active' : '') + '" onclick="SportsDashboard.setParlayHubFilter(\'next\')">Next to start</button>',
+        '  </div>',
+        '</div>',
+        '<p class="text-xs text-gray-500 mb-3">Selecciones temáticas con props por categoría y justificación estadística.</p>',
+        '<article class="mb-3 rounded-2xl border border-emerald-500/40 bg-emerald-900/10 p-4">',
+        '  <div class="flex items-start justify-between gap-3">',
+        '    <div>',
+        '      <p class="text-[11px] uppercase tracking-widest text-emerald-300 font-black">La Jugada del Agente</p>',
+        '      <p class="text-white font-black text-sm sm:text-base mt-1">' + agentPlay.title + '</p>',
+        '      <p class="text-xs text-gray-300 mt-1">' + agentPlay.explanation + '</p>',
+        '    </div>',
+        '    <div class="text-right shrink-0">',
+        '      <p class="text-[10px] text-emerald-200/80 uppercase tracking-widest">Confianza</p>',
+        '      <p class="text-lg font-black text-emerald-300">' + agentPlay.confidence10 + '/10</p>',
+        '    </div>',
+        '  </div>',
+        '</article>',
+        '<div class="space-y-3">' + cards + '</div>'
+      ].join('');
+    },
 
     // ── Main view dispatcher ────────────────────────────────────────────
     renderView: async function (view) {
@@ -1020,6 +1686,7 @@
       else if (view === 'live')  { this.renderLive(); }
       else if (view === 'standings') { this.renderStandings(sport); }
       else if (view === 'parlay')    { this.renderParlay(); }
+      else if (view === 'parlayhub') { await this.renderParlayHub(); }
     },
   };
 
@@ -1031,6 +1698,9 @@
       sport: 'NBA',
       view: 'props',
       isPremium: localStorage.getItem('sports_premium') === '1',
+      canManageBilling: false,
+      parlayHubFilter: 'popular',
+      marketBySport: { NBA: 'nba_points', MLB: 'mlb_strikeouts', NFL: 'nfl_receiving_yards', TENNIS: 'tennis_total_aces' },
     },
 
     init: function () {
@@ -1046,6 +1716,22 @@
       }
 
       UIAgent.renderView(this.state.view);
+      this.syncPlanStatus();
+    },
+
+    syncPlanStatus: async function () {
+      try {
+        if (!window.firebaseServices || typeof window.firebaseServices.getUserPlan !== 'function') return;
+        var plan = await window.firebaseServices.getUserPlan();
+        var isPro = !!(plan && plan.planType === 'pro');
+        this.state.isPremium = isPro;
+        this.state.canManageBilling = !!(plan && plan.canManageBilling);
+        if (isPro) localStorage.setItem('sports_premium', '1');
+        else localStorage.removeItem('sports_premium');
+        UIAgent.renderView(this.state.view);
+      } catch (_) {
+        // keep local fallback state
+      }
     },
 
     switchSport: function (sport) {
@@ -1054,6 +1740,12 @@
         btn.classList.toggle('active', btn.getAttribute('data-sport') === sport);
       });
       UIAgent.renderView(this.state.view);
+    },
+    switchMarket: function (sport, marketKey) {
+      this.state.marketBySport[sport] = normalizeMarketKey(sport, marketKey);
+      if (this.state.sport === sport && this.state.view === 'props') {
+        UIAgent.renderProps(sport);
+      }
     },
 
     switchView: function (view) {
@@ -1072,19 +1764,20 @@
         modal.id = 'sd_premium_modal';
         modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px)';
         modal.innerHTML = [
-          '<div style="background:#111827;border:1px solid rgba(124,58,237,0.5);border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,0.5)">',
+          '<div style="background:linear-gradient(155deg,#060b16,#0b1324,#111827);border:1px solid rgba(234,179,8,0.45);border-radius:16px;padding:24px;max-width:360px;width:100%;box-shadow:0 25px 50px rgba(0,0,0,0.5)">',
           '  <div style="text-align:center;margin-bottom:20px">',
-          '    <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:12px;background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.5);margin-bottom:12px"><i class="fas fa-shield-alt" style="color:#a78bfa;font-size:1.25rem"></i></div>',
-          '    <h3 style="color:white;font-size:1.1rem;font-weight:900;margin:0 0 8px">Sports Premium</h3>',
-          '    <p style="color:#9ca3af;font-size:0.85rem;line-height:1.5">Guarda apuestas con AES-256-GCM, Parlay Builder ilimitado y alimenta la red global.</p>',
+          '    <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,rgba(234,179,8,0.28),rgba(59,130,246,0.2));border:1px solid rgba(234,179,8,0.55);margin-bottom:12px"><i class="fas fa-crown" style="color:#facc15;font-size:1.25rem"></i></div>',
+          '    <h3 style="color:white;font-size:1.1rem;font-weight:900;margin:0 0 8px">Upgrade a Pro</h3>',
+          '    <p style="color:#cbd5e1;font-size:0.85rem;line-height:1.5">Activa funciones premium y mejora tu ventaja estadística con Stripe Checkout seguro.</p>',
           '  </div>',
           '  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">',
-          '    <div style="display:flex;align-items:center;gap:10px;background:#1f2937;border-radius:10px;padding:10px;border:1px solid #374151"><i class="fas fa-lock" style="color:#a78bfa;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Historial cifrado AES-256-GCM</span></div>',
-          '    <div style="display:flex;align-items:center;gap:10px;background:#1f2937;border-radius:10px;padding:10px;border:1px solid #374151"><i class="fas fa-layer-group" style="color:#60a5fa;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Parlay Builder (hasta 6 legs)</span></div>',
-          '    <div style="display:flex;align-items:center;gap:10px;background:#1f2937;border-radius:10px;padding:10px;border:1px solid #374151"><i class="fas fa-chart-line" style="color:#34d399;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Alimenta la red global de datos</span></div>',
+          '    <div style="display:flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px;border:1px solid #334155"><i class="fas fa-chart-line" style="color:#facc15;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Acceso al Sharp Money</span></div>',
+          '    <div style="display:flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px;border:1px solid #334155"><i class="fas fa-wand-magic-sparkles" style="color:#60a5fa;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Smart Suggester de 70%+</span></div>',
+          '    <div style="display:flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px;border:1px solid #334155"><i class="fas fa-ban" style="color:#38bdf8;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Cero Anuncios</span></div>',
           '  </div>',
-          '  <button onclick="SportsDashboard.activatePremium()" style="width:100%;background:linear-gradient(90deg,#7c3aed,#6d28d9);color:white;font-weight:700;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:0.9rem;margin-bottom:8px">Activar Premium · $4.99/mes</button>',
-          '  <button onclick="SportsDashboard.closePremiumModal()" style="width:100%;background:transparent;color:#6b7280;border:none;cursor:pointer;padding:8px;font-size:0.85rem">Continuar sin Premium</button>',
+          '  <button id="sd_start_checkout_btn" onclick="SportsDashboard.activatePremium()" style="width:100%;background:linear-gradient(90deg,#d97706,#2563eb);color:white;font-weight:700;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:0.9rem;margin-bottom:8px">Iniciar checkout Pro</button>',
+          '  <p id="sd_checkout_error" style="display:none;color:#fca5a5;font-size:0.78rem;line-height:1.35;margin:0 0 8px"></p>',
+          '  <button onclick="SportsDashboard.closePremiumModal()" style="width:100%;background:transparent;color:#94a3b8;border:none;cursor:pointer;padding:8px;font-size:0.85rem">Continuar en modo gratuito</button>',
           '</div>',
         ].join('');
         modal.addEventListener('click', function (e) { if (e.target === modal) self.closePremiumModal(); });
@@ -1098,12 +1791,36 @@
       if (m) m.style.display = 'none';
     },
 
-    activatePremium: function () {
-      this.state.isPremium = true;
-      localStorage.setItem('sports_premium', '1');
-      this.closePremiumModal();
-      UIAgent.flash('¡Premium activado! Apuestas cifradas con AES-256-GCM.', 'ok');
-      UIAgent.renderView(this.state.view);
+    activatePremium: async function () {
+      var btn = document.getElementById('sd_start_checkout_btn');
+      var errEl = document.getElementById('sd_checkout_error');
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+        btn.style.opacity = '0.8';
+      }
+      try {
+        if (!window.firebaseServices || typeof window.firebaseServices.createProCheckoutSession !== 'function') {
+          throw new Error('El checkout no esta disponible en este momento.');
+        }
+        var checkout = await window.firebaseServices.createProCheckoutSession();
+        if (!checkout || !checkout.url) throw new Error('No se recibio URL de checkout.');
+        window.location.href = checkout.url;
+      } catch (err) {
+        var msg = (err && err.message) ? err.message : 'No se pudo iniciar el checkout.';
+        if (errEl) {
+          errEl.textContent = msg;
+          errEl.style.display = 'block';
+        }
+        UIAgent.flash(msg, 'error');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Iniciar checkout Pro';
+          btn.style.opacity = '1';
+        }
+      }
     },
   };
 
@@ -1147,7 +1864,29 @@
   var SportsDashboard = {
     init:             function ()        { OrchestratorAgent.init(); },
     switchSport:      function (s)       { OrchestratorAgent.switchSport(s); },
+    switchMarket:     function (s, m)    { OrchestratorAgent.switchMarket(s, m); },
     switchView:       function (v)       { OrchestratorAgent.switchView(v); },
+    setParlayHubFilter: function (filter) {
+      OrchestratorAgent.state.parlayHubFilter = filter === 'next' ? 'next' : 'popular';
+      if (OrchestratorAgent.state.view === 'parlayhub') UIAgent.renderParlayHub();
+    },
+    openCustomerPortal: async function () {
+      try {
+        if (!window.firebaseServices || typeof window.firebaseServices.createCustomerPortalSession !== 'function') {
+          UIAgent.flash('Portal de facturación no disponible.', 'error');
+          return;
+        }
+        UIAgent.flash('Abriendo portal seguro de Stripe…', 'ok');
+        var portal = await window.firebaseServices.createCustomerPortalSession();
+        if (portal && portal.url) {
+          window.location.href = portal.url;
+          return;
+        }
+        UIAgent.flash('No se recibió enlace del portal.', 'error');
+      } catch (err) {
+        UIAgent.flash((err && err.message) ? err.message : 'No se pudo abrir el portal.', 'error');
+      }
+    },
     feedback:         recordFeedback,
     saveBet:          saveBet,
     toggleParlay:     function (id) {

@@ -1,99 +1,67 @@
-# Reglas de Firestore para Firebase Console
+# Firebase: reglas Firestore, Storage, App Check y despliegue
 
-## Cómo aplicarlas
+## 1. Firestore — publicar reglas (obligatorio tras cambios en `firestore.rules`)
 
-1. Entra en **Firebase Console**: https://console.firebase.google.com  
-2. Selecciona tu proyecto (Game Lottery / game-lottery-b0e90).  
-3. En el menú izquierdo: **Build** → **Firestore Database**.  
-4. Abre la pestaña **Reglas** (Rules).  
-5. **Borra todo** lo que haya en el editor y **pega exactamente** el bloque de abajo.  
-6. Pulsa **Publicar** (Publish).
+```bash
+firebase deploy --only firestore:rules
+```
+
+O en consola: **Firestore → Reglas** → pega el contenido de **`firestore.rules`** → Publicar.
+
+**Política actual (resumen):** solo colecciones de sorteos listadas + `user_stats`. Sin `lotto_comments` (el chat fue retirado del sitio). Sin `cash4life_drawings`. Sorteos: sin `update`, solo `create`/`delete` del dueño. Fechas `YYYY-MM-DD`. `user_stats`: dueño del doc y máximo 48 campos.
 
 ---
 
-## Reglas para pegar (copiar todo desde rules_version hasta la última llave)
+## 2. Storage — publicar reglas (nuevo)
 
+El archivo **`storage.rules`** deniega todo lectura/escritura (si no usas Storage, no afecta al sitio; si más adelante subes archivos, abre reglas con cuidado).
+
+```bash
+firebase deploy --only storage
 ```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    
-    function isSignedIn() {
-      return request.auth != null;
-    }
 
-    function hasDrawingFields() {
-      return request.resource.data.keys().hasAll(['mainNumbers', 'date'])
-             && request.resource.data.date is string
-             && (request.resource.data.mainNumbers is list || request.resource.data.mainNumbers is string);
-    }
-    function isValidDrawing() {
-      return isSignedIn() && hasDrawingFields();
-    }
+Si el proyecto no tiene Storage activado, la CLI puede pedirte activarlo o puedes omitir este paso hasta que lo uses.
 
-    function isOwner() {
-      return isSignedIn() && resource.data.userId == request.auth.uid;
-    }
+---
 
-    match /artifacts/EstimatedGamelottery-app/public/data/powerball_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
+## 3. App Check (reCAPTCHA v3) — consola + sitio
 
-    match /artifacts/EstimatedGamelottery-app/public/data/cash4life_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
+1. **Firebase Console** → **App Check** → registra la app web con **reCAPTCHA v3** y copia la **clave del sitio** (site key).
+2. En **`sitio/index.html`** (y copia en raíz si la usas), rellena el meta:
+   ```html
+   <meta name="firebase-appcheck-recaptcha-site-key" content="TU_CLAVE_PUBLICA_AQUI">
+   ```
+3. Despliega **Hosting** para que el meta llegue a producción.
+4. En App Check, activa **aplicación forzada** (enforcement) para **Firestore** (y **Auth** si lo recomienda la consola) **solo después** de comprobar en un dispositivo real que el sitio carga bien y Firestore responde. Si activas enforcement sin clave en el meta, los clientes fallarán.
 
-    match /artifacts/EstimatedGamelottery-app/public/data/megamillions_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
+El cliente ya importa `firebase-app-check` y llama a `initializeAppCheck` solo si el meta tiene contenido.
 
-    match /artifacts/EstimatedGamelottery-app/public/data/pick10_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
-    match /artifacts/EstimatedGamelottery-app/public/data/take5day_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
-    match /artifacts/EstimatedGamelottery-app/public/data/take5eve_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
-    match /artifacts/EstimatedGamelottery-app/public/data/win4day_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
-    match /artifacts/EstimatedGamelottery-app/public/data/win4eve_drawings/{docId} {
-      allow read: if true;
-      allow create: if isValidDrawing();
-      allow delete: if isOwner();
-    }
+---
 
-    match /artifacts/EstimatedGamelottery-app/public/data/lotto_comments/{docId} {
-      allow read: if true;
-      allow create: if isSignedIn() 
-                    && request.resource.data.text is string
-                    && request.resource.data.text.size() < 500;
-    }
+## 4. Hosting (CSP + cabeceras)
 
-    match /artifacts/EstimatedGamelottery-app/public/data/user_stats/{userId} {
-      allow read: if true;
-      allow write: if isSignedIn() && request.auth.uid == userId;
-    }
-  }
-}
+```bash
+firebase deploy --only hosting
 ```
 
 ---
 
-Después de publicar, recarga tu página; los avisos de “Sin permiso para pick10 / take5day / win4day / take5eve / win4eve” deberían desaparecer.
+## 5. Borrar legacy `cash4life_drawings` (opcional, Admin SDK)
+
+```bash
+npm run delete-cash4life-legacy
+```
+
+Comprueba que el `projectId` impreso sea **game-lottery-b0e90**.
+
+---
+
+## 6. Datos viejos de `lotto_comments`
+
+Las reglas ya no definen esa colección (acceso denegado). Puedes borrar la colección desde la consola de Firestore o con un script Admin similar al de cash4life si quieres liberar espacio.
+
+---
+
+## 7. Google Cloud — API key y dominios
+
+En **Google Cloud Console** → APIs y servicios → **Credenciales** → restricciones de la clave de API del navegador (HTTP referrers: `https://www.prediccionloteria.com/*`, etc.). Esto complementa App Check; no sustituye las reglas de Firestore.

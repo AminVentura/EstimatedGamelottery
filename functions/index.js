@@ -665,7 +665,7 @@ async function refreshMlbPlayerTrendScores(db, year) {
 // getSeasonContext — dynamic snapshot for current season/year
 // ════════════════════════════════════════════════════════════════════════════
 exports.getSeasonContext = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const sport = String((request.data && request.data.sport) || 'MLB').toUpperCase();
@@ -693,7 +693,7 @@ exports.getSeasonContext = onCall(
 // getAgentPrediction — initial heuristic based on stats_history + memory
 // ════════════════════════════════════════════════════════════════════════════
 exports.getAgentPrediction = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const sport = String((request.data && request.data.sport) || 'MLB').toUpperCase();
@@ -776,7 +776,7 @@ exports.ingestMlbDailyAt4am = onSchedule(
 );
 
 exports.initializeUniversalSportsSchema = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const year = Number((request.data && request.data.year) || getCurrentYear(new Date()));
@@ -787,7 +787,7 @@ exports.initializeUniversalSportsSchema = onCall(
 );
 
 exports.analyzeMlbPlayerTrends = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const year = Number((request.data && request.data.year) || getCurrentYear(new Date()));
@@ -854,14 +854,14 @@ async function runMlbPropPrediction(request) {
 }
 
 exports.getMlbPropPredictions = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => runMlbPropPrediction(request)
 );
 
 // Compatibility aliases for frontend bridge naming variants.
 // Same handler: app.js calls getMlbAgentPrediction first, then getMLBAgentPrediction (capital MLB).
 const _getMlbAgentPredictionCallable = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => runMlbPropPrediction(request)
 );
 exports.getMlbAgentPrediction = _getMlbAgentPredictionCallable;
@@ -875,9 +875,7 @@ exports.getSportsOdds = onCall(
     region: 'us-central1',
     secrets: [ODDS_API_KEY],
     cors: ALLOWED_ORIGINS,
-    // App Check remains enabled in frontend when configured, but this endpoint
-    // does not hard-require it while production site key is pending.
-    enforceAppCheck: false,
+    enforceAppCheck: true,
   },
   async (request) => {
     const sport    = (request.data && request.data.sport) || 'NBA';
@@ -977,7 +975,7 @@ exports.getSportsOdds = onCall(
 // getSportsEvents — MLB mock feed backed by Firestore sports_events
 // ════════════════════════════════════════════════════════════════════════════
 exports.getSportsEvents = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const sport = ((request.data && request.data.sport) || 'MLB').toUpperCase();
@@ -1032,7 +1030,7 @@ exports.getSportsEvents = onCall(
 // getStandings — serves Firestore cache; graceful fail if empty
 // ════════════════════════════════════════════════════════════════════════════
 exports.getStandings = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
 
@@ -1063,7 +1061,7 @@ exports.getStandings = onCall(
 // Or call from the SDK in the browser once Firebase is initialized.
 // ════════════════════════════════════════════════════════════════════════════
 exports.seedStandings = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     console.log('[seedStandings] called by uid=' + request.auth.uid);
@@ -1825,7 +1823,7 @@ exports.ingestOfficialLotteryResults = onSchedule(
 );
 
 exports.getLotteryAgentInsight = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError('unauthenticated', 'Debes estar autenticado para obtener insights.');
