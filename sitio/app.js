@@ -10,7 +10,7 @@ const firebaseConfig = {
   projectId: "game-lottery-b0e90",
   storageBucket: "game-lottery-b0e90.firebasestorage.app",
   messagingSenderId: "192610858921",
-  appId: "1:192610858921:web:7b36e8"
+  appId: "1:192610858921:web:7e76e398b3c5978f7b36b8"
 };
 
 const appId = "EstimatedGamelottery-app";
@@ -1315,10 +1315,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const userCredential = await signInAnonymously(auth);
     userId = userCredential.user.uid;
+    var _appCheckThrottled = false;
     const waitForAuthAndWarmTokens = async function () {
       if (!auth.currentUser) return;
-      // Warm token to avoid first-call unauthenticated races in callable headers.
-      await auth.currentUser.getIdToken(true);
+      if (_appCheckThrottled) return;
+      try {
+        await auth.currentUser.getIdToken(true);
+      } catch (tokenErr) {
+        var msg = String((tokenErr && tokenErr.message) || '');
+        if (/throttled/i.test(msg) || /appCheck/i.test(msg)) {
+          _appCheckThrottled = true;
+          setTimeout(function () { _appCheckThrottled = false; }, 35000);
+        }
+        // Continúa sin token fresco — mejor intentar sin token nuevo que no intentar
+      }
       await new Promise(function (resolve) { setTimeout(resolve, 250); });
     };
     const isTransientUnauth = function (error) {
@@ -1329,6 +1339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         || /Unauthenticated/i.test(msg);
     };
     const runCallableWithAuthRetry = async function (callable, payload, opts) {
+      if (_appCheckThrottled) throw new Error('Servicio temporalmente no disponible. Intenta en unos segundos.');
       const options = opts || {};
       const maxRetries = Number(options.maxRetries || 2);
       const retryDelayMs = Number(options.retryDelayMs || 350);
@@ -1337,7 +1348,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
           return await callable(payload || {});
         } catch (error) {
-          if (!isTransientUnauth(error) || attempt >= maxRetries) throw error;
+          var errMsg = String((error && error.message) || '');
+          var isThrottled = _appCheckThrottled || /throttled/i.test(errMsg);
+          if (!isTransientUnauth(error) || isThrottled || attempt >= maxRetries) throw error;
           await waitForAuthAndWarmTokens();
           await new Promise(function (resolve) { setTimeout(resolve, retryDelayMs * (attempt + 1)); });
         }
