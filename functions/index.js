@@ -1172,31 +1172,38 @@ exports.createCheckoutSession = onCall(
     secrets: [STRIPE_SECRET_KEY, STRIPE_PRO_PRICE_ID],
   },
   async (request) => {
-    if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
+    }
 
-    const uid = request.auth.uid;
+    const uid    = request.auth.uid;
     const stripe = createStripeClient(resolveStripeApiKey(STRIPE_SECRET_KEY));
     const priceId = await resolveProPriceId(stripe, STRIPE_PRO_PRICE_ID);
 
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: PRO_SUCCESS_URL,
-      cancel_url: PRO_CANCEL_URL,
-      client_reference_id: uid,
-      metadata: { uid, planType: 'pro' },
-      subscription_data: { metadata: { uid, planType: 'pro' } },
-      allow_promotion_codes: true,
-      billing_address_collection: 'auto',
-      // Wallets like Apple Pay / Google Pay are surfaced by Checkout when available.
-      // Cash App Pay can also be offered by Checkout with automatic payment methods.
-      automatic_payment_methods: { enabled: true },
-    });
+    try {
+      const session = await stripe.checkout.sessions.create({
+        mode: 'subscription',
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: PRO_SUCCESS_URL,
+        cancel_url: PRO_CANCEL_URL,
+        client_reference_id: uid,
+        metadata: { uid, planType: 'pro' },
+        subscription_data: { metadata: { uid, planType: 'pro' } },
+        allow_promotion_codes: true,
+        billing_address_collection: 'auto',
+        automatic_payment_methods: { enabled: true },
+      });
 
-    if (!session.url) {
-      throw new HttpsError('internal', 'Stripe did not return a checkout URL.');
+      if (!session.url) {
+        throw new HttpsError('internal', 'Stripe no devolvió una URL de checkout.');
+      }
+
+      return { sessionId: session.id, url: session.url };
+    } catch (error) {
+      console.error('[createCheckoutSession] Stripe error:', error.code || error.message);
+      if (error instanceof HttpsError) throw error;
+      throw new HttpsError('internal', 'Error al iniciar el pago. Intenta de nuevo.');
     }
-    return { sessionId: session.id, url: session.url };
   }
 );
 
