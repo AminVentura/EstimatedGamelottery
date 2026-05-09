@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guía de fuentes oficiales: lotería USA, MLB, NFL y NBA | prediccionloteria.com</title>
+  <meta name="description" content="Cómo prediccionloteria.com usa datos públicos oficiales (NY Open Data, MLB Stats API, ESPN, NFL.com) para estadísticas de lotería y el dashboard deportivo. Transparencia y enlaces de verificación.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://www.prediccionloteria.com/guia-fuentes-loteria-deportes.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Guía de fuentes oficiales: lotería USA, MLB, NFL y NBA",
+    "dateModified": "2026-05-09",
+    "author": { "@type": "Organization", "name": "prediccionloteria.com" },
+    "publisher": { "@type": "Organization", "name": "prediccionloteria.com" }
+  }
+  </script>
+</head>
+<body class="px-2 py-3 sm:p-6 md:p-8 min-h-screen flex flex-col items-center justify-start bg-gray-900 text-white">
+<div class="bg-gray-900 bg-opacity-95 backdrop-blur-lg p-3 sm:p-6 md:p-8 rounded-2xl w-full max-w-5xl border border-gray-800 text-left relative z-10">
+  <nav class="text-xs text-gray-500 mb-4">
+    <a href="/" class="text-cyan-400 hover:underline">Inicio</a>
+    <span class="mx-2">/</span>
+    <span class="text-gray-400">Fuentes oficiales</span>
+  </nav>
+
+  <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Guía de fuentes oficiales y metodología</h1>
+  <p class="text-gray-400 text-sm mb-8">Documentación para usuarios y revisores: de dónde salen los datos, cómo se actualizan y qué limitaciones tienen las herramientas de prediccionloteria.com.</p>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">1. Lotería de Estados Unidos (Powerball, Mega Millions, NY games)</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Los historiales de sorteos que alimentan los algoritmos de números calientes, fríos, pares y modelos Markov provienen de conjuntos de datos públicos, en línea con el catálogo de <strong class="text-white">NY Open Data</strong> y la información que publica la <strong class="text-white">New York Lottery</strong>. Esos registros incluyen fechas y combinaciones ganadoras verificables; nosotros no modificamos los resultados oficiales.
+    </p>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Las <strong class="text-white">predicciones numéricas</strong> son salidas estadísticas sobre ese historial: combinan frecuencias ponderadas por fecha, media móvil exponencial (EMA), análisis de intervalos entre apariciones (gaps), cadenas de Markov sobre transiciones entre sorteos y un término de balance por franjas numéricas para evitar sesgos solo por frecuencia global. La lotería sigue siendo azar; ningún modelo garantiza premios.
+    </p>
+    <ul class="list-disc list-inside text-gray-300 text-sm space-y-2 mb-3">
+      <li>Verificación humana: compare siempre con <a href="https://nylottery.ny.gov/all-winning-numbers" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">NY Lottery — All Winning Numbers</a>.</li>
+      <li>Powerball y Mega Millions son juegos multiestatales; las reglas y premios oficiales están en los sitios de cada organización.</li>
+    </ul>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">2. MLB — estadísticas de jugadores (ponches, hits, bases)</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Para el modo <strong class="text-white">Deportes → MLB</strong>, los valores recientes de temporadas (por ejemplo, ponches de un abridor o hits de un bateador) se obtienen principalmente de la <strong class="text-white">MLB Stats API</strong> (<code class="text-gray-400">statsapi.mlb.com</code>), la interfaz pública de estadísticas de Major League Baseball. Es la misma familia de datos que usan medios y analistas cuando citan líneas oficiales de juego.
+    </p>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      En la interfaz mostramos hasta diez partidos recientes cuando la API responde correctamente; la probabilidad del modelo deportivo combina ventana corta (L5), ventana larga (L10), volatilidad, contexto de rival y señales editoriales de línea. Los props reales dependen de la disponibilidad de cuotas vía proveedor agregador (The Odds API) en el servidor.
+    </p>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+      Sitios de referencia para contrastar noticias y calendarios: <a href="https://www.mlb.com/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">MLB.com</a>.
+    </p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">3. NBA — diario de partidos y puntos</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Las series temporales de puntos, rebotes y asistencias para construir PRA y puntos se obtienen desde feeds públicos de <strong class="text-white">ESPN</strong> (resumen de partidos por atleta). No somos filiales de ESPN; usamos estos datos como referencia estadística, igual que haría un fanático que revisa el mismo feed para preparar una quiniela de fantasía.
+    </p>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+      La NBA publica reglas y resultados oficiales en <a href="https://www.nba.com/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">NBA.com</a>.
+    </p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">4. NFL — contexto y límites actuales</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      La National Football League concentra yardas, touchdowns y participaciones en plataformas con acuerdos de datos restrictivos. En prediccionloteria.com, la vista <strong class="text-white">NFL</strong> del dashboard combina líneas de mercado (cuando el agregador las entrega) con heurísticas de forma simulada cuando no hay historial jugador-a-jugador en tiempo real. Recomendamos contrastar cualquier decisión de apuesta con <a href="https://www.nfl.com/stats/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">NFL.com/stats</a> y las casas reguladas en su estado.
+    </p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">5. ads.txt y Google AdSense</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      El archivo <code class="text-gray-400">/ads.txt</code> en la raíz del dominio lista el ID de editor de Google autorizado. Debe servirse como texto plano (<code class="text-gray-400">text/plain</code>) y ser accesible en <strong class="text-white">https://www.prediccionloteria.com/ads.txt</strong> (y el dominio apex si aplica). Si AdSense indica que no se encontró el archivo, suele deberse a caché CDN, despliegue incompleto o bloqueo temporal del rastreador; tras publicar, use «Comprobar» en AdSense y vuelva a solicitar revisión.
+    </p>
+  </section>
+
+  <section class="mb-6">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">6. Juego responsable</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+      Solo mayores de edad según su jurisdicción. Las apuestas deportivas solo donde estén legalmente permitidas. Si necesita ayuda con conductas de juego problemático, en EE. UU. puede contactar la <a href="https://www.ncpgambling.org/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">National Council on Problem Gambling</a> (1-800-522-4700).
+    </p>
+  </section>
+
+  <div class="flex flex-wrap gap-2 text-sm pt-4 border-t border-gray-700">
+    <a href="/" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Volver al inicio</a>
+    <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">FAQ</a>
+    <a href="/about.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Acerca de</a>
+  </div>
+  <p class="text-gray-500 text-xs mt-8">© 2026 prediccionloteria.com</p>
+</div>
+</body>
+</html>

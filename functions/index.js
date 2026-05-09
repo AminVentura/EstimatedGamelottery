@@ -24,6 +24,8 @@ const {
   buildConfidenceScore,
   mean,
   stdDev,
+  fetchNbaPlayerGamelog,
+  fetchMlbPlayerSeasonStats,
 } = require('./sports-eternal');
 
 // Guard: only initialize once (safe across hot-reloads & multi-file setups)
@@ -665,7 +667,7 @@ async function refreshMlbPlayerTrendScores(db, year) {
 // getSeasonContext — dynamic snapshot for current season/year
 // ════════════════════════════════════════════════════════════════════════════
 exports.getSeasonContext = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const sport = String((request.data && request.data.sport) || 'MLB').toUpperCase();
@@ -693,7 +695,7 @@ exports.getSeasonContext = onCall(
 // getAgentPrediction — initial heuristic based on stats_history + memory
 // ════════════════════════════════════════════════════════════════════════════
 exports.getAgentPrediction = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const sport = String((request.data && request.data.sport) || 'MLB').toUpperCase();
@@ -781,7 +783,7 @@ exports.ingestMlbDailyAt4am = onSchedule(
 );
 
 exports.initializeUniversalSportsSchema = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const rawYear = request.data && request.data.year != null
@@ -798,7 +800,7 @@ exports.initializeUniversalSportsSchema = onCall(
 );
 
 exports.analyzeMlbPlayerTrends = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const rawYear = request.data && request.data.year != null
@@ -884,14 +886,14 @@ async function runMlbPropPrediction(request) {
 }
 
 exports.getMlbPropPredictions = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => runMlbPropPrediction(request)
 );
 
 // Compatibility aliases for frontend bridge naming variants.
 // Same handler: app.js calls getMlbAgentPrediction first, then getMLBAgentPrediction (capital MLB).
 const _getMlbAgentPredictionCallable = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => runMlbPropPrediction(request)
 );
 exports.getMlbAgentPrediction = _getMlbAgentPredictionCallable;
@@ -906,6 +908,7 @@ exports.getSportsOdds = onCall(
     secrets: [ODDS_API_KEY],
     cors: ALLOWED_ORIGINS,
     enforceAppCheck: true,
+    consumeAppCheckToken: true,
   },
   async (request) => {
     const sport    = (request.data && request.data.sport) || 'NBA';
@@ -1007,7 +1010,7 @@ exports.getSportsOdds = onCall(
 // getSportsEvents — MLB mock feed backed by Firestore sports_events
 // ════════════════════════════════════════════════════════════════════════════
 exports.getSportsEvents = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     const sport = ((request.data && request.data.sport) || 'MLB').toUpperCase();
@@ -1059,10 +1062,82 @@ exports.getSportsEvents = onCall(
 );
 
 // ════════════════════════════════════════════════════════════════════════════
+// getPlayerStatsHistory — real last-N game values from MLB Stats API or ESPN NBA
+// Used by frontend to enrich mock player data with real historical stats for
+// better prediction accuracy.
+// Input:  { sport: 'MLB'|'NBA', playerId: string, metric: string, lastN?: number }
+// Output: { last5, last10, seasonAvg, source }
+// ════════════════════════════════════════════════════════════════════════════
+exports.getPlayerStatsHistory = onCall(
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
+  async (request) => {
+    if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
+
+    const data     = request.data || {};
+    const sport    = String(data.sport || '').toUpperCase();
+    const playerId = String(data.playerId || '').trim();
+    let metric     = String(data.metric || 'points').toLowerCase();
+    if (sport === 'MLB') {
+      const mlbMap = { k: 'strikeouts', er: 'earned_runs', h: 'hits', tb: 'total_bases', hr: 'hits' };
+      metric = mlbMap[metric] || metric;
+    }
+    const lastN    = Math.min(20, Math.max(5, Number(data.lastN) || 10));
+
+    if (!playerId || playerId.length > 20) {
+      throw new HttpsError('invalid-argument', 'playerId requerido (≤20 chars).');
+    }
+    if (!['MLB', 'NBA'].includes(sport)) {
+      return { last5: [], last10: [], seasonAvg: null, source: 'unsupported' };
+    }
+
+    try {
+      if (sport === 'MLB') {
+        // First try Firestore player averages (populated by daily scheduled function)
+        const db = getFirestore();
+        const refs = getUniversalSeasonRefs(db, 'mlb', getCurrentYear());
+        const snap = await refs.playerAveragesCollection.doc(playerId).get();
+        if (snap.exists) {
+          const doc = snap.data();
+          const history = Array.isArray(doc.rollingHistory) ? doc.rollingHistory : [];
+          if (history.length >= 3) {
+            const getter = {
+              strikeouts:   (h) => Number((h.metrics && h.metrics.strikeouts)   || 0),
+              earned_runs:  (h) => Number((h.metrics && h.metrics.earned_runs)  || 0),
+              hits:         (h) => Number((h.metrics && h.metrics.hits)         || 0),
+              total_bases:  (h) => Number((h.metrics && h.metrics.total_bases)  || 0),
+              stolen_bases: (h) => Number((h.metrics && h.metrics.stolen_bases) || 0),
+            }[metric] || ((h) => 0);
+            const vals   = history.slice(-10).map(getter);
+            const avgVal = vals.length ? mean(vals) : 0;
+            return { last5: vals.slice(-5), last10: vals, seasonAvg: Number(avgVal.toFixed(2)), source: 'firestore' };
+          }
+        }
+        // Fallback: MLB Stats API live fetch
+        const mlbStats = await fetchMlbPlayerSeasonStats(playerId, metric, getCurrentYear());
+        return { ...mlbStats, source: 'mlb_statsapi' };
+      }
+
+      if (sport === 'NBA') {
+        const metricKey = metric === 'pra' ? 'pra' : metric === 'assists' ? 'ast' : metric === 'rebounds' ? 'reb' : 'pts';
+        const gamelog = await fetchNbaPlayerGamelog(playerId, lastN);
+        const vals    = gamelog.map((g) => Number(g[metricKey] || 0));
+        const avgVal  = vals.length ? mean(vals) : 0;
+        return { last5: vals.slice(-5), last10: vals, seasonAvg: Number(avgVal.toFixed(2)), source: 'espn_api' };
+      }
+    } catch (err) {
+      console.warn('[getPlayerStatsHistory] fetch error:', err.message);
+      return { last5: [], last10: [], seasonAvg: null, source: 'error' };
+    }
+
+    return { last5: [], last10: [], seasonAvg: null, source: 'unsupported' };
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════════════
 // getStandings — serves Firestore cache; graceful fail if empty
 // ════════════════════════════════════════════════════════════════════════════
 exports.getStandings = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
 
@@ -1093,7 +1168,7 @@ exports.getStandings = onCall(
 // Or call from the SDK in the browser once Firebase is initialized.
 // ════════════════════════════════════════════════════════════════════════════
 exports.seedStandings = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
     console.log('[seedStandings] called by uid=' + request.auth.uid);
@@ -1131,7 +1206,7 @@ exports.seedStandings = onCall(
 // getUserPlan — returns planType + remaining requests for the current user
 // ════════════════════════════════════════════════════════════════════════════
 exports.getUserPlan = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'Debes estar autenticado.');
 
@@ -1169,6 +1244,7 @@ exports.createCheckoutSession = onCall(
     region: 'us-central1',
     cors: ALLOWED_ORIGINS,
     enforceAppCheck: true,
+    consumeAppCheckToken: true,
     secrets: [STRIPE_SECRET_KEY, STRIPE_PRO_PRICE_ID],
   },
   async (request) => {
@@ -1177,12 +1253,13 @@ exports.createCheckoutSession = onCall(
     }
 
     const uid    = request.auth.uid;
-    const stripe = createStripeClient(resolveStripeApiKey(STRIPE_SECRET_KEY));
-    const priceId = await resolveProPriceId(stripe, STRIPE_PRO_PRICE_ID);
+   const stripe = createStripeClient(STRIPE_SECRET_KEY.value());
+   const priceId = "price_1TUGZ9CrdqApE2p7bY6cBHqw";
 
     try {
       const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
+        payment_method_types: ['card'],
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: PRO_SUCCESS_URL,
         cancel_url: PRO_CANCEL_URL,
@@ -1191,7 +1268,6 @@ exports.createCheckoutSession = onCall(
         subscription_data: { metadata: { uid, planType: 'pro' } },
         allow_promotion_codes: true,
         billing_address_collection: 'auto',
-        automatic_payment_methods: { enabled: true },
       });
 
       if (!session.url) {
@@ -1216,6 +1292,7 @@ exports.createCustomerPortalSession = onCall(
     region: 'us-central1',
     cors: ALLOWED_ORIGINS,
     enforceAppCheck: true,
+    consumeAppCheckToken: true,
     secrets: [STRIPE_SECRET_KEY],
   },
   async (request) => {
@@ -1862,7 +1939,7 @@ exports.ingestOfficialLotteryResults = onSchedule(
 );
 
 exports.getLotteryAgentInsight = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
     if (!request.auth) {
       throw new HttpsError('unauthenticated', 'Debes estar autenticado para obtener insights.');

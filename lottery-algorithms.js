@@ -199,7 +199,7 @@ function calculateGapAnalysis(allHistoryData, maxNumber, minNumber = 1) {
 }
 
 // --- SISTEMA DE PUNTUACIÓN ENSEMBLE ---
-// Combina frecuencia, EMA, gap y Markov en un único score por número.
+// Combina frecuencia, EMA, gap, Markov y balance por franjas en un único score por número.
 // Pesos: 30% frecuencia simple, 25% frecuencia ponderada, 25% EMA, 10% gap, 10% Markov.
 function scoreNumbers(allHistoryData, maxNumber, minNumber = 1) {
   const scores = {};
@@ -257,6 +257,28 @@ function scoreNumbers(allHistoryData, maxNumber, minNumber = 1) {
         scores[i] += ((markovProbs[i] || 0) / maxMarkov) * 10;
       }
     }
+  }
+
+  // 6. Balance por franjas numéricas en ventana reciente — peso 8% (evita sesgo solo por frecuencia global)
+  const win = Math.min(40, allHistoryData.length);
+  const bucketCount = Math.min(6, Math.max(3, Math.ceil(numRange / 14)));
+  const span = maxNumber - minNumber + 1;
+  const bucketSize = span / bucketCount;
+  const bucketTally = Array(bucketCount).fill(0);
+  for (let di = 0; di < win; di++) {
+    const parsed = parseDrawingData(allHistoryData[di].data);
+    (parsed.mainNumbers || []).forEach((n) => {
+      if (typeof n === 'number' && n >= minNumber && n <= maxNumber) {
+        const bi = Math.min(bucketCount - 1, Math.floor((n - minNumber) / bucketSize));
+        bucketTally[bi]++;
+      }
+    });
+  }
+  const maxT = Math.max(1, ...bucketTally);
+  for (let i = minNumber; i <= maxNumber; i++) {
+    const bi = Math.min(bucketCount - 1, Math.floor((i - minNumber) / bucketSize));
+    const saturation = bucketTally[bi] / maxT;
+    scores[i] += (1 - saturation) * 8;
   }
 
   return scores;

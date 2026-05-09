@@ -6,7 +6,7 @@
  * Agents:
  *   StorageAgent   — native Web Crypto AES-256-GCM, localStorage wrappers
  *   DataAgent      — The Odds API fetch with 30-min in-memory cache
- *   AnalysisAgent  — 4-factor probability, insights, money direction
+ *   AnalysisAgent  — multi-factor probability (historial L5/L10, momentum, z-score)
  *   FeedbackAgent  — accuracy tracking, confidence tiers
  *   ParlayAgent    — leg management, combined prob, implied odds
  *   UIAgent        — all DOM rendering (Props, Live, Standings, Parlay)
@@ -38,6 +38,13 @@
       { key: 'nfl_receiving_yards', label: 'Yardas Recepción', unit: 'yds' },
       { key: 'nfl_td_anytime', label: 'Touchdown en cualquier momento', unit: 'TD' },
       { key: 'nfl_touchdown_any_moment', label: 'Touchdown Any Moment', unit: 'TD' }
+    ],
+    Tennis: [
+      { key: 'tennis_aces', label: 'Aces', unit: 'ace' },
+      { key: 'tennis_sets_won', label: 'Sets Ganados', unit: 'sets' },
+      { key: 'tennis_total_games', label: 'Juegos Totales en el Partido', unit: 'games' },
+      { key: 'tennis_double_faults', label: 'Dobles Faltas', unit: 'df' },
+      { key: 'tennis_break_points', label: 'Break Points Convertidos', unit: 'bp' }
     ]
   };
   var MARKET_KEY_ALIASES = {
@@ -52,24 +59,24 @@
       icon: 'fas fa-basketball-ball', colorName: 'orange',
       metric: 'Puntos', unit: 'pts',
       players: [
-        { id:'ld_pts', name:'Luka Dončić',           team:'DAL', avg:33.8, line:32.5, last5:[38,29,35,31,36], opponentRank:7,  isHome:false, lineDelta:+1.0, hot:true  },
-        { id:'jt_pts', name:'Jayson Tatum',           team:'BOS', avg:28.5, line:26.5, last5:[31,29,30,27,33], opponentRank:18, isHome:true,  lineDelta:+0.5, hot:true  },
-        { id:'ga_pts', name:'Giannis Antetokounmpo',  team:'MIL', avg:30.5, line:29.5, last5:[33,28,32,25,34], opponentRank:16, isHome:true,  lineDelta:+1.0, hot:false },
-        { id:'sc_ast', name:'Stephen Curry',          team:'GSW', avg:28.1, line:27.5, last5:[31,24,29,33,23], opponentRank:12, isHome:false, lineDelta: 0,   hot:false },
-        { id:'nj_reb', name:'Nikola Jokić',           team:'DEN', avg:26.4, line:25.0, last5:[30,27,24,31,20], opponentRank:22, isHome:true,  lineDelta: 0,   hot:false },
-        { id:'lj_pts', name:'LeBron James',           team:'LAL', avg:25.3, line:24.5, last5:[28,22,31,19,26], opponentRank:18, isHome:true,  lineDelta:-0.5, hot:false },
+        { id:'ld_pts', statsId:'3945274', name:'Luka Dončić',           team:'DAL', avg:33.8, line:32.5, last5:[38,29,35,31,36], opponentRank:7,  isHome:false, lineDelta:+1.0, hot:true  },
+        { id:'jt_pts', statsId:'4065648', name:'Jayson Tatum',           team:'BOS', avg:28.5, line:26.5, last5:[31,29,30,27,33], opponentRank:18, isHome:true,  lineDelta:+0.5, hot:true  },
+        { id:'ga_pts', statsId:'3032977', name:'Giannis Antetokounmpo',  team:'MIL', avg:30.5, line:29.5, last5:[33,28,32,25,34], opponentRank:16, isHome:true,  lineDelta:+1.0, hot:false },
+        { id:'sc_ast', statsId:'3975',    name:'Stephen Curry',          team:'GSW', avg:28.1, line:27.5, last5:[31,24,29,33,23], opponentRank:12, isHome:false, lineDelta: 0,   hot:false },
+        { id:'nj_reb', statsId:'3112335', name:'Nikola Jokić',           team:'DEN', avg:26.4, line:25.0, last5:[30,27,24,31,20], opponentRank:22, isHome:true,  lineDelta: 0,   hot:false },
+        { id:'lj_pts', statsId:'1966',    name:'LeBron James',           team:'LAL', avg:25.3, line:24.5, last5:[28,22,31,19,26], opponentRank:18, isHome:true,  lineDelta:-0.5, hot:false },
       ]
     },
     MLB: {
       icon: 'fas fa-baseball-ball', colorName: 'blue',
       metric: 'Ponches (K)', unit: 'K',
       players: [
-        { id:'ss_k',  name:'Spencer Strider', team:'ATL', avg:10.1, line:9.5,  last5:[11,9,12,8,10], opponentRank:21, isHome:false, lineDelta: 0,   hot:false },
-        { id:'gc_k',  name:'Gerrit Cole',     team:'NYY', avg:9.2,  line:8.5,  last5:[10,8,11,9,7],  opponentRank:14, isHome:true,  lineDelta: 0,   hot:false },
-        { id:'ms_k',  name:'Max Scherzer',    team:'TEX', avg:8.6,  line:7.5,  last5:[10,9,9,8,10],  opponentRank:8,  isHome:false, lineDelta:-0.5, hot:true  },
-        { id:'zw_k',  name:'Zack Wheeler',    team:'PHI', avg:8.3,  line:7.5,  last5:[9,7,10,8,8],   opponentRank:6,  isHome:true,  lineDelta: 0,   hot:false },
-        { id:'js_tb', name:'Juan Soto',       team:'NYY', avg:2.1,  line:1.5,  last5:[3,2,2,1,3],    opponentRank:19, isHome:true,  lineDelta:+0.5, hot:true  },
-        { id:'ff_h',  name:'Freddie Freeman', team:'LAD', avg:1.3,  line:1.5,  last5:[1,2,1,1,2],    opponentRank:11, isHome:false, lineDelta: 0,   hot:false },
+        { id:'ss_k',  statsId:'675911', name:'Spencer Strider', team:'ATL', avg:10.1, line:9.5,  last5:[11,9,12,8,10], opponentRank:21, isHome:false, lineDelta: 0,   hot:false },
+        { id:'gc_k',  statsId:'543037', name:'Gerrit Cole',     team:'NYY', avg:9.2,  line:8.5,  last5:[10,8,11,9,7],  opponentRank:14, isHome:true,  lineDelta: 0,   hot:false },
+        { id:'ms_k',  statsId:'453286', name:'Max Scherzer',    team:'TEX', avg:8.6,  line:7.5,  last5:[10,9,9,8,10],  opponentRank:8,  isHome:false, lineDelta:-0.5, hot:true  },
+        { id:'zw_k',  statsId:'554430', name:'Zack Wheeler',    team:'PHI', avg:8.3,  line:7.5,  last5:[9,7,10,8,8],   opponentRank:6,  isHome:true,  lineDelta: 0,   hot:false },
+        { id:'js_tb', statsId:'665742', name:'Juan Soto',       team:'NYY', avg:2.1,  line:1.5,  last5:[3,2,2,1,3],    opponentRank:19, isHome:true,  lineDelta:+0.5, hot:true  },
+        { id:'ff_h',  statsId:'518692', name:'Freddie Freeman', team:'LAD', avg:1.3,  line:1.5,  last5:[1,2,1,1,2],    opponentRank:11, isHome:false, lineDelta: 0,   hot:false },
       ]
     },
     NFL: {
@@ -82,6 +89,18 @@
         { id:'cm_yds', name:'Christian McCaffrey', team:'SF',  avg:92.1,  line:85.5,  last5:[101,88,96,79,104], opponentRank:6,  isHome:false, lineDelta:+2.5, hot:true  },
         { id:'sd_rec', name:'Stefon Diggs',         team:'HOU', avg:71.4,  line:68.0,  last5:[77,64,82,58,76],   opponentRank:5,  isHome:true,  lineDelta: 0,   hot:false },
         { id:'da_yds', name:'Davante Adams',        team:'LVR', avg:68.5,  line:65.5,  last5:[73,61,79,58,71],   opponentRank:14, isHome:true,  lineDelta:-2.5, hot:false },
+      ]
+    },
+    Tennis: {
+      icon: 'fas fa-circle', colorName: 'yellow',
+      metric: 'Aces', unit: 'ace',
+      players: [
+        { id:'ca_ace', name:'Carlos Alcaraz',          team:'ESP', avg:9.1,  line:8.5,  last5:[10,9,8,9,11], opponentRank:1,  isHome:true,  lineDelta:+1.0, hot:true  },
+        { id:'nj_ace', name:'Novak Djokovic',           team:'SRB', avg:8.2,  line:7.5,  last5:[9,8,7,8,9],  opponentRank:2,  isHome:false, lineDelta:+0.5, hot:true  },
+        { id:'js_ace', name:'Jannik Sinner',            team:'ITA', avg:7.8,  line:7.0,  last5:[8,7,8,7,9],  opponentRank:3,  isHome:false, lineDelta: 0,   hot:false },
+        { id:'az_ace', name:'Alexander Zverev',         team:'GER', avg:7.2,  line:6.5,  last5:[7,7,6,8,7],  opponentRank:5,  isHome:true,  lineDelta:-0.5, hot:false },
+        { id:'tp_ace', name:'Tommy Paul',               team:'USA', avg:6.5,  line:6.0,  last5:[7,6,6,6,7],  opponentRank:12, isHome:false, lineDelta: 0,   hot:false },
+        { id:'fa_ace', name:'Félix Auger-Aliassime',    team:'CAN', avg:6.8,  line:6.5,  last5:[7,6,7,6,8],  opponentRank:8,  isHome:true,  lineDelta: 0,   hot:false },
       ]
     }
   };
@@ -110,6 +129,14 @@
       { team:'Kansas City Chiefs',    w:11, l:6, pct:'.647', gb:'2',  conf:'AFC W' },
       { team:'Philadelphia Eagles',   w:11, l:6, pct:'.647', gb:'1',  conf:'NFC E' },
       { team:'Miami Dolphins',        w:11, l:6, pct:'.647', gb:'2',  conf:'AFC E' },
+    ],
+    Tennis: [
+      { team:'Carlos Alcaraz',           w:45, l:8,  pct:'.849', gb:'—',  conf:'ATP 1' },
+      { team:'Jannik Sinner',            w:42, l:10, pct:'.808', gb:'3',  conf:'ATP 2' },
+      { team:'Novak Djokovic',           w:35, l:12, pct:'.745', gb:'10', conf:'ATP 3' },
+      { team:'Alexander Zverev',         w:28, l:15, pct:'.651', gb:'14', conf:'ATP 4' },
+      { team:'Félix Auger-Aliassime',    w:26, l:17, pct:'.605', gb:'16', conf:'ATP 5' },
+      { team:'Tommy Paul',               w:22, l:18, pct:'.550', gb:'20', conf:'ATP 6' },
     ],
   };
 
@@ -175,6 +202,7 @@
     NBA: { DAL: 'Dallas', BOS: 'Boston', MIL: 'Milwaukee', GSW: 'Golden', DEN: 'Denver', LAL: 'Lakers' },
     MLB: { ATL: 'Atlanta', NYY: 'Yankees', TEX: 'Texas', PHI: 'Philadelphia', LAD: 'Dodgers' },
     NFL: { MIN: 'Minnesota', MIA: 'Miami', BUF: 'Buffalo', SF: 'Francisco', HOU: 'Houston', LVR: 'Raiders' },
+    Tennis: { ESP: 'Alcaraz', SRB: 'Djokovic', ITA: 'Sinner', GER: 'Zverev', USA: 'Paul', CAN: 'Auger' },
   };
 
   function parseStandingsPct(row) {
@@ -340,6 +368,23 @@
     var catalog = SPORT_MARKETS[sport] || [];
     return catalog.find(function (m) { return m.key === key; }) || { key: key, label: SPORTS_DATA[sport].metric, unit: SPORTS_DATA[sport].unit };
   }
+
+  /** Métrica esperada por getPlayerStatsHistory (MLB Stats API / ESPN NBA). */
+  function toStatsApiMetric(sport, market) {
+    var key = market && market.key ? market.key : '';
+    if (sport === 'MLB') {
+      if (key === 'mlb_strikeouts') return 'strikeouts';
+      if (key === 'mlb_earned_runs') return 'earned_runs';
+      if (key === 'mlb_hits') return 'hits';
+      if (key === 'mlb_total_bases') return 'total_bases';
+      return 'strikeouts';
+    }
+    if (sport === 'NBA') {
+      if (key === 'nba_pra') return 'pra';
+      return 'pts';
+    }
+    return 'pts';
+  }
   function deriveLast10(last5, line, seed, binaryMode) {
     var src = Array.isArray(last5) && last5.length ? last5 : [line, line, line, line, line];
     var out = [];
@@ -355,32 +400,42 @@
     var seed = seedFromText(player.id + '_' + market.key);
     var p = Object.assign({}, player);
     var baseLast5 = Array.isArray(player.last5) && player.last5.length ? player.last5.slice() : [player.line || 0, player.line || 0, player.line || 0, player.line || 0, player.line || 0];
-    if (market.key === 'nba_pra') {
-      var add = 10 + (seed % 7);
-      p.last5 = baseLast5.map(function (v) { return round1(v + add); });
-      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
-      p.line = round1((player.line || p.avg) + add - 1.5);
-    } else if (market.key === 'nba_race_20') {
-      p.last5 = baseLast5.map(function (v) { return v >= 20 ? 1 : 0; });
-      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
-      p.line = 0.5;
-    } else if (market.key === 'mlb_total_bases') {
-      p.last5 = baseLast5.map(function (v) { return round1(clamp((v / 3.8) + ((seed % 3) - 1) * 0.2, 0, 6)); });
-      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
-      p.line = round1(clamp(p.avg - 0.3, 0.5, 4.5));
-    } else if (market.key === 'mlb_first_hr') {
-      p.last5 = baseLast5.map(function (v, i) { return (((seed + i * 13) % 100) < clamp(v * 8, 10, 45)) ? 1 : 0; });
-      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
-      p.line = 0.5;
-    } else if (market.key === 'nfl_td_anytime' || market.key === 'nfl_touchdown_any_moment') {
-      p.last5 = baseLast5.map(function (v, i) { return (((seed + i * 19) % 100) < clamp(v * 0.65, 20, 80)) ? 1 : 0; });
-      p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
-      p.line = 0.5;
+    var skipMockDerivation = player._realStats && (
+      (sport === 'NBA' && (market.key === 'nba_points' || market.key === 'nba_pra')) ||
+      (sport === 'MLB' && ['mlb_strikeouts', 'mlb_earned_runs', 'mlb_hits', 'mlb_total_bases'].indexOf(market.key) !== -1)
+    );
+    if (!skipMockDerivation) {
+      if (market.key === 'nba_pra') {
+        var add = 10 + (seed % 7);
+        p.last5 = baseLast5.map(function (v) { return round1(v + add); });
+        p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+        p.line = round1((player.line || p.avg) + add - 1.5);
+      } else if (market.key === 'nba_race_20') {
+        p.last5 = baseLast5.map(function (v) { return v >= 20 ? 1 : 0; });
+        p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+        p.line = 0.5;
+      } else if (market.key === 'mlb_total_bases') {
+        p.last5 = baseLast5.map(function (v) { return round1(clamp((v / 3.8) + ((seed % 3) - 1) * 0.2, 0, 6)); });
+        p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+        p.line = round1(clamp(p.avg - 0.3, 0.5, 4.5));
+      } else if (market.key === 'mlb_first_hr') {
+        p.last5 = baseLast5.map(function (v, i) { return (((seed + i * 13) % 100) < clamp(v * 8, 10, 45)) ? 1 : 0; });
+        p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+        p.line = 0.5;
+      } else if (market.key === 'nfl_td_anytime' || market.key === 'nfl_touchdown_any_moment') {
+        p.last5 = baseLast5.map(function (v, i) { return (((seed + i * 19) % 100) < clamp(v * 0.65, 20, 80)) ? 1 : 0; });
+        p.avg = round1(p.last5.reduce(function (a, b) { return a + b; }, 0) / p.last5.length);
+        p.line = 0.5;
+      }
     }
     p.marketKey = market.key;
     p.marketLabel = market.label;
     p.marketUnit = market.unit;
-    p.last10 = deriveLast10(p.last5, p.line, seed, p.line <= 1);
+    if (player._realStats && Array.isArray(player.last10) && player.last10.length >= 5) {
+      p.last10 = player.last10.slice();
+    } else {
+      p.last10 = deriveLast10(p.last5, p.line, seed, p.line <= 1);
+    }
     return p;
   }
 
@@ -416,6 +471,7 @@
         var avg = round1(simulatedLast5.reduce(function (a, b) { return a + b; }, 0) / simulatedLast5.length);
         rows.push({
           id: String(ev.eventId || ev.id || 'ev') + '_' + target.market + '_' + idx,
+          statsId: String(prop.playerId || prop.statsApiId || '').trim(),
           name: title,
           team: (ev.teams && (ev.teams.home || ev.teams.away)) || 'MLB',
           avg: avg,
@@ -596,6 +652,46 @@
         return { sport: sport, source: 'error', events: [] };
       }
     },
+
+    // Enriches a player array with real last5/last10 from Cloud Function (MLB Stats API / ESPN).
+    // Uses statsId when present (MLB.com personId / ESPN athleteId).
+    enrichPlayersWithRealStats: async function (players, sport, market) {
+      if (!window.firebaseServices || typeof window.firebaseServices.getPlayerStatsHistory !== 'function') return players;
+      if (!['MLB', 'NBA'].includes(sport)) return players;
+      var apiMetric = toStatsApiMetric(sport, market);
+      var self = this;
+      var enriched = await Promise.all(players.map(async function (p) {
+        var pid = String(p.statsId != null && p.statsId !== '' ? p.statsId : p.id).trim();
+        var ck = 'pstats_' + sport + '_' + pid + '_' + apiMetric;
+        var cached = self._getSession(ck);
+        if (cached && cached.last5 && cached.last5.length >= 3) {
+          var l10c = (cached.last10 && cached.last10.length) ? cached.last10 : cached.last5.slice();
+          return Object.assign({}, p, {
+            last5: cached.last5.slice(),
+            last10: l10c,
+            avg: cached.seasonAvg != null ? cached.seasonAvg : p.avg,
+            _realStats: true,
+            _statsSource: cached.source || 'cache',
+          });
+        }
+        try {
+          var stats = await window.firebaseServices.getPlayerStatsHistory(sport, pid, apiMetric, 12);
+          if (stats && stats.last5 && stats.last5.length >= 3) {
+            self._setSession(ck, stats);
+            var l10 = (stats.last10 && stats.last10.length >= 5) ? stats.last10.slice() : stats.last5.slice();
+            return Object.assign({}, p, {
+              last5: stats.last5.slice(),
+              last10: l10,
+              avg: stats.seasonAvg != null ? stats.seasonAvg : p.avg,
+              _realStats: true,
+              _statsSource: stats.source || 'live',
+            });
+          }
+        } catch (_) {}
+        return p;
+      }));
+      return enriched;
+    },
     fetchAgentPrediction: async function (payload) {
       await this.waitFirebaseBridge();
       var ck = 'agent_prediction_' + JSON.stringify(payload || {});
@@ -677,30 +773,70 @@
   // ANALYSIS AGENT — 4-factor probability engine + insights
   // ════════════════════════════════════════════════════════════════════════
   var AnalysisAgent = {
-    // Season avg edge + recent form + opponent rank + home advantage
-    calculateProbability: function (player) {
+    // 5-factor probability engine: edge + trend(z-score) + opponent + home + line movement
+    // + volatility penalty + feedback calibration loop
+    calculateProbability: function (player, sport) {
       var avg = player.avg, line = player.line, last5 = player.last5;
       var opponentRank = player.opponentRank || 16;
       var isHome = player.isHome || false;
 
-      var edgeNorm  = (avg - line) / (avg * 0.15);
-      var baseProb  = 0.5 + Math.max(-0.22, Math.min(0.22, edgeNorm * 0.28));
+      // Factor 1 — season-average edge (26% weight)
+      var edgeNorm = (avg - line) / (avg * 0.15 + 0.001);
+      var baseProb = 0.5 + Math.max(-0.22, Math.min(0.22, edgeNorm * 0.28));
 
-      var aboveLine  = last5.filter(function (v) { return v > line; }).length;
-      var trendBonus = (aboveLine / last5.length - 0.5) * 0.28;
+      // Factor 2 — recent trend via z-score on L5
+      var mean5 = last5.reduce(function (s, v) { return s + v; }, 0) / last5.length;
+      var variance = last5.reduce(function (s, v) { return s + Math.pow(v - mean5, 2); }, 0) / last5.length;
+      var stdDev5 = Math.sqrt(variance) || 1;
+      var zScore5 = (mean5 - line) / stdDev5;
+      var trendBonus = Math.max(-0.16, Math.min(0.16, zScore5 * 0.085));
 
-      var oppBonus  = ((opponentRank - 16) / 32) * 0.14;
+      // Factor 2b — ventana L10 oficial (cuando existe): segunda z + momentum L3 vs L7
+      var l10 = Array.isArray(player.last10) && player.last10.length >= 8 ? player.last10 : null;
+      var longTrend = 0;
+      var momentum = 0;
+      if (l10) {
+        var mean10 = l10.reduce(function (s, v) { return s + v; }, 0) / l10.length;
+        var var10 = l10.reduce(function (s, v) { return s + Math.pow(v - mean10, 2); }, 0) / l10.length;
+        var sd10 = Math.sqrt(var10) || 1;
+        var z10 = (mean10 - line) / sd10;
+        longTrend = Math.max(-0.08, Math.min(0.08, z10 * 0.045));
+        var l3 = l10.slice(-3);
+        var lprev = l10.slice(0, Math.max(0, l10.length - 3));
+        var m3 = l3.reduce(function (s, v) { return s + v; }, 0) / l3.length;
+        var mPrev = lprev.length ? lprev.reduce(function (s, v) { return s + v; }, 0) / lprev.length : m3;
+        momentum = Math.max(-0.06, Math.min(0.06, (m3 - mPrev) / (sd10 + 0.25) * 0.04));
+      }
+
+      // Volatility penalty — high stdDev relative to avg reduces confidence
+      var volatilityRatio = stdDev5 / (avg || 1);
+      var volatilityPenalty = volatilityRatio > 0.25 ? -(volatilityRatio - 0.25) * 0.12 : 0;
+
+      // Factor 3 — opponent defensive rank (12% weight)
+      var oppBonus = ((opponentRank - 16) / 32) * 0.12;
+
+      // Factor 4 — home/away advantage
       var homeBonus = isHome ? 0.03 : -0.01;
 
+      // Factor 5 — line movement signal (strengthened)
       var lineDelta = player.lineDelta || 0;
-      var lineSignal = 0;
-      if (lineDelta > 0 && avg > line) lineSignal = 0.02;
-      if (lineDelta < 0 && avg < line) lineSignal = 0.02;
-      if (lineDelta > 0 && avg < line) lineSignal = -0.03;
-      if (lineDelta < 0 && avg > line) lineSignal = -0.02;
+      var lineSignal = Math.max(-0.06, Math.min(0.06, lineDelta * 0.04)) * (avg > line ? 1 : -1);
 
-      var prob = baseProb + trendBonus + oppBonus + homeBonus + lineSignal;
-      return Math.round(Math.max(0.26, Math.min(0.82, prob)) * 100);
+      // Confianza extra si el historial viene de API oficial (reduce ruido mock)
+      var sourceBoost = player._realStats ? 0.012 : 0;
+
+      var rawProb = baseProb + trendBonus + longTrend + momentum + volatilityPenalty + oppBonus + homeBonus + lineSignal + sourceBoost;
+
+      // Feedback calibration — nudge toward historical accuracy for this sport
+      if (sport) {
+        var histPct = FeedbackAgent.getPct(sport);
+        if (histPct !== null) {
+          var calibration = (histPct / 100 - 0.5) * 0.08;
+          rawProb += calibration;
+        }
+      }
+
+      return Math.round(Math.max(0.26, Math.min(0.82, rawProb)) * 100);
     },
 
     getProbabilityMeta: function (prob) {
@@ -758,7 +894,9 @@
     getData: function () {
       if (!this._data) {
         this._data = StorageAgent.get('sports_accuracy',
-          { NBA: { yes: 0, no: 0 }, MLB: { yes: 0, no: 0 }, NFL: { yes: 0, no: 0 } });
+          { NBA: { yes: 0, no: 0 }, MLB: { yes: 0, no: 0 }, NFL: { yes: 0, no: 0 }, Tennis: { yes: 0, no: 0 } });
+        // Ensure Tennis key exists on legacy stored data
+        if (!this._data.Tennis) this._data.Tennis = { yes: 0, no: 0 };
       }
       return this._data;
     },
@@ -931,6 +1069,11 @@
         '      <div><p style="color:white;font-size:0.85rem;margin:0;font-weight:600">Bono exclusivo en DraftKings</p><p style="color:#6b7280;font-size:0.75rem;margin:0">Hasta $1,000 en bono de bienvenida</p></div>',
         '    </div>',
         '  </div>',
+        '  <div style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(234,179,8,0.08);border:1px dashed rgba(234,179,8,0.45);border-radius:10px;padding:9px 14px;margin-bottom:10px">',
+        '    <i class="fas fa-tag" style="color:#fbbf24;font-size:0.8rem"></i>',
+        '    <span style="color:#d1d5db;font-size:0.8rem">Código de descuento:</span>',
+        '    <code style="color:#fbbf24;font-weight:800;font-size:0.9rem;letter-spacing:0.05em;background:rgba(234,179,8,0.12);padding:2px 8px;border-radius:6px">FRIENDS20</code>',
+        '  </div>',
         '  <button onclick="SportsDashboard.activatePremium()" style="width:100%;background:linear-gradient(90deg,#d97706,#b45309);color:white;font-weight:800;padding:14px;border-radius:12px;border:none;cursor:pointer;font-size:0.95rem;margin-bottom:10px">',
         '    <i class="fas fa-crown" style="margin-right:6px"></i>Activar Pro · $4.99/mes',
         '  </button>',
@@ -1100,7 +1243,7 @@
     },
 
     renderCard: function (player, sport) {
-      var prob     = AnalysisAgent.calculateProbability(player);
+      var prob     = AnalysisAgent.calculateProbability(player, sport);
       var meta     = AnalysisAgent.getProbabilityMeta(prob);
       var insight  = AnalysisAgent.getInsight(player, prob);
       var money    = AnalysisAgent.moneyDirection(player.lineDelta || 0);
@@ -1136,7 +1279,8 @@
         '      </div>',
         '      <div class="min-w-0">',
         '        <p class="text-white font-semibold text-sm truncate">' + player.name + (player.hot ? ' 🔥' : '') + '</p>',
-        '        <p class="text-gray-500 text-xs">' + player.team + ' · ' + (player.isHome ? 'Local' : 'Visitante') + ' · Def. rk #' + player.opponentRank + '</p>',
+        '        <p class="text-gray-500 text-xs">' + player.team + ' · ' + (player.isHome ? 'Local' : 'Visitante') + ' · Def. rk #' + player.opponentRank +
+          (player._realStats && player._statsSource ? ' · <span class="text-emerald-500/90" title="Datos de temporada recientes desde fuente oficial">Hist. ' + String(player._statsSource).replace(/</g, '') + '</span>' : '') + '</p>',
         '      </div>',
         '    </div>',
         '    <div class="shrink-0 text-right">',
@@ -1185,7 +1329,7 @@
         this.miniTrendSvg(player.last5, player.line),
         '  </div>',
         '  <div class="mb-3 rounded-xl p-2.5 border border-gray-700/80 bg-gray-900/60">',
-        '    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Racha Reciente</p>',
+        '    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Racha reciente (hasta 10 juegos)</p>',
         this.recentStreakBars(last10, player.line),
         '  </div>',
 
@@ -1234,9 +1378,11 @@
       var sourcePlayers = (sport === 'MLB' && liveEvents && Array.isArray(liveEvents.events) && liveEvents.events.length)
         ? buildMlbPlayersFromEvents(liveEvents.events, market)
         : data.players;
-      var players = sourcePlayers
+      // Enrich with real historical stats (MLB Stats API / ESPN NBA) — async, best-effort
+      var enrichedPlayers = await DataAgent.enrichPlayersWithRealStats(sourcePlayers, sport, market);
+      var players = enrichedPlayers
         .map(function (p) { return transformPlayerForMarket(p, sport, market); })
-        .map(function (p) { return Object.assign({}, p, { _prob: AnalysisAgent.calculateProbability(p) }); })
+        .map(function (p) { return Object.assign({}, p, { _prob: AnalysisAgent.calculateProbability(p, sport) }); })
         .sort(function (a, b) { return b._prob - a._prob; });
 
       var odds = await DataAgent.fetchOdds(sport);
@@ -1300,8 +1446,16 @@
           ' class="text-xs font-bold text-cyan-200 bg-cyan-950/60 border border-cyan-600/50 rounded-lg px-2 py-1 hover:bg-cyan-900/70 transition-colors">' +
           '<i class="fas fa-file-invoice-dollar mr-1"></i>Facturación</button>';
       }
+      var sourcesBanner = [
+        '<div class="mb-4 rounded-xl border border-cyan-800/50 bg-cyan-950/25 px-4 py-3 text-xs text-gray-300 leading-relaxed">',
+        '  <p class="font-bold text-cyan-300 mb-1"><i class="fas fa-database mr-1"></i>Fuentes de datos deportivos (actualización automática)</p>',
+        '  <p>Los historiales de jugadores <strong class="text-white">MLB</strong> se nutren de la <a href="https://statsapi.mlb.com/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">MLB Stats API</a> (oficial). <strong class="text-white">NBA</strong>: diario de partidos vía ESPN. Clasificaciones: ESPN. Cuotas Player Props: The Odds API a través de nuestro servidor. La caché del cliente renueva aprox. cada 30 minutos; vuelve a abrir <strong class="text-white">Player Props</strong> para refrescar.</p>',
+        '</div>',
+      ].join('');
+
       container.innerHTML = [
         accuracyHtml,
+        sourcesBanner,
         gameLinesHtml,
         '<div class="mb-4 flex flex-wrap items-start justify-between gap-3">',
         '  <div>',
@@ -1606,7 +1760,7 @@
       isPremium: localStorage.getItem('sports_premium') === '1',
       canManageBilling: false,
       parlayHubFilter: 'popular',
-      marketBySport: { NBA: 'nba_points', MLB: 'mlb_strikeouts', NFL: 'nfl_receiving_yards' },
+      marketBySport: { NBA: 'nba_points', MLB: 'mlb_strikeouts', NFL: 'nfl_receiving_yards', Tennis: 'tennis_aces' },
     },
 
     init: function () {
@@ -1680,6 +1834,11 @@
           '    <div style="display:flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px;border:1px solid #334155"><i class="fas fa-chart-line" style="color:#facc15;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Acceso al Sharp Money</span></div>',
           '    <div style="display:flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px;border:1px solid #334155"><i class="fas fa-wand-magic-sparkles" style="color:#60a5fa;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Smart Suggester de 70%+</span></div>',
           '    <div style="display:flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px;border:1px solid #334155"><i class="fas fa-ban" style="color:#38bdf8;flex-shrink:0"></i><span style="color:#d1d5db;font-size:0.85rem">Cero Anuncios</span></div>',
+          '  </div>',
+          '  <div style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(234,179,8,0.08);border:1px dashed rgba(234,179,8,0.45);border-radius:10px;padding:8px 12px;margin-bottom:10px">',
+          '    <i class="fas fa-tag" style="color:#fbbf24;font-size:0.8rem"></i>',
+          '    <span style="color:#d1d5db;font-size:0.8rem">Código de descuento:</span>',
+          '    <code style="color:#fbbf24;font-weight:800;font-size:0.9rem;letter-spacing:0.05em;background:rgba(234,179,8,0.12);padding:2px 8px;border-radius:6px">FRIENDS20</code>',
           '  </div>',
           '  <button id="sd_start_checkout_btn" onclick="SportsDashboard.activatePremium()" style="width:100%;background:linear-gradient(90deg,#d97706,#2563eb);color:white;font-weight:700;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:0.9rem;margin-bottom:8px">Iniciar checkout Pro</button>',
           '  <p id="sd_checkout_error" style="display:none;color:#fca5a5;font-size:0.78rem;line-height:1.35;margin:0 0 8px"></p>',

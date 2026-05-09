@@ -66,7 +66,7 @@
       "name": "Predicciones Lotería USA — Powerball, Mega Millions, Millionaire For Life",
       "description": "Herramienta de análisis estadístico de lotería USA con agente IA. Números calientes, fríos y jugada inteligente del día.",
       "inLanguage": "es",
-      "dateModified": "2026-05-04",
+      "dateModified": "2026-05-09",
       "isPartOf": { "@id": "https://www.prediccionloteria.com/#website" }
     },
     {
@@ -121,6 +121,7 @@
         <i class="fas fa-ticket-alt"></i> Ticket Check
       </a>
       <a href="/faq.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">FAQ</a>
+      <a href="/guia-fuentes-loteria-deportes.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Fuentes</a>
       <a href="/about.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Acerca de</a>
       <a href="/contacto.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Contacto</a>
       <a href="#aviso-legal" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Integridad</a>
@@ -315,6 +316,7 @@
     </p>
     <div class="flex flex-wrap gap-2 text-sm">
       <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Preguntas Frecuentes</a>
+      <a href="/guia-fuentes-loteria-deportes.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Fuentes oficiales (Lotería / MLB / NFL / NBA)</a>
       <a href="/about.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Acerca del proyecto</a>
       <a href="/contacto.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Contacto</a>
       <a href="/politica-privacidad.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Privacidad</a>
@@ -1205,20 +1207,20 @@
           </h4>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
-              <p class="text-emerald-400 font-bold mb-1">① Promedio Temp.</p>
-              <p class="text-gray-400">Base estadística: cuánto supera el jugador su línea en el año (40% del peso).</p>
+              <p class="text-emerald-400 font-bold mb-1">① Promedio temp. + borde</p>
+              <p class="text-gray-400">Comparación entre media de temporada y la línea del mercado.</p>
             </div>
             <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
-              <p class="text-cyan-400 font-bold mb-1">② Forma Reciente</p>
-              <p class="text-gray-400">Últimos 5 partidos: como los "números calientes" en lotería (35% del peso).</p>
+              <p class="text-cyan-400 font-bold mb-1">② Tendencia L5 + L10</p>
+              <p class="text-gray-400">Z-score en últimos 5 juegos y, si hay datos oficiales, ventana de hasta 10 juegos más momentum (últimos 3 vs anteriores).</p>
             </div>
             <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
-              <p class="text-yellow-400 font-bold mb-1">③ Rival Defensivo</p>
-              <p class="text-gray-400">Rango defensivo del equipo contrario. Peor defensa = más fácil superar la línea (15%).</p>
+              <p class="text-yellow-400 font-bold mb-1">③ Rival defensivo</p>
+              <p class="text-gray-400">Ranking defensivo del oponente (contexto de dificultad).</p>
             </div>
             <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
-              <p class="text-orange-400 font-bold mb-1">④ Local/Visitante</p>
-              <p class="text-gray-400">Jugar en casa da +3% de probabilidad. De visitante, -1% (10% del peso).</p>
+              <p class="text-orange-400 font-bold mb-1">④ Local / visitante + línea</p>
+              <p class="text-gray-400">Sesgo de casa, movimiento de línea y calibración con tus votos «¿Acertó?».</p>
             </div>
           </div>
         </div>
