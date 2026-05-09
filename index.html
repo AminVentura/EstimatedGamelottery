@@ -3,11 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- CSP en Firebase Hosting: firebase.json → hosting.headers (connect-src incluye https://ep1.adtrafficquality.google). -->
-  <!-- App Check: clave reCAPTCHA v3 desde Firebase Console → App Check. Vacío = no se inicializa App Check. -->
-  <meta name="firebase-appcheck-recaptcha-site-key" content="">
+  <!-- CSP en producción: firebase.json → hosting.headers Content-Security-Policy (incl. connect-src … ep1.adtrafficquality.google). No duplicar aquí otra CSP completa (el navegador exige cumplir todas las políticas). -->
+  <!-- App Check (reCAPTCHA Enterprise): clave del sitio desde Firebase Console → App Check → tu app web. Sin clave no se inicializa App Check. -->
+  <meta name="firebase-appcheck-recaptcha-site-key" content="6LeXmdgsAAAAADt_GN4dMGudJ8GNAJfgUUKfbM9G">
   <title>USA Lottery Predictions | Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4</title>
   <meta name="description" content="Predicciones de lotería USA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4. Guía de uso, números calientes y fríos, estadísticas y precisión por juego. Contenido editorial y herramientas de entretenimiento. Solo mayores de 18 años.">
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0891b2">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PredLoteria">
   <!-- Preload críticos: CSS y fuentes -->
   <link rel="preload" href="styles.css" as="style">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +41,7 @@
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://www.prediccionloteria.com/">
   <meta property="og:url" content="https://www.prediccionloteria.com/">
-  <!-- AdSense se carga bajo demanda tras consentimiento para evitar requests innecesarios -->
+  <!-- AdSense: se carga solo tras consentimiento de cookies para evitar 403 en consola cuando no hay consentimiento -->
   <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -43,19 +50,52 @@
       "@type": "WebSite",
       "@id": "https://www.prediccionloteria.com/#website",
       "url": "https://www.prediccionloteria.com/",
-      "name": "USA Lottery Predictions",
-      "description": "AI-powered lottery predictions for all US states: Powerball, Mega Millions, Millionaire For Life.",
-      "inLanguage": "es"
+      "name": "USA Lottery Predictions — PrediccionLoteria.com",
+      "description": "Predicciones de lotería USA con IA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4.",
+      "inLanguage": "es",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Businessskore LLC",
+        "url": "https://www.prediccionloteria.com/"
+      }
     },
     {
       "@type": "WebPage",
       "@id": "https://www.prediccionloteria.com/#webpage",
       "url": "https://www.prediccionloteria.com/",
-      "name": "USA Lottery Predictions - Powerball, Mega Millions, Millionaire For Life",
-      "description": "AI-powered lottery predictions for all US states: Powerball, Mega Millions, Millionaire For Life. Statistical analysis for entertainment.",
+      "name": "Predicciones Lotería USA — Powerball, Mega Millions, Millionaire For Life",
+      "description": "Herramienta de análisis estadístico de lotería USA con agente IA. Números calientes, fríos y jugada inteligente del día.",
       "inLanguage": "es",
-      "dateModified": "2026-04-01",
+      "dateModified": "2026-05-09",
       "isPartOf": { "@id": "https://www.prediccionloteria.com/#website" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://www.prediccionloteria.com/#app",
+      "name": "JAVIS AI Lottery Predictor",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web",
+      "url": "https://www.prediccionloteria.com/",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.7",
+        "ratingCount": "182"
+      }
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://www.prediccionloteria.com/#dataset",
+      "name": "USA Lottery Historical Drawings",
+      "description": "Histórico de sorteos de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4. Fuente: data.ny.gov.",
+      "url": "https://www.prediccionloteria.com/",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "creator": { "@type": "Organization", "name": "Businessskore LLC" },
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "application/json",
+        "contentUrl": "https://data.ny.gov/Government-Finance/Lottery-Mega-Millions-Winning-Numbers-Beginning-20/5xaw-6ayf"
+      }
     }
   ]
 }
@@ -75,29 +115,19 @@
   <div class="topbar-inner flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-xl bg-gray-800/90 border border-gray-700 backdrop-blur-sm">
     <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
       <span class="text-gray-500 text-xs">Idioma / Language:</span>
-      <div id="google_translate_element" class="translate-dropdown"></div>
+      <div id="google_translate_element" class="translate-dropdown" role="button" tabindex="0" aria-label="Seleccionar idioma"><span class="text-gray-400 text-xs">Seleccionar</span></div>
       <span class="text-gray-500 text-xs hidden sm:inline">|</span>
       <a href="https://nylottery.ny.gov/all-winning-numbers" target="_blank" rel="noopener noreferrer" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors flex items-center gap-1">
         <i class="fas fa-ticket-alt"></i> Ticket Check
       </a>
+      <a href="/faq.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">FAQ</a>
+      <a href="/guia-fuentes-loteria-deportes.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Fuentes</a>
+      <a href="/about.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Acerca de</a>
+      <a href="/contacto.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Contacto</a>
       <a href="#aviso-legal" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Integridad</a>
     </div>
   </div>
 </header>
-
-<!-- Navegación principal (AdSense: UX y navegación) -->
-<nav class="site-nav w-full max-w-5xl mx-auto mb-4 relative z-20">
-  <div class="nav-inner flex flex-wrap items-center justify-between gap-2 py-2 px-4 rounded-xl bg-gray-800/90 border border-gray-700">
-    <div class="flex items-center gap-1 sm:gap-4 flex-wrap text-sm">
-      <a href="/" class="nav-link text-white font-semibold hover:text-cyan-400 transition-colors px-2 py-1">🏠 Inicio</a>
-      <a href="#juegos" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">🎰 Juegos</a>
-      <a href="#como-funciona" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">📖 Cómo funciona</a>
-      <a href="/faq.html" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">❓ FAQ</a>
-      <a href="/about.html" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">ℹ️ Acerca de</a>
-      <a href="/contacto.html" class="nav-link text-gray-300 hover:text-cyan-400 transition-colors px-2 py-1">✉️ Contacto</a>
-    </div>
-  </div>
-</nav>
 
 <!-- Cookie Banner -->
 <div id="cookie-banner" class="cookie-banner">
@@ -139,20 +169,79 @@
   </header>
 
   <!-- ═══ MODE TOGGLE: Lotería / Deportes ═══ -->
-  <div class="flex items-center justify-center mb-5">
-    <div class="flex rounded-xl overflow-hidden border border-gray-700 bg-gray-800/80 p-0.5 gap-0.5 shadow-lg">
-      <button data-mode-toggle="lottery"
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-blue-600 text-white shadow">
-        <i class="fas fa-ticket-alt text-xs"></i>Lotería
+  <div id="mode-toggle-container" class="flex justify-center mb-4 sm:mb-6">
+    <div class="mode-toggle-pill" role="tablist" aria-label="Seleccionar modo de análisis">
+      <button id="btn-lottery-mode" role="tab" aria-selected="true"
+              class="mode-toggle-btn active"
+              onclick="switchAppMode('lottery')">
+        <i class="fas fa-ticket-alt"></i>
+        <span>Lotería</span>
       </button>
-      <button data-mode-toggle="sports"
-              class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 bg-transparent text-gray-400 hover:text-white">
-        <i class="fas fa-football text-xs"></i>Deportes
+      <button id="btn-sports-mode" role="tab" aria-selected="false"
+              class="mode-toggle-btn sports-mode"
+              onclick="switchAppMode('sports')">
+        <i class="fas fa-football-ball"></i>
+        <span>Deportes</span>
       </button>
     </div>
   </div>
 
-  <div id="lotteryMainContent">
+  <!-- ══ WIDGET: Precisión Global del Algoritmo ══ -->
+  <div id="global-accuracy-widget"
+       class="w-full max-w-5xl mx-auto mb-4 sm:mb-6 rounded-2xl border border-gray-700/60 bg-gray-800/60 backdrop-blur-sm px-4 py-4 sm:px-6 sm:py-5">
+    <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+
+      <!-- Circular ring -->
+      <div class="relative shrink-0 flex items-center justify-center" style="width:90px;height:90px">
+        <svg width="90" height="90" viewBox="0 0 90 90" class="-rotate-90">
+          <!-- Track -->
+          <circle cx="45" cy="45" r="40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+          <!-- Progress arc (circumference ≈ 251) -->
+          <circle id="ga-widget-circle" cx="45" cy="45" r="40" fill="none"
+            stroke="url(#ga-grad)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="251" stroke-dashoffset="251"
+            style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+          <defs>
+            <linearGradient id="ga-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <span id="ga-widget-pct" class="text-2xl font-black text-white leading-none">--</span>
+          <span class="text-gray-400 text-xs font-semibold">%</span>
+        </div>
+      </div>
+
+      <!-- Text -->
+      <div class="text-center sm:text-left flex-1 min-w-0">
+        <p class="text-white font-bold text-base sm:text-lg leading-tight">
+          Nuestra IA tiene un
+          <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            <span id="ga-widget-pct-inline">--</span>% de efectividad
+          </span>
+        </p>
+        <p class="text-gray-400 text-xs sm:text-sm mt-0.5" id="ga-widget-votes">Calculando en tiempo real…</p>
+        <!-- Linear progress bar -->
+        <div class="mt-2 h-1.5 w-full rounded-full bg-gray-700 overflow-hidden">
+          <div id="ga-widget-bar"
+               class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+               style="width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1)"></div>
+        </div>
+      </div>
+
+      <!-- CTA badge -->
+      <div class="shrink-0 hidden sm:flex flex-col items-center gap-1 text-center">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/40 border border-emerald-700/40 text-emerald-300 text-xs font-semibold">
+          <span class="live-dot"></span>En tiempo real
+        </div>
+        <p class="text-gray-600 text-xs mt-1">Basado en votos<br>de usuarios</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="lottery-main-content">
 
   <!-- ¿Eres ganador? How To Claim A Prize (enlace oficial NY Lottery) -->
   <section class="claim-prize-cta mb-4 sm:mb-6 rounded-xl overflow-hidden border border-cyan-500/30 bg-gradient-to-r from-cyan-900/40 via-blue-900/40 to-purple-900/40 p-4 sm:p-5">
@@ -170,7 +259,7 @@
   </section>
 
   <!-- Logos de Loterías (estilo NY Lottery: Powerball, Mega Millions, Cash4Life, Numbers) -->
-  <section class="lottery-logos-section mb-4 sm:mb-6" id="juegos" aria-label="Juegos disponibles">
+  <section class="lottery-logos-section mb-4 sm:mb-6" aria-label="Juegos disponibles">
     <h2 class="sr-only">Juegos de lotería disponibles</h2>
     <p class="text-center text-gray-400 text-sm mb-3">Elige tu juego</p>
     <div class="lottery-logos-grid flex flex-wrap items-center justify-center gap-3 sm:gap-4">
@@ -201,179 +290,59 @@
     </div>
   </section>
 
-  <!-- Contenido editorial (AdSense: visible por defecto para que Google lo indexe) -->
-  <section class="main-content-intro text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700" id="sobre-nosotros">
-    <h2 class="text-lg sm:text-xl font-bold text-white mb-4">Sobre prediccionloteria.com</h2>
-
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-      <strong>prediccionloteria.com</strong> es un sitio independiente de análisis estadístico
-      especializado en loterías de Estados Unidos. Ofrecemos herramientas de referencia y
-      entretenimiento basadas en el historial de sorteos oficiales de <strong>Powerball,
-      Mega Millions, Millionaire For Life, Pick 10, Take 5</strong> (diurno y nocturno) y
-      <strong>Win 4</strong> (diurno y nocturno), con cobertura para todos los estados
-      participantes.
-    </p>
-
-    <h3 class="text-base sm:text-lg font-semibold text-cyan-400 mb-2 mt-4">¿Qué ofrecemos?</h3>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      Nuestra plataforma combina análisis de frecuencia histórica, detección de pares de
-      números que aparecen juntos con regularidad y algoritmos de cadenas de Markov para
-      generar combinaciones sugeridas. Esto no predice el futuro — la lotería es un juego
-      de azar puro — pero te da un punto de partida informado basado en datos reales.
-    </p>
-    <ul class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 list-disc list-inside space-y-2">
-      <li><strong>Números calientes:</strong> los que más han salido en sorteos recientes.</li>
-      <li><strong>Números fríos:</strong> los que llevan más tiempo sin aparecer.</li>
-      <li><strong>Pares frecuentes:</strong> combinaciones de dos números que salen juntas con más regularidad.</li>
-      <li><strong>Estrategia mixta:</strong> combina frecuencia con distribución balanceada.</li>
-      <li><strong>Cadenas de Markov:</strong> modelo probabilístico basado en transiciones entre sorteos consecutivos.</li>
-    </ul>
-
-    <h3 class="text-base sm:text-lg font-semibold text-cyan-400 mb-2 mt-4">¿Por qué registrar sorteos?</h3>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      Puedes ingresar los resultados oficiales de cada sorteo directamente en la app. Esto
-      cumple dos funciones: primero, enriquece las estadísticas que usamos para generar
-      predicciones futuras; segundo, te permite ver tu <strong>precisión personal</strong>
-      — cuántos números de tu predicción coincidieron con el resultado real, por juego y
-      en el tiempo.
-    </p>
-
-    <h3 class="text-base sm:text-lg font-semibold text-cyan-400 mb-2 mt-4">¿Cómo se calculan las predicciones?</h3>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      El motor de predicción analiza el historial de sorteos disponible en nuestra base de
-      datos y aplica tres enfoques distintos:
-    </p>
-    <ol class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4 list-decimal list-inside space-y-2">
-      <li><strong>Análisis de frecuencia:</strong> ordena todos los números por cuántas veces han salido y pondera los más frecuentes.</li>
-      <li><strong>Detección de pares:</strong> identifica qué pares de números han aparecido juntos más de una vez y los prioriza.</li>
-      <li><strong>Modelo de Markov:</strong> calcula la probabilidad de que un número salga dado el conjunto del sorteo anterior.</li>
-    </ol>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">
-      Los tres métodos se pueden combinar en la estrategia «mixta», que equilibra frecuencia
-      con variedad para generar combinaciones que no repiten siempre los mismos números.
-    </p>
-
-    <h3 class="text-base sm:text-lg font-semibold text-yellow-400 mb-2 mt-4">⚠️ Aviso importante</h3>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      Este sitio está diseñado exclusivamente para entretenimiento y referencia estadística.
-      <strong>Ningún sistema puede predecir los números ganadores de la lotería</strong>,
-      ya que los sorteos son procesos completamente aleatorios supervisados por organismos
-      oficiales. Las combinaciones generadas aquí no garantizan ningún premio.
-    </p>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
-      Recomendamos jugar con moderación. Si crees que el juego está afectando tu vida,
-      visita <a href="https://www.ncpgambling.org/" target="_blank" rel="noopener noreferrer"
-      class="text-cyan-400 hover:underline">National Council on Problem Gambling</a> o
-      llama al 1-800-522-4700. Solo para mayores de 18 años.
-    </p>
+  <!-- Contenido editorial (AdSense: mucho contenido antes de cualquier anuncio) -->
+  <section class="main-content-intro collapsible-section collapsed text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
+    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
+      <h2 class="text-lg sm:text-xl font-bold text-white m-0">Sobre prediccionloteria.com</h2>
+      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
+    </div>
+    <div class="collapsible-content">
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
+        Somos un sitio independiente de análisis estadístico para loterías de Estados Unidos. Ofrecemos <strong>predicciones numéricas basadas en historial de sorteos</strong> de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 (diurno y nocturno), con cobertura para todos los estados. Nuestro objetivo es dar a los usuarios <strong>herramientas de referencia y entretenimiento</strong>: números frecuentes y fríos, pares que más salen y varias estrategias de generación (frecuencia, mixta, Markov). No estamos afiliados a ninguna lotería oficial; las predicciones son solo apoyo estadístico y no garantizan premios.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+        Puedes <strong>registrar los resultados oficiales</strong> de cada sorteo, guardar tus predicciones y ver tu precisión por juego. Todo el análisis se hace con algoritmos propios sobre los datos que la comunidad y nosotros mismos vamos añadiendo.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+        Este sitio está pensado para mayores de 18 años. La lotería es un juego de azar; recomendamos jugar con moderación y nunca apostar más de lo que puedas permitirte perder. Para dudas sobre privacidad o cookies, consulta nuestras páginas de Política de Privacidad y Política de Cookies enlazadas en el pie de página.
+      </p>
+    </div>
   </section>
 
-  <!-- Guía completa: siempre visible para AdSense -->
-  <section class="text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700" id="como-funciona">
-    <h2 class="text-lg sm:text-xl font-bold text-white mb-4">Guía completa: Cómo usar las predicciones de lotería</h2>
-
-    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 1 — Elige tu juego</h3>
-    <p class="text-gray-300 text-sm leading-relaxed mb-4">
-      En la parte superior verás los logos de todos los juegos disponibles: Powerball,
-      Mega Millions, Millionaire For Life, Pick 10, Take 5 (Day y Eve) y Win 4 (Day y Eve).
-      Haz clic en el que quieras y se cargará su panel con historial y herramientas.
+  <section class="text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
+    <h2 class="text-lg sm:text-xl font-bold text-white mb-2">Contenido editorial y transparencia</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+      Para que puedas evaluar mejor cómo funciona esta herramienta, publicamos secciones dedicadas de ayuda y documentación.
     </p>
+    <div class="flex flex-wrap gap-2 text-sm">
+      <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Preguntas Frecuentes</a>
+      <a href="/guia-fuentes-loteria-deportes.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Fuentes oficiales (Lotería / MLB / NFL / NBA)</a>
+      <a href="/about.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Acerca del proyecto</a>
+      <a href="/contacto.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Contacto</a>
+      <a href="/politica-privacidad.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Privacidad</a>
+      <a href="/politica-cookies.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Cookies</a>
+    </div>
+  </section>
 
-    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 2 — Genera una predicción</h3>
-    <p class="text-gray-300 text-sm leading-relaxed mb-3">
-      Dentro de cada panel, pulsa el botón <strong class="text-white">PREDECIR</strong>.
-      El sistema consultará el historial registrado y generará entre 3 y 5 combinaciones
-      sugeridas usando los algoritmos disponibles. Cada combinación viene etiquetada con
-      la estrategia usada: Frecuencia, Mixta o Markov.
-    </p>
-
-    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 3 — Consulta las estadísticas</h3>
-    <p class="text-gray-300 text-sm leading-relaxed mb-4">
-      El botón <strong class="text-white">ESTADÍSTICAS</strong> abre un panel con tres
-      bloques: 🔥 Números calientes (más frecuentes), ❄️ Números fríos (menos frecuentes)
-      y 🔗 Pares (combinaciones de dos números que aparecen juntos con regularidad).
-      Úsalos para tomar decisiones más informadas al comprar tu boleto.
-    </p>
-
-    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 4 — Registra el resultado oficial</h3>
-    <p class="text-gray-300 text-sm leading-relaxed mb-4">
-      Después de cada sorteo, ingresa los números ganadores oficiales usando la sección
-      <strong class="text-white">Registrar Sorteo</strong>. Selecciona la fecha, escribe
-      los números y pulsa Guardar. Esto actualiza el historial local y mejora la precisión
-      de las predicciones futuras.
-    </p>
-
-    <h3 class="text-base font-semibold text-cyan-400 mb-2">Paso 5 — Revisa tu historial y precisión</h3>
-    <p class="text-gray-300 text-sm leading-relaxed mb-4">
-      En la parte inferior de cada panel encontrarás el historial de sorteos registrados.
-      Si generaste una predicción antes del sorteo y luego registraste el resultado, el
-      sistema calculará cuántos números acertaste ese día. Con el tiempo, podrás ver tu
-      porcentaje de precisión por juego.
-    </p>
-
-    <!-- Tabla de referencia: reglas de cada juego -->
-    <h3 class="text-base font-semibold text-white mb-3 mt-6 border-t border-gray-700 pt-4">Reglas de cada juego (referencia rápida)</h3>
-    <div class="overflow-x-auto">
-      <table class="w-full text-xs sm:text-sm text-gray-300 border-collapse">
-        <thead>
-          <tr class="bg-gray-700 text-white">
-            <th class="p-2 text-left rounded-tl-lg">Juego</th>
-            <th class="p-2 text-left">Números principales</th>
-            <th class="p-2 text-left">Bola especial</th>
-            <th class="p-2 text-left rounded-tr-lg">Sorteos</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-red-400">Powerball</td>
-            <td class="p-2">5 números (1–69)</td>
-            <td class="p-2">Powerball (1–26)</td>
-            <td class="p-2">Lun, Mié, Sáb</td>
-          </tr>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-yellow-400">Mega Millions</td>
-            <td class="p-2">5 números (1–70)</td>
-            <td class="p-2">Mega Ball (1–25)</td>
-            <td class="p-2">Mar, Vie</td>
-          </tr>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-green-400">Millionaire For Life</td>
-            <td class="p-2">5 números (1–58)</td>
-            <td class="p-2">Millionaire Ball (1–5)</td>
-            <td class="p-2">Diario</td>
-          </tr>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-blue-400">Pick 10</td>
-            <td class="p-2">10 números (1–80)</td>
-            <td class="p-2">Ninguna</td>
-            <td class="p-2">Diario</td>
-          </tr>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-purple-400">Take 5 Day</td>
-            <td class="p-2">5 números (1–39)</td>
-            <td class="p-2">Ninguna</td>
-            <td class="p-2">Diario (mañana)</td>
-          </tr>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-indigo-400">Take 5 Eve</td>
-            <td class="p-2">5 números (1–39)</td>
-            <td class="p-2">Ninguna</td>
-            <td class="p-2">Diario (noche)</td>
-          </tr>
-          <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-rose-400">Win 4 Day</td>
-            <td class="p-2">4 dígitos (0–9)</td>
-            <td class="p-2">Ninguna</td>
-            <td class="p-2">Diario (mañana)</td>
-          </tr>
-          <tr class="hover:bg-gray-700/50">
-            <td class="p-2 font-semibold text-orange-400">Win 4 Eve</td>
-            <td class="p-2">4 dígitos (0–9)</td>
-            <td class="p-2">Ninguna</td>
-            <td class="p-2">Diario (noche)</td>
-          </tr>
-        </tbody>
-      </table>
+  <!-- Guía de uso: contenido de valor editorial -->
+  <section class="main-content-intro collapsible-section collapsed text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
+    <div class="collapsible-header flex flex-wrap items-center justify-between gap-2 mb-0">
+      <h2 class="text-lg sm:text-xl font-bold text-white m-0">Guía: Cómo usar las predicciones de lotería</h2>
+      <button type="button" class="toggle-collapse-btn px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition-colors" aria-expanded="false">Expandir texto</button>
+    </div>
+    <div class="collapsible-content">
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
+        En esta página puedes obtener <strong>combinaciones sugeridas</strong> para Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4. Cada juego tiene sus propias reglas: Powerball y Mega Millions se juegan con cinco números más una bola especial; Millionaire For Life (nuevo desde feb 2026, sustituye a Cash4Life) con cinco números (1-58) más la Millionaire Ball (1-5); Pick 10 con diez números elegidos de un sorteo de veinte; Take 5 y Win 4 con cinco o cuatro números respectivamente, en versión diurna y nocturna.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+        Los <strong>números calientes</strong> son aquellos que han salido con más frecuencia en los sorteos recientes que tenemos registrados; los <strong>números fríos</strong> son los que menos han aparecido. Nuestros algoritmos combinan estas frecuencias con otros criterios (pares que se repiten, patrones, etc.) para proponerte combinaciones. Puedes usar el botón <strong>PREDECIR</strong> para generar una sugerencia y el botón <strong>ESTADÍSTICAS</strong> para ver qué números están saliendo más o menos en cada juego.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
+        Para que tu <strong>precisión real</strong> se actualice, debes generar una predicción y, el mismo día, registrar el resultado oficial del sorteo en la sección «Registrar Sorteo». El sistema compara entonces tu predicción con el resultado y calcula el porcentaje de aciertos por juego. Los historiales que ves en cada pestaña te permiten consultar sorteos pasados y ayudan a que las estadísticas sean más útiles.
+      </p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
+        Recuerda que ningún sistema puede garantizar un premio. Las predicciones son únicamente un apoyo estadístico y de entretenimiento. Siempre verifica los resultados oficiales en las webs de cada lotería.
+      </p>
     </div>
   </section>
 
@@ -386,7 +355,6 @@
 
   <!-- Banner: Conexión automática a resultados oficiales -->
   <div id="liveDataBanner" class="mb-5 rounded-2xl border border-emerald-700/60 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-lg overflow-hidden">
-    <!-- Cabecera siempre visible -->
     <div class="flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4 cursor-pointer select-none" onclick="toggleLiveBanner()">
       <div class="flex items-center gap-3">
         <span class="relative flex h-3 w-3">
@@ -401,11 +369,7 @@
         <i id="liveBannerChevron" class="fas fa-chevron-down text-gray-500 text-xs transition-transform duration-300"></i>
       </div>
     </div>
-
-    <!-- Cuerpo colapsable -->
     <div id="liveBannerBody" class="hidden border-t border-gray-700/60 px-4 pb-5 pt-4 sm:px-6">
-
-      <!-- Aviso principal -->
       <div class="flex gap-3 bg-emerald-900/20 border border-emerald-700/40 rounded-xl p-3 sm:p-4 mb-4">
         <i class="fas fa-circle-info text-emerald-400 mt-0.5 shrink-0"></i>
         <div>
@@ -418,8 +382,6 @@
           </p>
         </div>
       </div>
-
-      <!-- Cómo usar -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <div class="flex items-start gap-3 bg-gray-900/60 rounded-xl p-3">
           <span class="text-2xl leading-none mt-0.5">1️⃣</span>
@@ -443,8 +405,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Tabla de fuentes -->
       <div>
         <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-2">Fuentes de datos oficiales</p>
         <div class="overflow-x-auto rounded-xl border border-gray-700/60">
@@ -511,21 +471,37 @@
   </div>
 
   <div id="lotteryAgentInsightPanel" class="hidden w-full max-w-3xl mx-auto mb-4">
-    <div class="rounded-2xl border border-cyan-600/40 bg-cyan-900/10 p-4 sm:p-5">
-      <div class="flex items-start justify-between gap-3 mb-2">
-        <div>
-          <p class="text-[11px] uppercase tracking-widest text-cyan-300 font-black">Jugada Inteligente del Dia</p>
-          <p id="lotteryAgentPlay" class="text-white text-sm sm:text-base font-black mt-1">No disponible</p>
+    <div class="rounded-2xl border border-cyan-600/40 bg-gradient-to-br from-cyan-900/20 to-gray-900/40 p-4 sm:p-5 shadow-lg">
+      <!-- Header: JAVIS badge + game + timestamp -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="inline-flex items-center gap-1 bg-cyan-500/20 text-cyan-300 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full border border-cyan-500/30">
+            <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            Analizado por JAVIS AI
+          </span>
+          <span id="lotteryAgentGame" class="text-[10px] text-gray-400 font-bold tracking-widest uppercase">-</span>
         </div>
-        <div class="text-right shrink-0">
-          <p class="text-[10px] uppercase tracking-widest text-cyan-200/80">Confianza</p>
-          <p id="lotteryAgentConfidence" class="text-lg font-black text-cyan-300">-/10</p>
-          <p id="lotteryAgentGame" class="text-[10px] text-gray-400 font-semibold mt-1">-</p>
+        <span id="lotteryAgentTimestamp" class="text-[10px] text-gray-500 shrink-0">-</span>
+      </div>
+      <!-- Play numbers -->
+      <div class="mb-4">
+        <p class="text-[11px] uppercase tracking-widest text-cyan-300 font-black mb-1">Jugada Inteligente del Día</p>
+        <p id="lotteryAgentPlay" class="text-white text-lg sm:text-xl font-black tracking-widest">No disponible</p>
+      </div>
+      <!-- Confidence bar -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-[10px] uppercase tracking-widest text-cyan-200/80 font-bold">Score de Confianza</p>
+          <p id="lotteryAgentConfidence" class="text-sm font-black text-cyan-300">-/10</p>
+        </div>
+        <div class="h-2 bg-gray-700/80 rounded-full overflow-hidden">
+          <div id="lotteryAgentConfBar" class="h-full rounded-full transition-all duration-700 ease-out bg-gradient-to-r from-cyan-500 to-teal-400" style="width:0%"></div>
         </div>
       </div>
+      <!-- Explainability / Wisdom -->
       <div class="rounded-xl border border-cyan-500/25 bg-gray-900/60 p-3">
-        <p class="text-[10px] uppercase tracking-widest text-cyan-300 font-bold mb-1">Sabiduria del Agente</p>
-        <p id="lotteryAgentWisdom" class="text-xs sm:text-sm text-gray-300">Esperando analisis del agente.</p>
+        <p class="text-[10px] uppercase tracking-widest text-cyan-300 font-bold mb-1">Por qué este análisis</p>
+        <p id="lotteryAgentWisdom" class="text-xs sm:text-sm text-gray-300 leading-relaxed">Esperando análisis del agente.</p>
       </div>
     </div>
   </div>
@@ -939,7 +915,7 @@
   </section>
 
   <!-- Anuncio Inferior: después de todo el contenido editorial. Si ves 400 en consola, revisa en AdSense que la unidad 2043462391 exista y esté activa. -->
-  <div id="ad-bottom-container" class="ad-slot ad-empty w-full bg-gray-800 rounded-lg my-4 flex items-center justify-center border border-dashed border-gray-600">
+  <div id="ad-bottom-container" class="ad-slot ad-empty w-full bg-gray-800 rounded-lg my-4 flex items-center justify-center border border-dashed border-gray-600" data-ad-slot="2043462391">
     <ins class="adsbygoogle"
          style="display:block; text-align:center;"
          data-ad-client="ca-pub-8721021745606812"
@@ -975,12 +951,9 @@
   <!-- Banner Jackpocket Referral -->
   <div class="relative overflow-hidden rounded-2xl mb-6 sm:mb-8 border border-yellow-500/40 shadow-xl"
        style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);">
-    <!-- Glow decorativo -->
     <div class="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-20" style="background: radial-gradient(circle, #fbbf24, transparent 70%);"></div>
     <div class="absolute -bottom-10 -left-10 w-48 h-48 rounded-full opacity-10" style="background: radial-gradient(circle, #6366f1, transparent 70%);"></div>
-
     <div class="relative z-10 p-5 sm:p-8">
-      <!-- Encabezado -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5">
         <div class="flex items-center gap-3">
           <div class="bg-yellow-400 rounded-xl p-2.5 shadow-lg shadow-yellow-400/30">
@@ -991,21 +964,16 @@
             <p class="text-gray-400 text-xs sm:text-sm mt-0.5">Oficial · Seguro · 100% legal en NY</p>
           </div>
         </div>
-        <!-- Badge $10 -->
         <div class="flex-shrink-0 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl px-4 py-3 text-center shadow-lg shadow-yellow-400/30 border border-yellow-300/50">
           <p class="text-gray-900 font-black text-2xl sm:text-3xl leading-none">$10</p>
           <p class="text-gray-800 font-bold text-xs uppercase tracking-wide">gratis</p>
           <p class="text-gray-700 text-[10px]">en créditos</p>
         </div>
       </div>
-
-      <!-- Descripción -->
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-5">
         Usa <strong class="text-white">Jackpocket</strong> — la app oficial para comprar boletos de Powerball, Mega Millions, Pick 10, Take 5 y más, directo desde tu celular.
         Regístrate con mi enlace de invitación y <strong class="text-yellow-400">tú y yo recibimos $10 en créditos de lotería</strong> cuando hagas tu primer depósito.
       </p>
-
-      <!-- Pasos -->
       <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
         <div class="bg-white/5 rounded-xl p-3 text-center border border-white/10">
           <div class="text-yellow-400 font-black text-lg mb-1">1</div>
@@ -1020,8 +988,6 @@
           <p class="text-gray-300 text-xs leading-tight">¡Ambos reciben $10!</p>
         </div>
       </div>
-
-      <!-- Botón CTA -->
       <div class="flex flex-col sm:flex-row items-center gap-3">
         <a href="https://lottery.jackpocket.com/r/lotto/aminventura/LOTTERY/US-NY"
            target="_blank" rel="noopener noreferrer sponsored"
@@ -1038,8 +1004,6 @@
           lottery.jackpocket.com
         </a>
       </div>
-
-      <!-- Disclaimer legal -->
       <p class="text-gray-600 text-[11px] mt-4 leading-relaxed">
         <i class="fas fa-info-circle mr-1"></i>
         Enlace de referido. Al registrarte aceptas los
@@ -1049,6 +1013,7 @@
     </div>
   </div>
 
+  <!-- Estadísticas (chat comunitario eliminado por seguridad: reducía superficie de abuso en Firestore) -->
   <div class="max-w-2xl mx-auto w-full">
     <div class="bg-gray-800 p-3 sm:p-6 rounded-xl border border-gray-700">
       <h2 class="text-sm sm:text-lg font-bold mb-3 sm:mb-4 text-white flex items-center"><i class="fas fa-chart-pie mr-2 text-blue-400"></i>Estadísticas Globales</h2>
@@ -1060,19 +1025,220 @@
     </div>
   </div>
 
-  </div><!-- /lotteryMainContent -->
+  </div><!-- /#lottery-main-content -->
 
-  <!-- ═══ SPORTS INTELLIGENCE DASHBOARD ═══ -->
-  <div id="sportsDashboard" class="hidden w-full text-left">
-    <div id="sportsContent" class="w-full">
-      <div class="flex items-center justify-center py-10 text-gray-500 text-sm">
-        <div class="text-center">
-          <i class="fas fa-football text-3xl mb-3 opacity-20"></i>
-          <p>Iniciando Sports Intelligence...</p>
-        </div>
-      </div>
+  <!-- ═══ SPORTS BETTING DASHBOARD ═══ -->
+  <div id="sports-dashboard" class="hidden w-full text-left">
+    <!-- Sports header -->
+    <div class="mb-5 text-center">
+      <h2 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
+        Dashboard de Apuestas Deportivas
+      </h2>
+      <p class="text-gray-400 text-sm mt-1">Análisis estadístico de Player Props — NFL · NBA · MLB · 🎾 Tennis</p>
     </div>
-  </div>
+
+    <!-- API status banner: shown/hidden by JS based on ODDS_API_KEY -->
+    <div id="sd-api-notice" class="mb-4 flex items-start gap-2 p-3 rounded-xl text-xs" style="display:none">
+      <!-- Filled dynamically by updateApiNoticeBanner() -->
+    </div>
+
+    <!-- Sport tabs: NBA | MLB | NFL -->
+    <div class="tabs-container flex flex-nowrap justify-start gap-0 mb-4 border-b border-gray-700 pb-0 overflow-x-auto" role="tablist">
+      <div id="sport-tabs" class="flex"></div>
+    </div>
+
+    <!-- View sub-tabs: Player Props | En Vivo | Clasificación -->
+    <div class="flex flex-wrap gap-2 mb-5">
+      <button class="sport-view-tab active" data-view="props" onclick="SportsDashboard.switchView('props')">
+        <i class="fas fa-user-check"></i>Player Props
+      </button>
+      <button class="sport-view-tab" data-view="live" onclick="SportsDashboard.switchView('live')">
+        <i class="fas fa-broadcast-tower"></i>En Vivo
+      </button>
+      <button class="sport-view-tab" data-view="standings" onclick="SportsDashboard.switchView('standings')">
+        <i class="fas fa-list-ol"></i>Clasificación
+      </button>
+      <button class="sport-view-tab" data-view="parlay" onclick="SportsDashboard.switchView('parlay')">
+        <i class="fas fa-layer-group"></i>Parlay Builder
+      </button>
+      <button class="sport-view-tab" data-view="parlayhub" onclick="SportsDashboard.switchView('parlayhub')">
+        <i class="fas fa-fire"></i>Parlay Hub
+      </button>
+    </div>
+
+    <!-- Dynamic content area -->
+    <div id="sports-view-content" class="w-full"></div>
+
+    <!-- ══ GUÍA COMPLETA: Cómo Apostar con el Dashboard ══ -->
+    <div class="mt-6 rounded-2xl overflow-hidden border border-gray-700/60" id="sd-betting-guide">
+
+      <!-- Header colapsable -->
+      <button onclick="toggleBettingGuide()" class="w-full flex items-center justify-between p-4 sm:p-5 bg-gray-800/80 hover:bg-gray-800 transition-colors text-left" aria-expanded="false" id="sd-guide-btn">
+        <span class="flex items-center gap-2 font-bold text-white text-sm">
+          <i class="fas fa-book-open text-green-400"></i>
+          Guía: Cómo Usar el Dashboard y Cómo Apostar
+        </span>
+        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="sd-guide-chevron"></i>
+      </button>
+
+      <div id="sd-guide-content" class="hidden bg-gray-900/60 p-4 sm:p-5">
+
+        <!-- Paso 0: Entender el Dashboard -->
+        <div class="mb-5">
+          <h4 class="text-green-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-map-signs"></i>Secciones del Dashboard
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-user-check text-blue-400 mr-1"></i>Player Props</p>
+              <p class="text-gray-400 leading-relaxed">Predicciones individuales por jugador — puntos, rebotes, yardas, ponches.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-layer-group text-indigo-400 mr-1"></i>Parlay Builder</p>
+              <p class="text-gray-400 leading-relaxed">Combina hasta 6 predicciones. El sistema calcula la probabilidad combinada y las cuotas.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-list-ol text-yellow-400 mr-1"></i>Clasificación</p>
+              <p class="text-gray-400 leading-relaxed">Récords actuales de equipos NBA, MLB y NFL para contexto de forma.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700">
+              <p class="text-white font-bold mb-1"><i class="fas fa-broadcast-tower text-green-400 mr-1"></i>En Vivo</p>
+              <p class="text-gray-400 leading-relaxed">Cuotas en tiempo real con tu clave de The Odds API y fuentes recomendadas.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 1: Leer una tarjeta -->
+        <div class="mb-5">
+          <h4 class="text-cyan-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-id-card"></i>Cómo leer una tarjeta de Player Prop
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="space-y-2">
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-2xl font-black text-green-400 leading-none w-10 shrink-0">74%</span>
+                <div><p class="text-white font-semibold">Probabilidad (el número grande)</p><p class="text-gray-400">Calculada por el algoritmo: 0–49% baja, 50–67% media, 68%+ alta confianza.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-xs font-black text-green-300 border border-green-700 bg-green-900/50 px-1.5 py-0.5 rounded shrink-0 mt-0.5">OVER</span>
+                <div><p class="text-white font-semibold">OVER / UNDER</p><p class="text-gray-400">El algoritmo predice si el jugador <strong class="text-white">supera (OVER)</strong> o <strong class="text-white">no alcanza (UNDER)</strong> la línea oficial.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-cyan-400 font-black text-sm shrink-0 w-10">26.5</span>
+                <div><p class="text-white font-semibold">Línea (Line)</p><p class="text-gray-400">El número que fija la casa de apuestas (DraftKings/FanDuel). Apostar OVER = el jugador anota más de 26.5 pts.</p></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="flex gap-0.5 shrink-0 mt-0.5">
+                  <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:rgba(6,78,59,0.7);color:#34d399;font-size:0.65rem;align-items:center;justify-content:center;border:1px solid rgba(52,211,153,0.4)">✓</span>
+                  <span style="display:inline-flex;width:18px;height:18px;border-radius:50%;background:rgba(127,29,29,0.7);color:#f87171;font-size:0.65rem;align-items:center;justify-content:center;border:1px solid rgba(248,113,113,0.4)">✗</span>
+                </span>
+                <div><p class="text-white font-semibold">Dots de tendencia</p><p class="text-gray-400">✓ verde = superó la línea ese partido. ✗ rojo = no la superó. 5 partidos más recientes.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-emerald-400 font-black text-sm shrink-0 w-10">+4.2%</span>
+                <div><p class="text-white font-semibold">Edge %</p><p class="text-gray-400">Diferencia entre el promedio de temporada y la línea. Positivo = ventaja sobre la casa.</p></div>
+              </div>
+              <div class="flex items-start gap-2 bg-gray-800 rounded-lg p-2.5 border border-gray-700">
+                <span class="text-green-400 font-black text-xs shrink-0 w-10">▲ OVER</span>
+                <div><p class="text-white font-semibold">Dinero Sharp</p><p class="text-gray-400">Si la línea subió (▲), los apostadores profesionales pusieron dinero en OVER. Señal de confirmación.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2: Cómo apostar -->
+        <div class="mb-5">
+          <h4 class="text-orange-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-dollar-sign"></i>Cómo hacer tu primera apuesta en DraftKings
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">1</div>
+              <p class="text-white font-semibold mb-1">Elige una predicción</p>
+              <p class="text-gray-400">Busca probabilidad ≥65% con Edge positivo y 4+ dots verdes recientes.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">2</div>
+              <p class="text-white font-semibold mb-1">Pulsa "Apostar en DraftKings"</p>
+              <p class="text-gray-400">El botón verde te lleva a DraftKings con tu referido. Crea cuenta o inicia sesión.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">3</div>
+              <p class="text-white font-semibold mb-1">Busca el Player Prop</p>
+              <p class="text-gray-400">En DraftKings: Más apuestas → Player Props → busca el jugador y selecciona OVER o UNDER.</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-center">
+              <div class="text-green-400 font-black text-2xl mb-1">4</div>
+              <p class="text-white font-semibold mb-1">Confirma y registra</p>
+              <p class="text-gray-400">Vuelve aquí y pulsa ¿Acertó? SÍ/NO para mejorar la precisión del algoritmo.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3: Parlay Builder -->
+        <div class="mb-5">
+          <h4 class="text-indigo-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-layer-group"></i>Cómo usar el Parlay Builder
+          </h4>
+          <div class="bg-gray-800 rounded-xl p-3 border border-gray-700 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <p class="text-indigo-300 font-semibold mb-1.5">¿Qué es un Parlay?</p>
+                <p class="text-gray-400 leading-relaxed">Combinas múltiples apuestas en una sola. Si todas aciertan, la ganancia se multiplica. Si una falla, pierdes todo.</p>
+              </div>
+              <div>
+                <p class="text-indigo-300 font-semibold mb-1.5">Cómo armarlo aquí</p>
+                <p class="text-gray-400 leading-relaxed">Pulsa el ícono <i class="fas fa-plus-circle text-blue-400 mx-1"></i> en cualquier tarjeta de Props. Agrega hasta 6 legs. El sistema muestra la probabilidad combinada y las cuotas americanas.</p>
+              </div>
+              <div>
+                <p class="text-indigo-300 font-semibold mb-1.5">Cuotas Americanas</p>
+                <p class="text-gray-400 leading-relaxed"><strong class="text-white">+300</strong> = apuestas $100 → ganas $300 extra. <strong class="text-white">-150</strong> = debes apostar $150 para ganar $100. Entre más legs, mejores cuotas pero más riesgo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Algoritmo -->
+        <div class="mb-4">
+          <h4 class="text-purple-400 font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i class="fas fa-brain"></i>Cómo calcula la Probabilidad el Algoritmo
+          </h4>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-emerald-400 font-bold mb-1">① Promedio temp. + borde</p>
+              <p class="text-gray-400">Comparación entre media de temporada y la línea del mercado.</p>
+            </div>
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-cyan-400 font-bold mb-1">② Tendencia L5 + L10</p>
+              <p class="text-gray-400">Z-score en últimos 5 juegos y, si hay datos oficiales, ventana de hasta 10 juegos más momentum (últimos 3 vs anteriores).</p>
+            </div>
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-yellow-400 font-bold mb-1">③ Rival defensivo</p>
+              <p class="text-gray-400">Ranking defensivo del oponente (contexto de dificultad).</p>
+            </div>
+            <div class="bg-gray-900/60 rounded-xl p-3 border border-gray-700">
+              <p class="text-orange-400 font-bold mb-1">④ Local / visitante + línea</p>
+              <p class="text-gray-400">Sesgo de casa, movimiento de línea y calibración con tus votos «¿Acertó?».</p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /guide content -->
+    </div><!-- /betting guide -->
+
+    <!-- Sports disclaimer -->
+    <div class="mt-4 p-3 bg-amber-950/30 border border-amber-700/30 rounded-xl">
+      <p class="text-amber-400/80 text-xs font-semibold uppercase tracking-wide mb-1">
+        <i class="fas fa-exclamation-triangle mr-1"></i>Aviso Legal — Apuestas Deportivas
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed">
+        Las probabilidades mostradas son análisis estadísticos con fines de entretenimiento únicamente. No constituyen asesoramiento financiero ni garantizan resultados. Solo para mayores de 21 años donde sea legal. Juega con responsabilidad.
+        Si tienes un problema con el juego, llama al <strong class="text-amber-400">1-800-522-4700</strong> (NCPG).
+      </p>
+    </div>
+  </div><!-- /#sports-dashboard -->
 
 </div>
 
@@ -1086,75 +1252,155 @@
     </div>
   </section>
 
-<!-- Footer: navegación y legal (AdSense) -->
-<footer class="w-full max-w-5xl mx-auto mt-8 pt-6 border-t border-gray-700 text-gray-500 text-xs sm:text-sm">
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6 text-left px-2">
+<!-- Footer -->
+<footer class="mt-6 sm:mt-12 pb-4 sm:pb-8 text-center w-full bg-gray-900 bg-opacity-50 pt-4 sm:pt-8 border-t border-gray-800">
+  <div class="max-w-4xl mx-auto px-4">
+    <p class="text-gray-400 text-sm mb-2">&copy; 2026 Predicción de Lotería Profesional</p>
+    <div class="text-xs text-gray-500 space-x-4 mb-4">
+      <a href="#aviso-legal" class="hover:text-gray-300">Aviso Legal</a>
+      <span>|</span>
+      <a href="/politica-privacidad.html" class="hover:text-gray-300">Política de Privacidad</a>
+      <span>|</span>
+      <a href="/politica-cookies.html" class="hover:text-gray-300">Política de Cookies</a>
+      <span>|</span>
+      <a href="/faq.html" class="hover:text-gray-300">FAQ</a>
+      <span>|</span>
+      <a href="/about.html" class="hover:text-gray-300">Acerca de</a>
+      <span>|</span>
+      <a href="/contacto.html" class="hover:text-gray-300">Contacto</a>
+    </div>
+    <p class="text-gray-500 text-xs mb-4">Última actualización: <span id="lastUpdate"></span></p>
+    <p class="text-gray-500 text-xs mb-4">El uso de este sitio implica tu acuerdo con la <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a>.</p>
 
-    <!-- Columna 1: Sobre el sitio -->
-    <div>
-      <h4 class="text-gray-300 font-semibold mb-3 text-sm">prediccionloteria.com</h4>
-      <p class="leading-relaxed mb-3">
-        Sitio independiente de análisis estadístico para loterías de EE.UU.
-        Herramienta de entretenimiento. No afiliado a ninguna lotería oficial.
+    <!-- Juego responsable (estilo NY Lottery) -->
+    <div class="footer-responsible-play mt-4 pt-4 border-t border-gray-700 text-left">
+      <p class="text-amber-400/90 text-xs font-semibold uppercase tracking-wide mb-2">Please play responsibly.</p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        Must be 18+ to purchase a Lottery ticket and 21+ for Quick Draw where alcohol is served. Gambling problem? Visit <a href="https://nyproblemgamblinghelp.org" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">NYProblemGamblingHelp.org</a>. Call the HOPEline <a href="tel:+18778467369" class="text-cyan-400 hover:underline">1-877-846-7369</a> or text 467369.
       </p>
-      <p class="text-gray-600">Solo para mayores de 18 años.</p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        All New York Lottery transactions are subject to New York State Gaming Commission rules and regulations. New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. This site is not affiliated with the New York State Gaming Commission or any official lottery.
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
+        The information on this website is believed to be accurate. In the event of a discrepancy between the information displayed on this website and the information in the official records maintained by the New York State Gaming Commission (or other official lottery authorities), the records maintained by the Gaming Commission or the respective authority shall prevail.
+      </p>
     </div>
 
-    <!-- Columna 2: Navegación -->
-    <div>
-      <h4 class="text-gray-300 font-semibold mb-3 text-sm">Navegación</h4>
-      <ul class="space-y-2">
-        <li><a href="/" class="hover:text-cyan-400 transition-colors">🏠 Inicio</a></li>
-        <li><a href="#como-funciona" class="hover:text-cyan-400 transition-colors">📖 Cómo funciona</a></li>
-        <li><a href="/faq.html" class="hover:text-cyan-400 transition-colors">❓ Preguntas frecuentes</a></li>
-        <li><a href="/about.html" class="hover:text-cyan-400 transition-colors">ℹ️ Acerca de nosotros</a></li>
-        <li><a href="/contacto.html" class="hover:text-cyan-400 transition-colors">✉️ Contacto</a></li>
-      </ul>
+    <!-- Copyright y aviso legal del sitio -->
+    <div class="footer-legal mt-6 pt-4 border-t border-gray-700 text-left">
+      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">&copy; 2026 Predicción Lotería. Todos los derechos reservados.</p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. &copy; 2026 New York State Gaming Commission — All rights reserved. Este sitio no está afiliado con la New York State Gaming Commission ni con ninguna lotería oficial.
+      </p>
+      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
+        Predicción Lotería es un servicio independiente de entretenimiento. No estamos afiliados, respaldados ni asociados con Powerball®, Mega Millions®, Millionaire For Life™, Pick 10, Take 5, Win 4 ni con ninguna lotería oficial. Las predicciones son meramente informativas y no garantizan resultados. Solo para mayores de 18 años. Juega con responsabilidad.
+      </p>
     </div>
-
-    <!-- Columna 3: Legal -->
-    <div>
-      <h4 class="text-gray-300 font-semibold mb-3 text-sm">Legal</h4>
-      <ul class="space-y-2">
-        <li><a href="/politica-privacidad.html" class="hover:text-cyan-400 transition-colors">🔒 Política de Privacidad</a></li>
-        <li><a href="/politica-cookies.html" class="hover:text-cyan-400 transition-colors">🍪 Política de Cookies</a></li>
-        <li><a href="#aviso-legal" class="hover:text-cyan-400 transition-colors">⚖️ Aviso Legal</a></li>
-        <li>
-          <a href="https://www.ncpgambling.org/" target="_blank" rel="noopener noreferrer"
-             class="hover:text-cyan-400 transition-colors">🆘 Juego Responsable</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Disclaimer y copyright -->
-  <div class="border-t border-gray-800 pt-4 pb-6 text-center text-gray-600 text-xs px-2">
-    <p class="mb-2">
-      Las predicciones son únicamente para entretenimiento y no garantizan premios.
-      La lotería es un juego de azar. Juega con responsabilidad.
-    </p>
-    <p>© 2025 prediccionloteria.com — Todos los derechos reservados.</p>
   </div>
 </footer>
 
-<!-- Google Translate -->
+<!-- Google Translate: carga diferida para evitar violación document.write en carga inicial -->
 <script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement(
-    { pageLanguage: 'es', includedLanguages: 'es,en,zh-CN,ru,ar,fr,it,ko,pl', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
-    'google_translate_element'
-  );
+window.googleTranslateElementInit = function() {
+  if (typeof google !== 'undefined' && google.translate && google.translate.TranslateElement) {
+    new google.translate.TranslateElement(
+      { pageLanguage: 'es', includedLanguages: 'es,en,zh-CN,ru,ar,fr,it,ko,pl', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+      'google_translate_element'
+    );
+  }
+};
+function loadGoogleTranslate() {
+  if (window.__googleTranslateLoaded) return;
+  window.__googleTranslateLoaded = true;
+  var s = document.createElement('script');
+  s.type = 'text/javascript';
+  s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  s.async = true;
+  s.defer = true;
+  document.head.appendChild(s);
 }
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('google_translate_element');
+  if (el) {
+    el.setAttribute('title', 'Seleccionar idioma');
+    el.addEventListener('click', loadGoogleTranslate, { once: true });
+    el.addEventListener('focus', loadGoogleTranslate, { once: true });
+    el.style.cursor = 'pointer';
+  }
+});
 </script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
 
-<!-- CryptoJS: cifrado AES-256 para apuestas Premium -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-<!-- Sports Intelligence Dashboard -->
-<script src="sports-dashboard.js"></script>
+<!-- Sports Intelligence Dashboard (native Web Crypto — no external deps) -->
+<script src="sports-dashboard.js" defer></script>
 <!-- Scripts de lotería (módulos: no bloquean el parser) -->
 <script type="module" src="lottery-algorithms.js"></script>
 <script type="module" src="app.js"></script>
+<!-- Mode switcher: Lotería ↔ Deportes -->
+<script>
+(function () {
+  function updateApiNoticeBanner() {
+    var el = document.getElementById('sd-api-notice');
+    if (!el) return;
+    // API key is now 100% server-side via Cloud Function — always show connected
+    el.style.display = 'flex';
+    el.className = 'mb-4 flex items-start gap-2 p-3 bg-green-950/40 border border-green-700/40 rounded-xl text-xs text-gray-300';
+    el.innerHTML = '<i class=”fas fa-shield-alt text-green-400 shrink-0 mt-0.5”></i>' +
+      '<span><strong class=”text-green-300”>Cuotas Seguras ✓</strong> ' +
+      'The Odds API activa vía servidor — clave 100% invisible para el cliente.</span>';
+  }
+
+  function toggleBettingGuide() {
+    var content = document.getElementById('sd-guide-content');
+    var chevron = document.getElementById('sd-guide-chevron');
+    var btn     = document.getElementById('sd-guide-btn');
+    if (!content) return;
+    var isHidden = content.classList.contains('hidden');
+    content.classList.toggle('hidden', !isHidden);
+    if (chevron) chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
+    if (btn) btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+  }
+
+  function switchAppMode(mode) {
+    var lotteryEl  = document.getElementById('lottery-main-content');
+    var sportsEl   = document.getElementById('sports-dashboard');
+    var btnLottery = document.getElementById('btn-lottery-mode');
+    var btnSports  = document.getElementById('btn-sports-mode');
+    if (!lotteryEl || !sportsEl) return;
+    if (mode === 'sports') {
+      lotteryEl.classList.add('hidden');
+      sportsEl.classList.remove('hidden');
+      btnLottery.classList.remove('active');
+      btnLottery.setAttribute('aria-selected', 'false');
+      btnSports.classList.add('active');
+      btnSports.setAttribute('aria-selected', 'true');
+      localStorage.setItem('appMode', 'sports');
+      updateApiNoticeBanner();
+      if (window.SportsDashboard && SportsDashboard.init) {
+        if (!window.__sportsDashboardBooted) {
+          SportsDashboard.init();
+          window.__sportsDashboardBooted = true;
+        } else if (SportsDashboard.switchView) {
+          SportsDashboard.switchView('props');
+        }
+      }
+    } else {
+      sportsEl.classList.add('hidden');
+      lotteryEl.classList.remove('hidden');
+      btnSports.classList.remove('active');
+      btnSports.setAttribute('aria-selected', 'false');
+      btnLottery.classList.add('active');
+      btnLottery.setAttribute('aria-selected', 'true');
+      localStorage.setItem('appMode', 'lottery');
+    }
+  }
+
+  window.switchAppMode = switchAppMode;
+  window.toggleBettingGuide = toggleBettingGuide;
+  document.addEventListener('DOMContentLoaded', function () {
+    if (localStorage.getItem('appMode') === 'sports') switchAppMode('sports');
+  });
+})();
+</script>
 
 <!-- Expandir / Ocultar texto en secciones colapsables -->
 <script>
@@ -1209,51 +1455,43 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-  <!-- AdSense: se carga y rellena solo tras consentimiento -->
+<!-- AdSense: script se carga solo tras consentimiento para evitar 403 en usuarios sin cookies aceptadas -->
 <script>
-  function loadAdSenseScript() {
-    if (window.__adsenseScriptReady) return Promise.resolve();
-    if (window.__adsenseScriptPromise) return window.__adsenseScriptPromise;
-    window.__adsenseScriptPromise = new Promise(function(resolve, reject) {
-      var script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8721021745606812';
-      script.crossOrigin = 'anonymous';
-      script.onload = function() {
-        window.__adsenseScriptReady = true;
-        resolve();
-      };
-      script.onerror = function(err) { reject(err); };
-      document.head.appendChild(script);
-    });
-    return window.__adsenseScriptPromise;
+  function loadAdSenseScript(callback) {
+    if (window.__adsbygoogle) { if (callback) callback(); return; }
+    var s = document.createElement('script');
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8721021745606812';
+    s.onload = s.onerror = function() { if (callback) callback(); };
+    document.head.appendChild(s);
+    window.__adsbygoogle = true;
   }
-
+  window.__adsState = window.__adsState || { initStarted: false, initializedSlots: {} };
+  function pushAdSlotOnce(containerId) {
+    var el = document.getElementById(containerId);
+    if (!el || el.offsetParent === null) return;
+    if (window.__adsState.initializedSlots[containerId]) return;
+    if (el.querySelector('iframe')) {
+      window.__adsState.initializedSlots[containerId] = true;
+      return;
+    }
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      window.__adsState.initializedSlots[containerId] = true;
+    } catch (e) {}
+  }
   function initAdSense() {
     if (localStorage.getItem('cookieConsent') !== '1') return;
-    if (!window.isSecureContext) return;
-    try {
-      var introBlocks = document.querySelectorAll('.main-content-intro');
-      if (introBlocks.length < 2) return;
-      var topAd = document.getElementById('ad-top-container');
-      var bottomAd = document.getElementById('ad-bottom-container');
-      loadAdSenseScript().then(function() {
-        if (typeof adsbygoogle === 'undefined') return;
-        var topIns = topAd ? topAd.querySelector('ins.adsbygoogle') : null;
-        var bottomIns = bottomAd ? bottomAd.querySelector('ins.adsbygoogle') : null;
-
-        if (topAd && topAd.offsetParent !== null && topIns && topAd.dataset.adsInitialized !== '1') {
-          (adsbygoogle = window.adsbygoogle || []).push({});
-          topAd.dataset.adsInitialized = '1';
-        }
-        if (bottomAd && bottomAd.offsetParent !== null && bottomIns && bottomAd.dataset.adsInitialized !== '1') {
-          (adsbygoogle = window.adsbygoogle || []).push({});
-          bottomAd.dataset.adsInitialized = '1';
-        }
-      }).catch(function() {
-        // Algunos errores de red/403 de Google Ads son externos al sitio; no romper UX.
-      });
-    } catch(e) {}
+    if (window.__adsState.initStarted) return;
+    window.__adsState.initStarted = true;
+    loadAdSenseScript(function() {
+      if (typeof adsbygoogle === 'undefined') return;
+      try {
+        pushAdSlotOnce('ad-top-container');
+        pushAdSlotOnce('ad-bottom-container');
+      } catch(e) {}
+    });
   }
 
   function hasAdIframe(container) {
@@ -1291,18 +1529,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('load', function() {
     setTimeout(observeAdSlots, 500);
     setTimeout(initAdSense, 1200);
-    // Verificación final del sistema (después de que todo cargue)
-    console.log('🎯 Predicción de Lotería: Página completamente cargada.');
-    const today = new Date().toISOString().split('T')[0];
-    const savedKeys = Object.keys(localStorage).filter(k => k.startsWith('prediction_') && k.includes(today));
-    if (savedKeys.length > 0) {
-      console.log(`✅ Se encontraron ${savedKeys.length} predicción(es) guardada(s) para hoy.`);
-    }
-    if (typeof window.lotteryAlgorithms !== 'undefined') {
-      console.log('✅ Módulo de algoritmos cargado correctamente.');
-    } else {
-      console.warn('⚠️ Módulo de algoritmos no detectado.');
-    }
+    // Sin logs de verificación para mantener consola limpia en producción.
   });
 
   window.addEventListener('DOMContentLoaded', function() {
@@ -1325,7 +1552,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   });
 
-  // Toggle banner "Conectado a resultados oficiales"
   function toggleLiveBanner() {
     const body = document.getElementById('liveBannerBody');
     const chevron = document.getElementById('liveBannerChevron');
@@ -1341,10 +1567,8 @@ document.addEventListener('DOMContentLoaded', function() {
       localStorage.setItem('liveBannerOpen', '1');
     }
   }
-  // Restaurar estado del banner al cargar
   window.addEventListener('DOMContentLoaded', function() {
     const saved = localStorage.getItem('liveBannerOpen');
-    // Abrir por defecto la primera vez que el usuario visita
     if (saved !== '0') {
       const body = document.getElementById('liveBannerBody');
       const chevron = document.getElementById('liveBannerChevron');

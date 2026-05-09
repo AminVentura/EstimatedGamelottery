@@ -259,7 +259,7 @@ function scoreNumbers(allHistoryData, maxNumber, minNumber = 1) {
     }
   }
 
-  // 6. Balance por franjas numéricas en ventana reciente — peso 8% (evita sesgo solo por frecuencia global)
+  // 6. Balance por franjas numéricas en ventana reciente — peso 8%
   const win = Math.min(40, allHistoryData.length);
   const bucketCount = Math.min(6, Math.max(3, Math.ceil(numRange / 14)));
   const span = maxNumber - minNumber + 1;
