@@ -11,6 +11,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
 <main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
   <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Win 4</nav>
   <h1 class="text-2xl sm:text-3xl font-bold mb-3">Win 4: el orden y los ceros importan</h1>
@@ -30,6 +44,66 @@
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
   <p class="text-gray-300 leading-relaxed mb-6">Oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Dataset: data.ny.gov/resource/hsys-3def. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento, no caja. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
   <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+<!-- AUTO:probabilidades:START -->
+<section class="mb-8" id="probabilidades">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Probabilidades reales, calculadas</h2>
+<p class="text-gray-300 text-sm mb-2">Win 4 sortea cuatro dígitos del 0 al 9 (0000–9999): 10<sup>4</sup> = 10 000 resultados igual de probables. Una jugada <strong>Straight</strong> (orden exacto) acierta con probabilidad 1 en 10 000. En <strong>Box</strong> (cualquier orden) la probabilidad depende de cuántos órdenes distintos tiene tu número: 4!/(repeticiones) órdenes.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Win 4: conteo exhaustivo de los 10 000 números posibles (cálculo propio). Premios y tipos de jugada: New York Lottery (nylottery.ny.gov).</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Tipo de número</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cuántos hay</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Órdenes posibles y probabilidad Box</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 distintos (p. ej. 1234)</td><td class="px-3 py-2 text-gray-300 align-top">5,040 de 10 000 (50.4%)</td><td class="px-3 py-2 text-gray-300 align-top">24 órdenes → Box: 1 en 416.67</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">un par (1123)</td><td class="px-3 py-2 text-gray-300 align-top">4,320 de 10 000 (43.2%)</td><td class="px-3 py-2 text-gray-300 align-top">12 órdenes → Box: 1 en 833.33</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">dos pares (1122)</td><td class="px-3 py-2 text-gray-300 align-top">270 de 10 000 (2.7%)</td><td class="px-3 py-2 text-gray-300 align-top">6 órdenes → Box: 1 en 1,666.67</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">trío (1112)</td><td class="px-3 py-2 text-gray-300 align-top">360 de 10 000 (3.6%)</td><td class="px-3 py-2 text-gray-300 align-top">4 órdenes → Box: 1 en 2,500.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">cuádruple (1111)</td><td class="px-3 py-2 text-gray-300 align-top">10 de 10 000 (0.1%)</td><td class="px-3 py-2 text-gray-300 align-top">— (solo Straight)</td></tr></tbody></table></div>
+<p class="text-gray-400 text-sm mb-6">Fórmulas y el resto de juegos: <a class="text-cyan-300 hover:underline" href="/probabilidades-loteria.html">probabilidades reales de cada lotería</a>.</p>
+</section>
+<!-- AUTO:probabilidades:END -->
+<!-- AUTO:historial:START -->
+<section class="mb-8" id="historial-oficial">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Últimos resultados oficiales y prueba de azar</h2>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Últimos 10 días en el conjunto oficial.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Fecha</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Win 4 mediodía</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Win 4 noche</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-29</td><td class="px-3 py-2 text-gray-300 align-top">3836</td><td class="px-3 py-2 text-gray-300 align-top">6717</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-28</td><td class="px-3 py-2 text-gray-300 align-top">9141</td><td class="px-3 py-2 text-gray-300 align-top">4807</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-27</td><td class="px-3 py-2 text-gray-300 align-top">9075</td><td class="px-3 py-2 text-gray-300 align-top">9649</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-26</td><td class="px-3 py-2 text-gray-300 align-top">9961</td><td class="px-3 py-2 text-gray-300 align-top">1804</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-25</td><td class="px-3 py-2 text-gray-300 align-top">7966</td><td class="px-3 py-2 text-gray-300 align-top">9541</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-24</td><td class="px-3 py-2 text-gray-300 align-top">0141</td><td class="px-3 py-2 text-gray-300 align-top">2969</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-23</td><td class="px-3 py-2 text-gray-300 align-top">7204</td><td class="px-3 py-2 text-gray-300 align-top">0354</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-22</td><td class="px-3 py-2 text-gray-300 align-top">8401</td><td class="px-3 py-2 text-gray-300 align-top">1174</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-21</td><td class="px-3 py-2 text-gray-300 align-top">1709</td><td class="px-3 py-2 text-gray-300 align-top">4306</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-20</td><td class="px-3 py-2 text-gray-300 align-top">1035</td><td class="px-3 py-2 text-gray-300 align-top">4407</td></tr></tbody></table></div>
+<p class="text-gray-400 text-xs mb-4">Fuente: NY Open Data, conjunto «Lottery Daily Numbers/Win-4 Winning Numbers: Beginning 1980» (<a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/hsys-3def" rel="noopener noreferrer" target="_blank">data.ny.gov/d/hsys-3def</a>), publicado por la New York State Gaming Commission. Instantánea tomada el 2026-09-30; para el último sorteo y para reclamar premios, consulta <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>.</p>
+<h3 class="text-lg font-semibold text-gray-100 mt-4 mb-2">Mediodía: ¿coincide la realidad con la combinatoria?</h3>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Comparación entre lo sorteado y el conteo exacto de los 10 000 números posibles.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Tipo de número</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Observado en 1000 sorteos</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Esperado (cálculo)</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 distintos (p. ej. 1234)</td><td class="px-3 py-2 text-gray-300 align-top">536 (53.6%)</td><td class="px-3 py-2 text-gray-300 align-top">50.4%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">un par (1123)</td><td class="px-3 py-2 text-gray-300 align-top">388 (38.8%)</td><td class="px-3 py-2 text-gray-300 align-top">43.2%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">dos pares (1122)</td><td class="px-3 py-2 text-gray-300 align-top">28 (2.8%)</td><td class="px-3 py-2 text-gray-300 align-top">2.7%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">trío (1112)</td><td class="px-3 py-2 text-gray-300 align-top">46 (4.6%)</td><td class="px-3 py-2 text-gray-300 align-top">3.6%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">cuádruple (1111)</td><td class="px-3 py-2 text-gray-300 align-top">2 (0.2%)</td><td class="px-3 py-2 text-gray-300 align-top">0.1%</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Prueba chi-cuadrado de bondad de ajuste (trío y cuádruple agrupados): χ² = 9.82, 3 g.l., p = 0.020. La diferencia es mayor de lo habitual en una muestra de este tamaño. Puede ser casualidad (estamos haciendo varias pruebas) y no indica qué número saldrá; lo volveremos a medir con más sorteos.</p><p class="text-gray-300 text-sm mb-1">Frecuencia de cada dígito por posición:</p><ul class="list-disc pl-5 text-gray-300 text-sm space-y-1 mb-3"><li>Posición 1: dígitos 0–9 = 106 · 110 · 95 · 99 · 98 · 104 · 84 · 101 · 109 · 94 (esperado 100.00 cada uno); χ² = 5.56, 9 g.l., p = 0.783.</li><li>Posición 2: dígitos 0–9 = 95 · 93 · 98 · 115 · 110 · 97 · 105 · 108 · 78 · 101 (esperado 100.00 cada uno); χ² = 9.86, 9 g.l., p = 0.362.</li><li>Posición 3: dígitos 0–9 = 104 · 108 · 99 · 101 · 97 · 88 · 101 · 98 · 115 · 89 (esperado 100.00 cada uno); χ² = 5.86, 9 g.l., p = 0.754.</li><li>Posición 4: dígitos 0–9 = 116 · 101 · 106 · 97 · 99 · 94 · 105 · 86 · 108 · 88 (esperado 100.00 cada uno); χ² = 7.68, 9 g.l., p = 0.567.</li></ul><h3 class="text-lg font-semibold text-gray-100 mt-4 mb-2">Noche: ¿coincide la realidad con la combinatoria?</h3>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Comparación entre lo sorteado y el conteo exacto de los 10 000 números posibles.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Tipo de número</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Observado en 1000 sorteos</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Esperado (cálculo)</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 distintos (p. ej. 1234)</td><td class="px-3 py-2 text-gray-300 align-top">493 (49.3%)</td><td class="px-3 py-2 text-gray-300 align-top">50.4%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">un par (1123)</td><td class="px-3 py-2 text-gray-300 align-top">452 (45.2%)</td><td class="px-3 py-2 text-gray-300 align-top">43.2%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">dos pares (1122)</td><td class="px-3 py-2 text-gray-300 align-top">25 (2.5%)</td><td class="px-3 py-2 text-gray-300 align-top">2.7%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">trío (1112)</td><td class="px-3 py-2 text-gray-300 align-top">29 (2.9%)</td><td class="px-3 py-2 text-gray-300 align-top">3.6%</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">cuádruple (1111)</td><td class="px-3 py-2 text-gray-300 align-top">1 (0.1%)</td><td class="px-3 py-2 text-gray-300 align-top">0.1%</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Prueba chi-cuadrado de bondad de ajuste (trío y cuádruple agrupados): χ² = 2.64, 3 g.l., p = 0.451. La diferencia entre lo observado y lo esperado cabe dentro del azar.</p><p class="text-gray-300 text-sm mb-1">Frecuencia de cada dígito por posición:</p><ul class="list-disc pl-5 text-gray-300 text-sm space-y-1 mb-3"><li>Posición 1: dígitos 0–9 = 100 · 108 · 101 · 89 · 105 · 102 · 91 · 101 · 103 · 100 (esperado 100.00 cada uno); χ² = 3.06, 9 g.l., p = 0.962.</li><li>Posición 2: dígitos 0–9 = 99 · 102 · 106 · 92 · 103 · 102 · 109 · 88 · 99 · 100 (esperado 100.00 cada uno); χ² = 3.44, 9 g.l., p = 0.944.</li><li>Posición 3: dígitos 0–9 = 111 · 78 · 105 · 99 · 103 · 97 · 100 · 110 · 103 · 94 (esperado 100.00 cada uno); χ² = 7.94, 9 g.l., p = 0.540.</li><li>Posición 4: dígitos 0–9 = 106 · 88 · 94 · 94 · 106 · 102 · 108 · 100 · 99 · 103 (esperado 100.00 cada uno); χ² = 3.66, 9 g.l., p = 0.932.</li></ul>
+<p class="text-gray-400 text-sm mb-3">Diez pruebas a la vez (4 posiciones y el tipo de número, en los 2 sorteos): que alguna dé p &lt; 0,05 ocurre con frecuencia por puro azar. Un dígito «caliente» en una posición no cambia la probabilidad del próximo sorteo, que sigue siendo 1 en 10.</p>
+</section>
+<!-- AUTO:historial:END -->
 </main>
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
 </body>
 </html>

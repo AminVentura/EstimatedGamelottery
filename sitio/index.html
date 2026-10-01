@@ -8,7 +8,7 @@
   <!-- CSP en producción: firebase.json → hosting.headers Content-Security-Policy (incl. connect-src … ep1.adtrafficquality.google). No duplicar aquí otra CSP completa (el navegador exige cumplir todas las políticas). -->
   <!-- App Check (reCAPTCHA Enterprise): clave del sitio desde Firebase Console → App Check → tu app web. Sin clave no se inicializa App Check. -->
   <meta name="firebase-appcheck-recaptcha-site-key" content="6LeXmdgsAAAAADt_GN4dMGudJ8GNAJfgUUKfbM9G">
-  <title>USA Lottery Predictions | Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4</title>
+  <title>Lotería USA: probabilidades, resultados oficiales y análisis estadístico | prediccionloteria.com</title>
   <meta name="description" content="Predicciones de lotería USA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4. Guía de uso, números calientes y fríos, estadísticas y precisión por juego. Contenido editorial y herramientas de entretenimiento. Solo mayores de 18 años.">
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
@@ -118,6 +118,7 @@
         <i class="fas fa-ticket-alt"></i> Ticket Check
       </a>
       <a href="/faq.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">FAQ</a>
+      <a href="/probabilidades-loteria.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Probabilidades</a>
       <a href="/metodologia-estadistica.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Metodología</a>
       <a href="/guia-fuentes-loteria-deportes.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Fuentes</a>
       <a href="/about.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Acerca de</a>
@@ -144,8 +145,8 @@
     <div class="flex flex-col items-center mb-2">
       <img src="logo-adsense.svg" alt="Predicción Lotería - Powerball, Mega Millions, USA" class="h-10 sm:h-12 md:h-14 w-auto max-w-full object-contain" width="500" height="100" fetchpriority="high">
     </div>
-    <h1 class="text-xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight">Predicción de Lotería Profesional</h1>
-    <p class="text-gray-400 mb-3 text-xs sm:text-sm md:text-base">Predicciones con IA: Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5, Win 4 — USA</p>
+    <h1 class="text-xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight">Análisis estadístico de lotería USA</h1>
+    <p class="text-gray-400 mb-3 text-xs sm:text-sm md:text-base">Probabilidades calculadas, resultados oficiales y una herramienta de combinaciones para Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4</p>
     <div class="flex flex-wrap items-center justify-center gap-2">
       <div class="flex items-center gap-1 text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
         <i class="fas fa-user-circle"></i><span>ID:</span><span id="userIdDisplay" class="font-mono text-blue-400">Cargando...</span>
@@ -247,6 +248,7 @@
     </p>
     <div class="flex flex-wrap gap-2 text-sm">
       <a href="/analisis/" class="px-3 py-2 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white">Análisis por juego</a>
+      <a href="/probabilidades-loteria.html" class="px-3 py-2 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white">Probabilidades reales</a>
       <a href="/analisis/proxima-jugada.html" class="px-3 py-2 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white">Algoritmo de próxima jugada</a>
       <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Preguntas Frecuentes</a>
       <a href="/metodologia-estadistica.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Metodología estadística</a>
@@ -554,7 +556,7 @@
           <div class="space-y-4">
             <div><label class="block text-gray-400 mb-1 text-xs uppercase">Fecha</label><input type="date" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 focus:outline-none"></div>
             <div><label class="block text-gray-400 mb-1 text-xs uppercase">Números (1-70)</label><div class="grid grid-cols-5 gap-2"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"><input type="number" class="lottery-input p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-yellow-500 text-center font-bold" min="1" max="70" data-type="main"></div></div>
-            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Mega Ball (1-25)</label><input type="number" class="lottery-input w-full p-3 rounded-lg bg-gray-800 text-yellow-400 border border-yellow-900 focus:border-yellow-500 text-center font-bold text-xl" min="1" max="25" data-type="special"></div>
+            <div><label class="block text-gray-400 mb-1 text-xs uppercase">Mega Ball (1-24)</label><input type="number" class="lottery-input w-full p-3 rounded-lg bg-gray-800 text-yellow-400 border border-yellow-900 focus:border-yellow-500 text-center font-bold text-xl" min="1" max="24" data-type="special"></div>
             <button class="save-btn w-full px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg transition-all shadow-lg mt-2" data-lottery="megamillions">GUARDAR SORTEO</button>
           </div>
         </div>
@@ -984,7 +986,7 @@
 <!-- Footer -->
 <footer class="mt-6 sm:mt-12 pb-4 sm:pb-8 text-center w-full bg-gray-900 bg-opacity-50 pt-4 sm:pt-8 border-t border-gray-800">
   <div class="max-w-4xl mx-auto px-4">
-    <p class="text-gray-400 text-sm mb-2">&copy; 2026 Predicción de Lotería Profesional</p>
+    <p class="text-gray-400 text-sm mb-2">prediccionloteria.com</p>
     <div class="text-xs text-gray-500 space-x-4 mb-4">
       <a href="#aviso-legal" class="hover:text-gray-300">Aviso Legal</a>
       <span>|</span>
@@ -1009,28 +1011,22 @@
     <p class="text-gray-500 text-xs mb-4">Última actualización: <span id="lastUpdate"></span></p>
     <p class="text-gray-400 text-xs mb-4">El uso de este sitio implica tu acuerdo con los <a href="/terminos.html" class="text-cyan-400 hover:underline">Términos de uso</a> y la <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a>.</p>
 
-    <!-- Juego responsable (estilo NY Lottery) -->
+    <!-- Juego responsable (texto propio; 2026-09-30 se quitó el texto copiado de la NY Lottery) -->
     <div class="footer-responsible-play mt-4 pt-4 border-t border-gray-700 text-left">
-      <p class="text-amber-400/90 text-xs font-semibold uppercase tracking-wide mb-2">Please play responsibly.</p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
-        Must be 18+ to purchase a Lottery ticket and 21+ for Quick Draw where alcohol is served. Gambling problem? Visit <a href="https://nyproblemgamblinghelp.org" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">NYProblemGamblingHelp.org</a>. Call the HOPEline <a href="tel:+18778467369" class="text-cyan-400 hover:underline">1-877-846-7369</a> or text 467369.
+      <p class="text-amber-400/90 text-xs font-semibold uppercase tracking-wide mb-2">Juega con responsabilidad</p>
+      <p class="text-gray-400 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        Para comprar lotería hay que tener 18 años o más (21 en algunos juegos y estados). Si el juego te causa problemas: 1-800-522-4700 (<a href="https://www.ncpgambling.org/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">NCPG</a>); en Nueva York, HOPEline <a href="tel:+18778467369" class="text-cyan-400 hover:underline">1-877-846-7369</a>, mensaje de texto al 467369 o <a href="https://nyproblemgamblinghelp.org" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">NYProblemGamblingHelp.org</a>.
       </p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
-        All New York Lottery transactions are subject to New York State Gaming Commission rules and regulations. New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. This site is not affiliated with the New York State Gaming Commission or any official lottery.
-      </p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
-        The information on this website is believed to be accurate. In the event of a discrepancy between the information displayed on this website and the information in the official records maintained by the New York State Gaming Commission (or other official lottery authorities), the records maintained by the Gaming Commission or the respective authority shall prevail.
+      <p class="text-gray-400 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
+        Los resultados que mostramos proceden de fuentes oficiales (ver <a href="/guia-fuentes-loteria-deportes.html" class="text-cyan-400 hover:underline">fuentes</a>). Si hay alguna diferencia con el registro oficial de la lotería, prevalece el oficial.
       </p>
     </div>
 
     <!-- Copyright y aviso legal del sitio -->
     <div class="footer-legal mt-6 pt-4 border-t border-gray-700 text-left">
-      <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-2">&copy; 2026 Predicción Lotería. Todos los derechos reservados.</p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto mb-2">
-        New York Lottery trademarks and service marks may be used only with the prior permission of the New York State Gaming Commission. &copy; 2026 New York State Gaming Commission — All rights reserved. Este sitio no está afiliado con la New York State Gaming Commission ni con ninguna lotería oficial.
-      </p>
-      <p class="text-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
-        Predicción Lotería es un servicio independiente de entretenimiento. No estamos afiliados, respaldados ni asociados con Powerball®, Mega Millions®, Millionaire For Life™, Pick 10, Take 5, Win 4 ni con ninguna lotería oficial. Las predicciones son meramente informativas y no garantizan resultados. Solo para mayores de 18 años. Juega con responsabilidad.
+      <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-2">&copy; 2026 prediccionloteria.com</p>
+      <p class="text-gray-400 text-xs leading-relaxed max-w-3xl mx-auto">
+        Servicio independiente de información y entretenimiento. No estamos afiliados, respaldados ni asociados con la New York State Gaming Commission, Powerball®, Mega Millions®, Millionaire For Life™, Pick 10, Take 5, Win 4 ni con ninguna lotería oficial; sus nombres son marcas de sus respectivos dueños y se citan solo para identificar los juegos. Las combinaciones del sitio no garantizan resultados. Solo para mayores de 18 años.
       </p>
     </div>
   </div>

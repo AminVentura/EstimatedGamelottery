@@ -18,7 +18,11 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "appcheck-test.html",
+      "run-walkforward.mjs",
+      "exportar-logo-png.js",
+      "LEEME-LOGO-ADSENSE.txt"
     ],
     "headers": [
       {

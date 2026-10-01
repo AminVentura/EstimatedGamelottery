@@ -23,6 +23,20 @@
   </script>
 </head>
 <body class="px-2 py-3 sm:p-6 md:p-8 min-h-screen flex flex-col items-center justify-start bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
 <div class="bg-gray-900 bg-opacity-95 backdrop-blur-lg p-3 sm:p-6 md:p-8 rounded-2xl w-full max-w-5xl border border-gray-800 text-left relative z-10">
   <nav class="text-xs text-gray-500 mb-4">
     <a href="/" class="text-cyan-400 hover:underline">Inicio</a>
@@ -31,7 +45,7 @@
   </nav>
 
   <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Guía de fuentes oficiales de lotería</h1>
-  <p class="text-gray-400 text-sm mb-8">Documentación para usuarios y revisores: de dónde salen los resultados de lotería, cómo se actualizan y qué limitaciones tienen las herramientas de prediccionloteria.com.</p>
+  <p class="text-gray-400 text-sm mb-8">De dónde salen los resultados de lotería, cómo se actualizan y qué limitaciones tienen las herramientas de prediccionloteria.com.</p>
 
   <section class="mb-8">
     <h2 class="text-lg font-semibold text-cyan-400 mb-3">1. Lotería de Estados Unidos (Powerball, Mega Millions, NY games)</h2>
@@ -72,10 +86,19 @@
   </section>
 
   <section class="mb-8">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-3">5. ads.txt y Google AdSense</h2>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      El archivo <code class="text-gray-400">/ads.txt</code> en la raíz del dominio lista el ID de editor de Google autorizado. Debe servirse como texto plano (<code class="text-gray-400">text/plain</code>) y ser accesible en <strong class="text-white">https://www.prediccionloteria.com/ads.txt</strong> (y el dominio apex si aplica). Si AdSense indica que no se encontró el archivo, suele deberse a caché CDN, despliegue incompleto o bloqueo temporal del rastreador; tras publicar, use «Comprobar» en AdSense y vuelva a solicitar revisión.
-    </p>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">5. Conjuntos de datos por juego (revisados el 30 de septiembre de 2026)</h2>
+    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">Estos son los conjuntos públicos de NY Open Data, publicados por la New York State Gaming Commission, que consultamos para cada juego, con la cobertura que tenían el día de la revisión. Si un conjunto está incompleto o pertenece a un juego retirado, lo decimos en vez de rellenar huecos.</p>
+    <div class="overflow-x-auto mb-3"><table class="w-full text-sm border border-gray-700">
+      <thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left">Juego</th><th scope="col" class="px-3 py-2 text-left">Conjunto</th><th scope="col" class="px-3 py-2 text-left">Cobertura y estado</th></tr></thead>
+      <tbody class="text-gray-300">
+        <tr class="border-t border-gray-800"><td class="px-3 py-2">Powerball</td><td class="px-3 py-2"><a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/d6yy-54nr" rel="noopener noreferrer" target="_blank">d6yy-54nr</a></td><td class="px-3 py-2">Desde el 3-feb-2010; 2 005 sorteos hasta el 28-sep-2026. Las reglas actuales (5/69 + 1/26) rigen desde el 7-oct-2015.</td></tr>
+        <tr class="border-t border-gray-800"><td class="px-3 py-2">Mega Millions</td><td class="px-3 py-2"><a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/5xaw-6ayf" rel="noopener noreferrer" target="_blank">5xaw-6ayf</a></td><td class="px-3 py-2">Incompleto: desde el cambio de reglas del 8-abr-2025 trae unos pocos sorteos (aprox. uno al mes). Usar megamillions.com para el historial completo.</td></tr>
+        <tr class="border-t border-gray-800"><td class="px-3 py-2">Millionaire For Life</td><td class="px-3 py-2">—</td><td class="px-3 py-2">Sin conjunto propio en NY Open Data. El conjunto <a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/kwxv-fwze" rel="noopener noreferrer" target="_blank">kwxv-fwze</a> es de Cash4Life, juego retirado (último sorteo: 21-feb-2026), y no se usa para Millionaire For Life.</td></tr>
+        <tr class="border-t border-gray-800"><td class="px-3 py-2">Pick 10</td><td class="px-3 py-2"><a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/bycu-cw7c" rel="noopener noreferrer" target="_blank">bycu-cw7c</a></td><td class="px-3 py-2">Desde 1987; más de 14 000 sorteos.</td></tr>
+        <tr class="border-t border-gray-800"><td class="px-3 py-2">Take 5</td><td class="px-3 py-2"><a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/dg63-4siq" rel="noopener noreferrer" target="_blank">dg63-4siq</a></td><td class="px-3 py-2">Desde 1992; mediodía y noche en columnas separadas.</td></tr>
+        <tr class="border-t border-gray-800"><td class="px-3 py-2">Win 4</td><td class="px-3 py-2"><a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/hsys-3def" rel="noopener noreferrer" target="_blank">hsys-3def</a></td><td class="px-3 py-2">Desde 1980 (junto con Numbers); mediodía y noche.</td></tr>
+      </tbody></table></div>
+    <p class="text-gray-400 text-sm">Las tablas de resultados recientes de cada <a class="text-cyan-300 hover:underline" href="/analisis/">página de análisis</a> salen de estos conjuntos e indican la fecha de la instantánea.</p>
   </section>
 
   <section class="mb-6">
@@ -92,6 +115,12 @@
   </div>
   <p class="text-gray-500 text-xs mt-8">© 2026 prediccionloteria.com</p>
 </div>
-<p class="text-gray-400 text-xs text-center mt-6 max-w-3xl mx-auto px-4">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. <a href="/juego-responsable.html" class="text-cyan-400 underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-400 underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-400 underline">Privacidad</a></p>
+
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
 </body>
 </html>

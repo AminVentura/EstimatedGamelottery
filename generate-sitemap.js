@@ -16,7 +16,8 @@ const TODAY    = new Date().toISOString().split('T')[0];
 
 // Páginas a EXCLUIR del sitemap (archivos de prueba, utilidades, etc.)
 const EXCLUDED = new Set([
-  'appcheck-test.html',
+  'appcheck-test.html', // página de prueba: noindex y fuera del hosting (firebase.json → ignore)
+  '404.html',           // página de error: noindex
 ]);
 
 // Prioridades y frecuencias por página
@@ -25,6 +26,7 @@ const PAGE_CONFIG = {
   'analisis/index.html':                     { priority: '0.85', changefreq: 'weekly' },
   'faq.html':                                { priority: '0.8', changefreq: 'weekly' },
   'metodologia-estadistica.html':            { priority: '0.8', changefreq: 'monthly' },
+  'probabilidades-loteria.html':             { priority: '0.85', changefreq: 'monthly' },
   'proxima-jugada.html':                     { priority: '0.85', changefreq: 'weekly' },
   'powerball.html':                          { priority: '0.8', changefreq: 'weekly' },
   'mega-millions.html':                      { priority: '0.8', changefreq: 'weekly' },
@@ -39,6 +41,7 @@ const PAGE_CONFIG = {
   'contacto.html':                           { priority: '0.6', changefreq: 'monthly' },
   'politica-privacidad.html':                { priority: '0.4', changefreq: 'yearly' },
   'politica-cookies.html':                   { priority: '0.4', changefreq: 'yearly' },
+  'terminos.html':                           { priority: '0.4', changefreq: 'yearly' },
 };
 
 const DEFAULT_CONFIG = { priority: '0.5', changefreq: 'monthly' };

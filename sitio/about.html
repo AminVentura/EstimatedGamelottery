@@ -3,40 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Acerca de prediccionloteria.com</title>
-  <meta name="description" content="Conoce la historia, misión y metodología de prediccionloteria.com. Sitio independiente de análisis estadístico para loterías USA. Solo entretenimiento, mayores de 18 años.">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Acerca de prediccionloteria.com: quién lo hace y cómo</title>
+  <meta name="description" content="Quién está detrás de prediccionloteria.com, de dónde salen los datos, cómo se hacen los cálculos, cómo se financia el sitio y cómo corregimos errores.">
+  <link rel="stylesheet" href="/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://www.prediccionloteria.com/about.html">
 </head>
-<body class="px-2 py-3 sm:p-6 md:p-8 min-h-screen flex flex-col items-center justify-start bg-gray-900 text-white">
-<div class="bg-gray-900 bg-opacity-95 backdrop-blur-lg p-3 sm:p-6 md:p-8 rounded-2xl w-full max-w-5xl border border-gray-800 text-left relative z-10">
-  <h1 class="text-2xl sm:text-3xl font-bold text-white mb-6">Acerca de prediccionloteria.com</h1>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4" aria-label="Ruta"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / Acerca de</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold text-white mb-4">Acerca de prediccionloteria.com</h1>
+  <p class="text-gray-300 leading-relaxed mb-6">prediccionloteria.com es un sitio independiente, en español, sobre las loterías de Estados Unidos: reglas, probabilidades calculadas, resultados oficiales y herramientas para explorar el historial de sorteos. Lo que intentamos aportar es una explicación honesta, con números comprobables, de un juego que se suele vender con promesas.</p>
+
   <section class="mb-6">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Historia del proyecto</h2>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">prediccionloteria.com nació para ofrecer una herramienta clara de análisis estadístico para loterías de Estados Unidos. En vez de promesas vacías, explicamos cómo se construyen las sugerencias con historial, frecuencias, pares y modelos probabilísticos.</p>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Quién está detrás</h2>
+    <p class="text-gray-300 leading-relaxed mb-2">El sitio lo opera Businessskore LLC <strong>[PENDIENTE DATO REAL: nombre legal exacto y estado de constitución]</strong>.</p>
+    <p class="text-gray-300 leading-relaxed mb-2">Responsable del contenido: <strong>[PENDIENTE DATO REAL: nombre y función de la persona que revisa y firma el contenido]</strong>.</p>
+    <p class="text-gray-300 leading-relaxed">Para cualquier asunto: <a href="/contacto.html" class="text-cyan-300 hover:underline">página de contacto</a>.</p>
   </section>
+
   <section class="mb-6">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Misión</h2>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">Democratizar el acceso al análisis de sorteos: números calientes y fríos, comparación de precisión por juego y herramientas de consulta en lenguaje simple para usuarios nuevos y avanzados.</p>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Qué hacemos y qué no</h2>
+    <ul class="list-disc pl-5 text-gray-300 leading-relaxed space-y-1">
+      <li>Explicamos las reglas de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 y calculamos la <a href="/probabilidades-loteria.html" class="text-cyan-300 hover:underline">probabilidad de cada premio</a> con la fórmula a la vista.</li>
+      <li>Publicamos <a href="/analisis/" class="text-cyan-300 hover:underline">resultados recientes</a> tomados de fuentes oficiales, con el conjunto de datos y la fecha de consulta, y les aplicamos pruebas estadísticas para ver si los números «calientes» se apartan del azar.</li>
+      <li>Ofrecemos en la <a href="/" class="text-cyan-300 hover:underline">página principal</a> una herramienta que genera combinaciones a partir del historial. Es entretenimiento: ninguna combinación tiene más probabilidad que otra, y la herramienta lo dice.</li>
+      <li>No vendemos boletos, no aceptamos apuestas y no estamos afiliados a ninguna lotería oficial ni a la New York State Gaming Commission.</li>
+      <li>No publicamos testimonios, porcentajes de «efectividad» ni promesas de premio.</li>
+    </ul>
   </section>
+
   <section class="mb-6">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Qué nos diferencia</h2>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">Somos independientes y no afiliados a loterías oficiales. No vendemos boletos, no prometemos premios y no ofrecemos “fórmulas mágicas”. Publicamos metodología y recomendamos siempre validar resultados en fuentes oficiales.</p>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-2">De dónde salen los datos</h2>
+    <p class="text-gray-300 leading-relaxed mb-2">Los resultados de los juegos de Nueva York y de Powerball salen de NY Open Data, el portal de datos abiertos del estado, que los publica a partir de la New York State Gaming Commission. Las reglas y las probabilidades oficiales las cotejamos con los sitios de cada operador (powerball.com, megamillions.com, la lotería estatal correspondiente). La lista completa, con la cobertura de cada conjunto y sus problemas conocidos, está en la <a href="/guia-fuentes-loteria-deportes.html" class="text-cyan-300 hover:underline">guía de fuentes</a>.</p>
+    <p class="text-gray-300 leading-relaxed">Cuando una fuente está incompleta (hoy pasa con Mega Millions) o no existe (Millionaire For Life), lo decimos en la página del juego en lugar de rellenar el hueco.</p>
   </section>
+
   <section class="mb-6">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Metodología resumida</h2>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-4">Combinamos análisis de frecuencia, detección de pares y un modelo de Markov para generar sugerencias. Ningún enfoque garantiza ganar: la lotería es azar. Nuestro aporte es organizar datos para entretenimiento y referencia.</p>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cómo se hacen los cálculos y los textos</h2>
+    <p class="text-gray-300 leading-relaxed mb-2">Las tablas de probabilidades, los últimos resultados y las pruebas chi-cuadrado se generan con un script propio que descarga los datos oficiales y escribe el resultado en la página; cada tabla indica su fecha. Los métodos de la herramienta (frecuencias, intervalos, Markov, ensemble y la comparación walk-forward) están descritos en la <a href="/metodologia-estadistica.html" class="text-cyan-300 hover:underline">metodología</a> y en <a href="/analisis/proxima-jugada.html" class="text-cyan-300 hover:underline">cómo se elige la próxima jugada</a>.</p>
+    <p class="text-gray-300 leading-relaxed">Parte del código y de los textos se escribe con ayuda de herramientas de inteligencia artificial. Las cifras no se toman de esas herramientas: se calculan o se copian de la fuente oficial citada, y se pueden repetir con una hoja de cálculo.</p>
   </section>
+
   <section class="mb-6">
-    <h2 class="text-lg font-semibold text-yellow-400 mb-2">Aviso legal</h2>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">Las predicciones son únicamente para entretenimiento y no garantizan resultados. Solo para mayores de 18 años. Juega con responsabilidad.</p>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cómo se financia</h2>
+    <p class="text-gray-300 leading-relaxed">El sitio es gratuito. Puede mostrar anuncios de Google AdSense, solo si aceptas las cookies de publicidad (puedes cambiarlo en <a href="/politica-cookies.html#preferencias" data-cookie-prefs class="text-cyan-300 hover:underline">preferencias de cookies</a>), y la página principal incluye un enlace de afiliado de Jackpocket señalado como publicidad. Ni los anunciantes ni el afiliado deciden el contenido.</p>
   </section>
-  <p class="text-gray-500 text-xs mt-6">© 2026 prediccionloteria.com — Todos los derechos reservados.</p>
-</div>
+
+  <section class="mb-6">
+    <h2 class="text-lg font-semibold text-cyan-400 mb-2">Correcciones</h2>
+    <p class="text-gray-300 leading-relaxed">Si encuentras un resultado, una regla o una cifra equivocada, escríbenos desde <a href="/contacto.html" class="text-cyan-300 hover:underline">contacto</a> con el juego, la fecha y el dato. Lo comprobamos contra la fuente oficial y, si hay error, lo corregimos. En caso de discrepancia, siempre prevalece el resultado oficial de la lotería.</p>
+  </section>
+
+  <section class="mb-2">
+    <h2 class="text-lg font-semibold text-yellow-400 mb-2">Juego responsable</h2>
+    <p class="text-gray-300 leading-relaxed">Solo para mayores de 18 años (21+ donde la ley lo exija). La lotería es azar y casi siempre se pierde lo jugado. Si el juego te causa problemas, consulta nuestra página de <a href="/juego-responsable.html" class="text-cyan-300 hover:underline">juego responsable</a> o llama al 1-800-522-4700 (NCPG).</p>
+  </section>
+  <p class="text-gray-500 text-xs mt-6">Última revisión: 30 de septiembre de 2026.</p>
+</main>
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
 </body>
 </html>

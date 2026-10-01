@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Probabilidades reales de Powerball, Mega Millions, Pick 10, Take 5 y Win 4 | prediccionloteria.com</title>
+  <meta name="description" content="Cálculo combinatorio paso a paso de las probabilidades de cada premio en Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4, cotejado con las cifras oficiales." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/probabilidades-loteria.html" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4" aria-label="Ruta"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / Probabilidades</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Probabilidades reales de cada lotería, calculadas paso a paso</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Antes de mirar números calientes, fríos o cualquier «predicción», conviene saber contra qué se juega. Aquí calculamos la probabilidad de cada resultado en los seis juegos que cubre el sitio con una sola herramienta: contar combinaciones. Cada tabla muestra la fórmula, el número exacto de casos y, al lado, la cifra que publica el operador oficial para que puedas comprobar que coinciden.</p>
+  <p class="text-gray-400 text-sm leading-relaxed mb-6">Ninguna estadística del historial cambia estas probabilidades. Sirven para decidir cuánto jugar (o no jugar) sabiendo lo que hay detrás de cada boleto. Solo para mayores de 18 años (21+ donde la ley lo exija).</p>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">La herramienta: combinaciones sin orden</h2>
+    <p class="text-gray-300 leading-relaxed mb-3">Cuando la lotería saca <em>k</em> bolas de un bombo con <em>N</em> números y el orden no importa, el número de resultados posibles es el coeficiente binomial:</p>
+    <p class="bg-gray-800 border border-gray-700 rounded-lg p-3 font-mono text-sm text-gray-100 mb-3">C(N, k) = N! / (k! · (N − k)!)</p>
+    <p class="text-gray-300 leading-relaxed mb-3">Por ejemplo, C(69, 5) = 69·68·67·66·65 / (5·4·3·2·1) = 11 238 513 formas de elegir 5 números de 69. Si además hay una bola especial independiente con <em>B</em> valores, se multiplica por <em>B</em>.</p>
+    <p class="text-gray-300 leading-relaxed mb-3">Para acertar exactamente <em>m</em> de los <em>k</em> números, tu boleto tiene que coincidir en <em>m</em> de los <em>k</em> sorteados y fallar en los <em>k − m</em> restantes, que salen de los <em>N − k</em> números que no se sortearon:</p>
+    <p class="bg-gray-800 border border-gray-700 rounded-lg p-3 font-mono text-sm text-gray-100 mb-3">P(m aciertos) = C(k, m) · C(N − k, k − m) / C(N, k)</p>
+    <p class="text-gray-300 leading-relaxed">Es la distribución hipergeométrica. Con ella sale todo lo demás. El número medio de aciertos al azar es k·k/N (por ejemplo 5·5/69 ≈ 0,36 en Powerball), y es la referencia con la que el sitio compara sus métodos en las <a class="text-cyan-300 hover:underline" href="/analisis/">páginas de análisis</a>.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Powerball</h2>
+<!-- AUTO:prob-powerball:START -->
+<p class="text-gray-300 text-sm mb-2">Espacio total: C(69,5) × 26 = 11,238,513 × 26 = <strong>292,201,338</strong> jugadas posibles. Casos favorables para acertar exactamente <em>m</em> de los 5 números: C(5,m) · C(64,5−m); para la bola: 1 forma de acertarla o 25 de fallarla.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Powerball: 5 de 69 + Powerball 1–26. Fuente de las cifras oficiales: <a class="text-cyan-300 hover:underline" href="https://www.powerball.com/powerball-prize-chart" rel="noopener noreferrer" target="_blank">powerball.com — Prize chart</a>.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Resultado</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra oficial publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(64,0)·1 = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 292,201,338.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 292,201,338.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(64,0)·25 = 25</td><td class="px-3 py-2 text-gray-300 align-top">1 en 11,688,053.52</td><td class="px-3 py-2 text-gray-300 align-top">1 en 11,688,053.52</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(64,1)·1 = 320</td><td class="px-3 py-2 text-gray-300 align-top">1 en 913,129.18</td><td class="px-3 py-2 text-gray-300 align-top">1 en 913,129.18</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(64,1)·25 = 8,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 36,525.17</td><td class="px-3 py-2 text-gray-300 align-top">1 en 36,525.17</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(64,2)·1 = 20,160</td><td class="px-3 py-2 text-gray-300 align-top">1 en 14,494.11</td><td class="px-3 py-2 text-gray-300 align-top">1 en 14,494.11</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(64,2)·25 = 504,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 579.76</td><td class="px-3 py-2 text-gray-300 align-top">1 en 579.76</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(64,3)·1 = 416,640</td><td class="px-3 py-2 text-gray-300 align-top">1 en 701.33</td><td class="px-3 py-2 text-gray-300 align-top">1 en 701.33</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(64,3)·25 = 10,416,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 28.05</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(64,4)·1 = 3,176,880</td><td class="px-3 py-2 text-gray-300 align-top">1 en 91.98</td><td class="px-3 py-2 text-gray-300 align-top">1 en 91.98</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(64,4)·25 = 79,422,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.68</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(64,5)·1 = 7,624,512</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38.32</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38.32</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(64,5)·25 = 190,612,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 1.53</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Sumando las 9 combinaciones con premio, la probabilidad de ganar <em>algo</em> con una jugada es 1 en 24.87 (cifra oficial publicada: 1 en 24.87).</p>
+<!-- AUTO:prob-powerball:END -->
+    <p class="text-gray-400 text-sm">Historial y frecuencias: <a class="text-cyan-300 hover:underline" href="/analisis/powerball.html">análisis de Powerball</a>.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Mega Millions</h2>
+    <p class="text-gray-300 text-sm mb-2">Desde el 8 de abril de 2025 la Mega Ball va del 1 al 24 (antes del 1 al 25) y el boleto cuesta 5 dólares con multiplicador incluido. Las cifras de abajo son las de las reglas actuales.</p>
+<!-- AUTO:prob-megamillions:START -->
+<p class="text-gray-300 text-sm mb-2">Espacio total: C(70,5) × 24 = 12,103,014 × 24 = <strong>290,472,336</strong> jugadas posibles. Casos favorables para acertar exactamente <em>m</em> de los 5 números: C(5,m) · C(65,5−m); para la bola: 1 forma de acertarla o 23 de fallarla.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Mega Millions: 5 de 70 + Mega Ball 1–24. Fuente de las cifras oficiales: <a class="text-cyan-300 hover:underline" href="https://www.megamillions.com/How-to-Play.aspx" rel="noopener noreferrer" target="_blank">megamillions.com — How to Play</a>.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Resultado</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra oficial publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(65,0)·1 = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 290,472,336.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 290,472,336</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(65,0)·23 = 23</td><td class="px-3 py-2 text-gray-300 align-top">1 en 12,629,232.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 12,629,232</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(65,1)·1 = 325</td><td class="px-3 py-2 text-gray-300 align-top">1 en 893,761.03</td><td class="px-3 py-2 text-gray-300 align-top">1 en 893,761</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(65,1)·23 = 7,475</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38,859.18</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38,859</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(65,2)·1 = 20,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 13,965.02</td><td class="px-3 py-2 text-gray-300 align-top">1 en 13,965</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(65,2)·23 = 478,400</td><td class="px-3 py-2 text-gray-300 align-top">1 en 607.17</td><td class="px-3 py-2 text-gray-300 align-top">1 en 607</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(65,3)·1 = 436,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 665.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 665</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(65,3)·23 = 10,046,400</td><td class="px-3 py-2 text-gray-300 align-top">1 en 28.91</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(65,4)·1 = 3,385,200</td><td class="px-3 py-2 text-gray-300 align-top">1 en 85.81</td><td class="px-3 py-2 text-gray-300 align-top">1 en 86</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(65,4)·23 = 77,859,600</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.73</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(65,5)·1 = 8,259,888</td><td class="px-3 py-2 text-gray-300 align-top">1 en 35.17</td><td class="px-3 py-2 text-gray-300 align-top">1 en 35</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(65,5)·23 = 189,977,424</td><td class="px-3 py-2 text-gray-300 align-top">1 en 1.53</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Sumando las 9 combinaciones con premio, la probabilidad de ganar <em>algo</em> con una jugada es 1 en 23.07.</p>
+<!-- AUTO:prob-megamillions:END -->
+    <p class="text-gray-400 text-sm">Más: <a class="text-cyan-300 hover:underline" href="/analisis/mega-millions.html">análisis de Mega Millions</a>.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Millionaire For Life</h2>
+    <p class="text-gray-300 text-sm mb-2">Juego multiestatal que sustituyó a Cash4Life en febrero de 2026. Mostramos todos los resultados posibles; la última columna solo trae las cifras oficiales que hemos podido cotejar. Qué combinaciones pagan y cuánto: tabla oficial de tu lotería estatal.</p>
+<!-- AUTO:prob-millionaireforlife:START -->
+<p class="text-gray-300 text-sm mb-2">Espacio total: C(58,5) × 5 = 4,582,116 × 5 = <strong>22,910,580</strong> jugadas posibles. Casos favorables para acertar exactamente <em>m</em> de los 5 números: C(5,m) · C(53,5−m); para la bola: 1 forma de acertarla o 4 de fallarla.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Millionaire For Life: 5 de 58 + Millionaire Ball 1–5. Fuente de las cifras oficiales: <a class="text-cyan-300 hover:underline" href="https://nclottery.com/Millionaire-For-Life-how-to-play" rel="noopener noreferrer" target="_blank">nclottery.com — Millionaire For Life, How to play</a>.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Resultado</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra oficial publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(53,0)·1 = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 22,910,580.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 22,910,580.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(53,0)·4 = 4</td><td class="px-3 py-2 text-gray-300 align-top">1 en 5,727,645.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 5,727,645.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(53,1)·1 = 265</td><td class="px-3 py-2 text-gray-300 align-top">1 en 86,455.02</td><td class="px-3 py-2 text-gray-300 align-top">1 en 86,455.02</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(53,1)·4 = 1,060</td><td class="px-3 py-2 text-gray-300 align-top">1 en 21,613.75</td><td class="px-3 py-2 text-gray-300 align-top">1 en 21,613.75</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(53,2)·1 = 13,780</td><td class="px-3 py-2 text-gray-300 align-top">1 en 1,662.60</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(53,2)·4 = 55,120</td><td class="px-3 py-2 text-gray-300 align-top">1 en 415.65</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(53,3)·1 = 234,260</td><td class="px-3 py-2 text-gray-300 align-top">1 en 97.80</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(53,3)·4 = 937,040</td><td class="px-3 py-2 text-gray-300 align-top">1 en 24.45</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(53,4)·1 = 1,464,125</td><td class="px-3 py-2 text-gray-300 align-top">1 en 15.65</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(53,4)·4 = 5,856,500</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.91</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(53,5)·1 = 2,869,685</td><td class="px-3 py-2 text-gray-300 align-top">1 en 7.98</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(53,5)·4 = 11,478,740</td><td class="px-3 py-2 text-gray-300 align-top">1 en 2.00</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr></tbody></table></div>
+
+<!-- AUTO:prob-millionaireforlife:END -->
+    <p class="text-gray-400 text-sm">Más: <a class="text-cyan-300 hover:underline" href="/analisis/millionaire-for-life.html">análisis de Millionaire For Life</a>.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Pick 10 (Nueva York)</h2>
+<!-- AUTO:prob-pick10:START -->
+<p class="text-gray-300 text-sm mb-2">Eliges 10 números; la lotería sortea 20 de 80. Es más cómodo contarlo desde tu boleto: de los C(80,10) = <strong>1,646,492,110,120</strong> boletos posibles, los que tienen exactamente <em>m</em> números entre los 20 sorteados son C(20,m)·C(60,10−m).</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Pick 10 (NY): 10 elegidos, 20 sorteados de 80. Acertar 0 también tiene premio. Columna derecha: cifras redondeadas de la tabla de premios de la New York Lottery tal como la reproducen guías públicas del juego; la tabla oficial está en nylottery.ny.gov.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Aciertos</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">10 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,10)·C(60,0) = 184,756</td><td class="px-3 py-2 text-gray-300 align-top">1 en 8,911,711.18</td><td class="px-3 py-2 text-gray-300 align-top">1 en 8,911,711</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">9 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,9)·C(60,1) = 10,077,600</td><td class="px-3 py-2 text-gray-300 align-top">1 en 163,381.37</td><td class="px-3 py-2 text-gray-300 align-top">1 en 163,381</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">8 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,8)·C(60,2) = 222,966,900</td><td class="px-3 py-2 text-gray-300 align-top">1 en 7,384.47</td><td class="px-3 py-2 text-gray-300 align-top">1 en 7,384</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">7 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,7)·C(60,3) = 2,652,734,400</td><td class="px-3 py-2 text-gray-300 align-top">1 en 620.68</td><td class="px-3 py-2 text-gray-300 align-top">1 en 621</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">6 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,6)·C(60,4) = 18,900,732,600</td><td class="px-3 py-2 text-gray-300 align-top">1 en 87.11</td><td class="px-3 py-2 text-gray-300 align-top">1 en 87</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,5)·C(60,5) = 84,675,282,048</td><td class="px-3 py-2 text-gray-300 align-top">1 en 19.44</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,4)·C(60,6) = 242,559,401,700</td><td class="px-3 py-2 text-gray-300 align-top">1 en 6.79</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,3)·C(60,7) = 440,275,888,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.74</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,2)·C(60,8) = 486,137,960,550</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.39</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,1)·C(60,9) = 295,662,853,200</td><td class="px-3 py-2 text-gray-300 align-top">1 en 5.57</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 de tus 10</td><td class="px-3 py-2 text-gray-300 align-top">C(20,0)·C(60,10) = 75,394,027,566</td><td class="px-3 py-2 text-gray-300 align-top">1 en 21.84</td><td class="px-3 py-2 text-gray-300 align-top">1 en 22</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Probabilidad de ganar algún premio (10, 9, 8, 7, 6 o 0 aciertos): 1 en 16.94.</p>
+<!-- AUTO:prob-pick10:END -->
+    <p class="text-gray-400 text-sm">Fíjate en un detalle: acertar 0 de 10 (1 en 22 aprox.) es más probable que acertar 6 (1 en 87). Por eso el juego le pone premio. Más: <a class="text-cyan-300 hover:underline" href="/analisis/pick-10.html">análisis de Pick 10</a>.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Take 5 (Nueva York)</h2>
+<!-- AUTO:prob-take5:START -->
+<p class="text-gray-300 text-sm mb-2">Take 5: 5 números de 39, dos sorteos al día (mediodía y noche). Total: C(39,5) = <strong>575,757</strong> combinaciones.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Take 5 (NY). Acertar 2 da una jugada gratis (Quick Pick); 3, 4 y 5 aciertos tienen premios parimutuel, que cambian en cada sorteo. Columna derecha: cifras redondeadas de la New York Lottery tal como las reproducen guías públicas del juego; la tabla oficial está en nylottery.ny.gov.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Aciertos</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 de 5</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(34,0) = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 575,757.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 575,757</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 de 5</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(34,1) = 170</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3,386.81</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3,387</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 de 5</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(34,2) = 5,610</td><td class="px-3 py-2 text-gray-300 align-top">1 en 102.63</td><td class="px-3 py-2 text-gray-300 align-top">1 en 103</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 de 5</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(34,3) = 59,840</td><td class="px-3 py-2 text-gray-300 align-top">1 en 9.62</td><td class="px-3 py-2 text-gray-300 align-top">1 en 10</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 de 5</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(34,4) = 231,880</td><td class="px-3 py-2 text-gray-300 align-top">1 en 2.48</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 de 5</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(34,5) = 278,256</td><td class="px-3 py-2 text-gray-300 align-top">1 en 2.07</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr></tbody></table></div>
+<!-- AUTO:prob-take5:END -->
+    <p class="text-gray-400 text-sm">Más: <a class="text-cyan-300 hover:underline" href="/analisis/take-5.html">análisis de Take 5</a>.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Win 4 (Nueva York)</h2>
+<!-- AUTO:prob-win4:START -->
+<p class="text-gray-300 text-sm mb-2">Win 4 sortea cuatro dígitos del 0 al 9 (0000–9999): 10<sup>4</sup> = 10 000 resultados igual de probables. Una jugada <strong>Straight</strong> (orden exacto) acierta con probabilidad 1 en 10 000. En <strong>Box</strong> (cualquier orden) la probabilidad depende de cuántos órdenes distintos tiene tu número: 4!/(repeticiones) órdenes.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Win 4: conteo exhaustivo de los 10 000 números posibles (cálculo propio). Premios y tipos de jugada: New York Lottery (nylottery.ny.gov).</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Tipo de número</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cuántos hay</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Órdenes posibles y probabilidad Box</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 distintos (p. ej. 1234)</td><td class="px-3 py-2 text-gray-300 align-top">5,040 de 10 000 (50.4%)</td><td class="px-3 py-2 text-gray-300 align-top">24 órdenes → Box: 1 en 416.67</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">un par (1123)</td><td class="px-3 py-2 text-gray-300 align-top">4,320 de 10 000 (43.2%)</td><td class="px-3 py-2 text-gray-300 align-top">12 órdenes → Box: 1 en 833.33</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">dos pares (1122)</td><td class="px-3 py-2 text-gray-300 align-top">270 de 10 000 (2.7%)</td><td class="px-3 py-2 text-gray-300 align-top">6 órdenes → Box: 1 en 1,666.67</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">trío (1112)</td><td class="px-3 py-2 text-gray-300 align-top">360 de 10 000 (3.6%)</td><td class="px-3 py-2 text-gray-300 align-top">4 órdenes → Box: 1 en 2,500.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">cuádruple (1111)</td><td class="px-3 py-2 text-gray-300 align-top">10 de 10 000 (0.1%)</td><td class="px-3 py-2 text-gray-300 align-top">— (solo Straight)</td></tr></tbody></table></div>
+<!-- AUTO:prob-win4:END -->
+    <p class="text-gray-400 text-sm">Más: <a class="text-cyan-300 hover:underline" href="/analisis/win-4.html">análisis de Win 4</a>, donde comparamos estas proporciones con los sorteos reales.</p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Lo que estas cifras dicen (y lo que no)</h2>
+    <ul class="list-disc pl-5 text-gray-300 leading-relaxed space-y-2">
+      <li><strong>Todas las combinaciones valen lo mismo.</strong> 1-2-3-4-5 con Powerball 6 tiene exactamente la misma probabilidad que cualquier otra jugada. Lo que sí cambia es con cuántas personas compartirías un premio repartido: las combinaciones «bonitas» o de fechas las juega más gente.</li>
+      <li><strong>Los sorteos no tienen memoria.</strong> Un número que lleva 40 sorteos sin salir no está «atrasado». La fórmula de arriba no depende del historial.</li>
+      <li><strong>Comprar más boletos sube la probabilidad en proporción lineal.</strong> Diez boletos distintos de Powerball son 10 en 292 201 338: sigue siendo 1 en más de 29 millones.</li>
+      <li><strong>«Ganar algo» no es recuperar lo jugado.</strong> El premio más frecuente de muchos juegos es igual o menor que el precio del boleto.</li>
+      <li><strong>Las herramientas de este sitio no mejoran estas cifras.</strong> Sirven para explorar el historial y entretenerse; la <a class="text-cyan-300 hover:underline" href="/metodologia-estadistica.html">metodología</a> explica qué hacen y qué no.</li>
+    </ul>
+  </section>
+
+  <section class="mb-6">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo comprobarlo tú</h2>
+    <p class="text-gray-300 leading-relaxed mb-3">Cualquier hoja de cálculo trae la función <code>COMBIN</code> (en español <code>COMBINAT</code>). Para el premio mayor de Powerball: <code>=COMBINAT(69;5)*26</code> devuelve 292 201 338. Para 4 aciertos en Take 5: <code>=COMBINAT(39;5)/(COMBINAT(5;4)*COMBINAT(34;1))</code> devuelve 3 386,8 (la tabla oficial lo redondea a 3,387).</p>
+    <p class="text-gray-300 leading-relaxed">Si alguna cifra de esta página no coincide con la del operador oficial, prevalece la oficial y te agradecemos que nos escribas desde <a class="text-cyan-300 hover:underline" href="/contacto.html">contacto</a>.</p>
+  </section>
+<!-- AUTO:fecha:START -->
+<p class="text-gray-500 text-xs mb-6">Tablas generadas por <code>scripts/contenido-estatico.mjs</code> el 2026-09-30.</p>
+<!-- AUTO:fecha:END -->
+</main>
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
+</body>
+</html>

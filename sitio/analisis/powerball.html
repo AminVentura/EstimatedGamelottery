@@ -11,6 +11,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
 <main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
   <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Powerball</nav>
   <h1 class="text-2xl sm:text-3xl font-bold mb-3">Powerball: cómo leemos el sorteo para la próxima jugada</h1>
@@ -30,6 +44,73 @@
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
   <p class="text-gray-300 leading-relaxed mb-6">Números oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a> y powerball.com. Dataset: data.ny.gov/resource/d6yy-54nr. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento.</p>
   <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+<!-- AUTO:probabilidades:START -->
+<section class="mb-8" id="probabilidades">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Probabilidades reales, calculadas</h2>
+<p class="text-gray-300 text-sm mb-2">Espacio total: C(69,5) × 26 = 11,238,513 × 26 = <strong>292,201,338</strong> jugadas posibles. Casos favorables para acertar exactamente <em>m</em> de los 5 números: C(5,m) · C(64,5−m); para la bola: 1 forma de acertarla o 25 de fallarla.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Powerball: 5 de 69 + Powerball 1–26. Fuente de las cifras oficiales: <a class="text-cyan-300 hover:underline" href="https://www.powerball.com/powerball-prize-chart" rel="noopener noreferrer" target="_blank">powerball.com — Prize chart</a>.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Resultado</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra oficial publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(64,0)·1 = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 292,201,338.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 292,201,338.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(64,0)·25 = 25</td><td class="px-3 py-2 text-gray-300 align-top">1 en 11,688,053.52</td><td class="px-3 py-2 text-gray-300 align-top">1 en 11,688,053.52</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(64,1)·1 = 320</td><td class="px-3 py-2 text-gray-300 align-top">1 en 913,129.18</td><td class="px-3 py-2 text-gray-300 align-top">1 en 913,129.18</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(64,1)·25 = 8,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 36,525.17</td><td class="px-3 py-2 text-gray-300 align-top">1 en 36,525.17</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(64,2)·1 = 20,160</td><td class="px-3 py-2 text-gray-300 align-top">1 en 14,494.11</td><td class="px-3 py-2 text-gray-300 align-top">1 en 14,494.11</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(64,2)·25 = 504,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 579.76</td><td class="px-3 py-2 text-gray-300 align-top">1 en 579.76</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(64,3)·1 = 416,640</td><td class="px-3 py-2 text-gray-300 align-top">1 en 701.33</td><td class="px-3 py-2 text-gray-300 align-top">1 en 701.33</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(64,3)·25 = 10,416,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 28.05</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(64,4)·1 = 3,176,880</td><td class="px-3 py-2 text-gray-300 align-top">1 en 91.98</td><td class="px-3 py-2 text-gray-300 align-top">1 en 91.98</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(64,4)·25 = 79,422,000</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.68</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números + Powerball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(64,5)·1 = 7,624,512</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38.32</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38.32</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(64,5)·25 = 190,612,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 1.53</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Sumando las 9 combinaciones con premio, la probabilidad de ganar <em>algo</em> con una jugada es 1 en 24.87 (cifra oficial publicada: 1 en 24.87).</p>
+<p class="text-gray-400 text-sm mb-6">Fórmulas y el resto de juegos: <a class="text-cyan-300 hover:underline" href="/probabilidades-loteria.html">probabilidades reales de cada lotería</a>.</p>
+</section>
+<!-- AUTO:probabilidades:END -->
+<!-- AUTO:historial:START -->
+<section class="mb-8" id="historial-oficial">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Últimos resultados oficiales y prueba de azar</h2>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Últimos 12 sorteos en el conjunto oficial.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Fecha</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Números (1–69)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Powerball</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-28</td><td class="px-3 py-2 text-gray-300 align-top">17 21 29 42 49</td><td class="px-3 py-2 text-gray-300 align-top">07</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-26</td><td class="px-3 py-2 text-gray-300 align-top">14 40 52 55 57</td><td class="px-3 py-2 text-gray-300 align-top">24</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-23</td><td class="px-3 py-2 text-gray-300 align-top">05 15 26 29 30</td><td class="px-3 py-2 text-gray-300 align-top">14</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-21</td><td class="px-3 py-2 text-gray-300 align-top">02 07 09 17 58</td><td class="px-3 py-2 text-gray-300 align-top">20</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-19</td><td class="px-3 py-2 text-gray-300 align-top">18 30 41 45 68</td><td class="px-3 py-2 text-gray-300 align-top">10</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-16</td><td class="px-3 py-2 text-gray-300 align-top">02 21 24 25 64</td><td class="px-3 py-2 text-gray-300 align-top">07</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-14</td><td class="px-3 py-2 text-gray-300 align-top">19 20 57 61 67</td><td class="px-3 py-2 text-gray-300 align-top">22</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-12</td><td class="px-3 py-2 text-gray-300 align-top">14 16 23 58 69</td><td class="px-3 py-2 text-gray-300 align-top">03</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-09</td><td class="px-3 py-2 text-gray-300 align-top">09 40 42 55 65</td><td class="px-3 py-2 text-gray-300 align-top">23</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-07</td><td class="px-3 py-2 text-gray-300 align-top">15 19 28 39 56</td><td class="px-3 py-2 text-gray-300 align-top">03</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-05</td><td class="px-3 py-2 text-gray-300 align-top">15 40 47 53 59</td><td class="px-3 py-2 text-gray-300 align-top">09</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2026-09-02</td><td class="px-3 py-2 text-gray-300 align-top">03 10 29 58 64</td><td class="px-3 py-2 text-gray-300 align-top">14</td></tr></tbody></table></div>
+<p class="text-gray-400 text-xs mb-4">Fuente: NY Open Data, conjunto «Lottery Powerball Winning Numbers: Beginning 2010» (<a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/d6yy-54nr" rel="noopener noreferrer" target="_blank">data.ny.gov/d/d6yy-54nr</a>), publicado por la New York State Gaming Commission. Instantánea tomada el 2026-09-30; para el último sorteo y para reclamar premios, consulta <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>.</p>
+<p class="text-gray-300 text-sm mb-2">Usamos solo los sorteos desde el 7 de octubre de 2015, cuando Powerball pasó a 5 de 69 + 1 de 26. Mezclar sorteos con otras reglas inflaría la frecuencia de números que hoy ni existen o cambiaría la esperada.</p>
+<h3 class="text-lg font-semibold text-gray-100 mt-4 mb-2">Números blancos (1–69)</h3>
+<ul class="list-disc pl-5 text-gray-300 text-sm space-y-1 mb-2">
+<li>Sorteos analizados: <strong>1,413</strong>. Frecuencia esperada por número si el sorteo es justo: n·5/69 = <strong>102.39</strong> (desviación típica ≈ 9.75).</li>
+<li>Más frecuentes («calientes»): 21 (126), 61 (126), 64 (125), 28 (120), 27 (118). El máximo está a 2.42 desviaciones de lo esperado.</li>
+<li>Menos frecuentes («fríos»): 13 (76), 46 (83), 26 (83), 49 (84), 34 (84). El mínimo está a -2.71 desviaciones.</li>
+<li>Prueba chi-cuadrado de uniformidad (estadístico corregido ×(69−1)/(69−5) porque cada sorteo saca 5 números sin repetir): χ² = 83.52 con 68 grados de libertad, <strong>p = 0.097</strong>.</li>
+</ul>
+<p class="text-gray-400 text-sm mb-3">Las diferencias entre números calientes y fríos son del tamaño que produce el azar: no hay evidencia de sesgo. Con 69 números, que el más y el menos frecuente queden a 2 o 3 desviaciones de la media es lo normal.</p>
+<h3 class="text-lg font-semibold text-gray-100 mt-4 mb-2">Powerball (1–26)</h3>
+<ul class="list-disc pl-5 text-gray-300 text-sm space-y-1 mb-2">
+<li>Sorteos analizados: <strong>1,413</strong>. Frecuencia esperada por número si el sorteo es justo: n·1/26 = <strong>54.35</strong> (desviación típica ≈ 7.23).</li>
+<li>Más frecuentes («calientes»): 14 (67), 4 (66), 21 (63), 24 (63), 18 (62). El máximo está a 1.75 desviaciones de lo esperado.</li>
+<li>Menos frecuentes («fríos»): 16 (40), 17 (45), 15 (46), 8 (46), 22 (48). El mínimo está a -1.98 desviaciones.</li>
+<li>Prueba chi-cuadrado de uniformidad: χ² = 24.03 con 25 grados de libertad, <strong>p = 0.518</strong>.</li>
+</ul>
+<p class="text-gray-400 text-sm mb-3">Las diferencias entre números calientes y fríos son del tamaño que produce el azar: no hay evidencia de sesgo. Con 26 números, que el más y el menos frecuente queden a 2 o 3 desviaciones de la media es lo normal.</p>
+</section>
+<!-- AUTO:historial:END -->
 </main>
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
 </body>
 </html>

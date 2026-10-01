@@ -4,17 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Análisis Millionaire For Life: pool 58, bola 1-5 y historial corto | prediccionloteria.com</title>
-  <meta name="description" content="Millionaire For Life (5 de 58 + bola 1-5) sustituye a Cash4Life. Dataset NY kwxv-fwze, baseline ≈ 0,43 de 5, walk-forward sin fingir años de historia. Sin jackpot garantizado." />
+  <meta name="description" content="Millionaire For Life (5 de 58 + bola 1-5) sustituye a Cash4Life. Sin conjunto propio en NY Open Data, baseline ≈ 0,43 de 5, walk-forward sin fingir años de historia. Sin jackpot garantizado." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://www.prediccionloteria.com/analisis/millionaire-for-life.html" />
   <link rel="stylesheet" href="../styles.css" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
 <main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
   <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Millionaire For Life</nav>
   <h1 class="text-2xl sm:text-3xl font-bold mb-3">Millionaire For Life: juego nuevo, historial delicado</h1>
-  <p class="text-gray-300 leading-relaxed mb-4">Millionaire For Life (M4L) empezó en febrero 2026 y sustituye a Cash4Life. Formato en este sitio: cinco números del 1 al 58 y una bola del 1 al 5 (Millionaire Ball). Sorteo diario. El JSON público que aún usamos es el dataset NY <strong>kwxv-fwze</strong>, pensado originalmente para Cash4Life (campo <code>cash_ball</code>). Mientras NY no publique un recurso distinto, interpretamos <code>winning_numbers</code> + cash_ball/millionaire_ball con el mismo parser. Si el esquema cambia, las filas que no cumplan 5+1 en rango se descartan: preferimos un modelo corto a un modelo contaminado. No estamos afiliados a NY Lottery ni al operador multiestatal del juego.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Millionaire For Life (M4L) empezó en febrero 2026 y sustituye a Cash4Life. Formato en este sitio: cinco números del 1 al 58 y una bola del 1 al 5 (Millionaire Ball). Sorteo diario. A 30 de septiembre de 2026, NY Open Data no publica un conjunto de resultados de Millionaire For Life. El conjunto <strong>kwxv-fwze</strong> es de Cash4Life, que se retiró el 21 de febrero de 2026, y tiene otras reglas (números del 1 al 60, Cash Ball del 1 al 4). Por eso ya no lo usamos para este juego: el historial de Millionaire For Life del sitio solo incluye sorteos desde el 22 de febrero de 2026 con números dentro de rango. Preferimos un modelo corto a uno contaminado. No estamos afiliados a NY Lottery ni al operador multiestatal del juego.</p>
 
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
   <p class="text-gray-300 leading-relaxed mb-3">Principales al azar: 5×5/58 ≈ <strong>0,43</strong> aciertos de 5. La bola especial solo tiene 5 valores: 20 % al azar. El premio vitalicio que se publicita en el juego oficial no cambia esa matemática. “Precisión” aquí es coincidencias parciales de la sugerencia del día contra el sorteo publicado, no una renta de por vida.</p>
@@ -28,8 +42,37 @@
   <p class="text-gray-300 leading-relaxed mb-4">PREDECIR en la pestaña Millionaire For Life lanza los 8 métodos sobre el historial válido. Si hay suficientes sorteos, gana el de mayor avgHits en walk-forward. Si el historial es corto, el sello de próxima jugada cae al ensemble y la interfaz no inventa confianza. Detalle: <a class="text-cyan-300 hover:underline" href="/analisis/proxima-jugada.html">algoritmo de próxima jugada</a>. Métodos: <a class="text-cyan-300 hover:underline" href="/metodologia-estadistica.html">metodología estadística</a>.</p>
 
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
-  <p class="text-gray-300 leading-relaxed mb-6">Verifica en el operador de tu estado y en <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Dataset: data.ny.gov/resource/kwxv-fwze. Si el feed falla o una fila sale del rango 5+1, no inventamos un sorteo: se descarta la fila y se espera el próximo JSON válido. 18+. Entretenimiento. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
+  <p class="text-gray-300 leading-relaxed mb-6">Verifica en el operador de tu estado y en <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Si un sorteo no está en una fuente verificable o sale del rango 5+1, no lo inventamos: se descarta y se espera al siguiente. 18+. Entretenimiento. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
   <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+<!-- AUTO:probabilidades:START -->
+<section class="mb-8" id="probabilidades">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Probabilidades reales, calculadas</h2>
+<p class="text-gray-300 text-sm mb-2">Espacio total: C(58,5) × 5 = 4,582,116 × 5 = <strong>22,910,580</strong> jugadas posibles. Casos favorables para acertar exactamente <em>m</em> de los 5 números: C(5,m) · C(53,5−m); para la bola: 1 forma de acertarla o 4 de fallarla.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Millionaire For Life: 5 de 58 + Millionaire Ball 1–5. Fuente de las cifras oficiales: <a class="text-cyan-300 hover:underline" href="https://nclottery.com/Millionaire-For-Life-how-to-play" rel="noopener noreferrer" target="_blank">nclottery.com — Millionaire For Life, How to play</a>.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Resultado</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra oficial publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(53,0)·1 = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 22,910,580.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 22,910,580.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(53,0)·4 = 4</td><td class="px-3 py-2 text-gray-300 align-top">1 en 5,727,645.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 5,727,645.00</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(53,1)·1 = 265</td><td class="px-3 py-2 text-gray-300 align-top">1 en 86,455.02</td><td class="px-3 py-2 text-gray-300 align-top">1 en 86,455.02</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(53,1)·4 = 1,060</td><td class="px-3 py-2 text-gray-300 align-top">1 en 21,613.75</td><td class="px-3 py-2 text-gray-300 align-top">1 en 21,613.75</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(53,2)·1 = 13,780</td><td class="px-3 py-2 text-gray-300 align-top">1 en 1,662.60</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(53,2)·4 = 55,120</td><td class="px-3 py-2 text-gray-300 align-top">1 en 415.65</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(53,3)·1 = 234,260</td><td class="px-3 py-2 text-gray-300 align-top">1 en 97.80</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(53,3)·4 = 937,040</td><td class="px-3 py-2 text-gray-300 align-top">1 en 24.45</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(53,4)·1 = 1,464,125</td><td class="px-3 py-2 text-gray-300 align-top">1 en 15.65</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(53,4)·4 = 5,856,500</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.91</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números + Millionaire Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(53,5)·1 = 2,869,685</td><td class="px-3 py-2 text-gray-300 align-top">1 en 7.98</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(53,5)·4 = 11,478,740</td><td class="px-3 py-2 text-gray-300 align-top">1 en 2.00</td><td class="px-3 py-2 text-gray-300 align-top">—</td></tr></tbody></table></div>
+
+<p class="text-gray-400 text-sm mb-6">Fórmulas y el resto de juegos: <a class="text-cyan-300 hover:underline" href="/probabilidades-loteria.html">probabilidades reales de cada lotería</a>.</p>
+</section>
+<!-- AUTO:probabilidades:END -->
 </main>
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
 </body>
 </html>

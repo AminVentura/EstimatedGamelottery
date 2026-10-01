@@ -28,7 +28,7 @@ let totalPredictions = 0;
 const LOTTERY_CONFIG = {
   powerball:    { mainCount: 5, mainMin: 1, mainMax: 69,  hasSpecial: true,  specialMin: 1, specialMax: 26,  verMasId: 'pb' },
   millionaireforlife: { mainCount: 5, mainMin: 1, mainMax: 58,  hasSpecial: true,  specialMin: 1, specialMax: 5,   verMasId: 'm4l' },
-  megamillions:{ mainCount: 5, mainMin: 1, mainMax: 70,  hasSpecial: true,  specialMin: 1, specialMax: 25,  verMasId: 'mm' },
+  megamillions:{ mainCount: 5, mainMin: 1, mainMax: 70,  hasSpecial: true,  specialMin: 1, specialMax: 24,  verMasId: 'mm' },
   pick10:      { mainCount: 10, mainMin: 1, mainMax: 80, hasSpecial: false, verMasId: 'pick10', drawResultCount: 20 },
   take5day:    { mainCount: 5, mainMin: 1, mainMax: 39,  hasSpecial: false, verMasId: 'take5day' },
   take5eve:    { mainCount: 5, mainMin: 1, mainMax: 39,  hasSpecial: false, verMasId: 'take5eve' },
@@ -1748,11 +1748,17 @@ async function fetchNYOpenData() {
     }
 
     if (m4lRes.status === 'fulfilled' && Array.isArray(m4lRes.value)) {
+      // kwxv-fwze es el conjunto de Cash4Life (retirado el 2026-02-21; 1-60 + Cash Ball 1-4).
+      // Solo se aceptan filas desde el arranque de Millionaire For Life (2026-02-22) y dentro de su rango (5 de 1-58 + bola 1-5).
       const items = m4lRes.value.map(row => {
         const date = _nyDate(row.draw_date);
-        const main = row.winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
-        return _nyItem('m4l', date, main, Number(row.cash_ball));
-      });
+        const main = String(row.winning_numbers || '').trim().split(/\s+/).map(Number).sort((a, b) => a - b);
+        const ball = Number(row.millionaire_ball ?? row.cash_ball);
+        return _nyItem('m4l', date, main, ball);
+      }).filter(it => it.data.date >= '2026-02-22'
+        && it.data.mainNumbers.length === 5
+        && it.data.mainNumbers.every(n => Number.isInteger(n) && n >= 1 && n <= 58)
+        && Number.isInteger(it.data.special) && it.data.special >= 1 && it.data.special <= 5);
       totalNew += _mergeNYInto('millionaireforlife', items);
     }
 

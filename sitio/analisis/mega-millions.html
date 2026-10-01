@@ -3,22 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Análisis Mega Millions: pool 70, Mega Ball 25 y próxima jugada | prediccionloteria.com</title>
-  <meta name="description" content="Cómo analizamos Mega Millions (5 de 70 + Mega Ball 1-25) con historial NY Open Data 5xaw-6ayf. Baseline ≈ 0,36 de 5. Walk-forward, sin mezclar Powerball ni jackpot garantizado." />
+  <title>Análisis Mega Millions: pool 70, Mega Ball 24 y próxima jugada | prediccionloteria.com</title>
+  <meta name="description" content="Cómo analizamos Mega Millions (5 de 70 + Mega Ball 1-24) con historial NY Open Data 5xaw-6ayf. Baseline ≈ 0,36 de 5. Walk-forward, sin mezclar Powerball ni jackpot garantizado." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://www.prediccionloteria.com/analisis/mega-millions.html" />
   <link rel="stylesheet" href="../styles.css" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<!-- NAV:START -->
+<header class="w-full max-w-5xl mx-auto mb-4">
+  <nav aria-label="Principal" class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm bg-gray-800 border border-gray-700 rounded-xl px-4 py-3">
+    <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
+    <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
+    <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
+    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
+    <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
+    <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
+    <a href="/contacto.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Contacto</a>
+  </nav>
+</header>
+<!-- NAV:END -->
 <main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
   <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Mega Millions</nav>
   <h1 class="text-2xl sm:text-3xl font-bold mb-3">Mega Millions: cómo leemos el pool 70 y la Mega Ball</h1>
-  <p class="text-gray-300 leading-relaxed mb-4">Mega Millions sortea martes y viernes. El jugador elige cinco números del 1 al 70 y una Mega Ball del 1 al 25. En prediccionloteria.com el historial llega del dataset público de New York <strong>5xaw-6ayf</strong>: <code>winning_numbers</code> son los cinco principales; <code>mega_ball</code> va en campo aparte. No estamos afiliados a Mega Millions ni a NY Lottery. Copiar el análisis de Powerball aquí sería incorrecto: el pool es más ancho (70 vs 69) y la bola especial tiene 25 estados, no 26. Eso cambia frecuencias, gaps esperados y el módulo que antes se usaba mal para “predecir” la bola.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Mega Millions sortea martes y viernes. El jugador elige cinco números del 1 al 70 y una Mega Ball del 1 al 24 (reglas vigentes desde el 8 de abril de 2025; antes iba del 1 al 25). En prediccionloteria.com el historial llega del dataset público de New York <strong>5xaw-6ayf</strong>: <code>winning_numbers</code> son los cinco principales; <code>mega_ball</code> va en campo aparte. No estamos afiliados a Mega Millions ni a NY Lottery. Copiar el análisis de Powerball aquí sería incorrecto: el pool es más ancho (70 vs 69) y la bola especial tiene 24 valores, no 26. Eso cambia frecuencias, gaps esperados y el módulo que antes se usaba mal para “predecir” la bola.</p>
 
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
   <p class="text-gray-300 leading-relaxed mb-3">Si eliges 5 números de 70 y el sorteo también saca 5 de 70, el valor esperado de coincidencias al azar es 5×5/70 ≈ <strong>0,36</strong>. Tres aciertos principales ya es infrecuente; el premio mayor exige los cinco más la Mega Ball. Cuando el panel dice “precisión”, cuenta coincidencias parciales de tu predicción del día contra el resultado oficial, no el jackpot.</p>
-  <p class="text-gray-300 leading-relaxed mb-4">La Mega Ball se modela aparte: 1/25 = 4 % al azar. El walk-forward puntúa los cinco principales (avgHits). Si un método gana en blancos pero falla siempre la Mega Ball, esa bola no infla el ranking: se cuenta aparte (<code>hitsSpecial</code>) como desempate. La Mega Ball se elige por frecuencia observada, no por la suma de los cinco.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">La Mega Ball se modela aparte: 1/24 ≈ 4,2 % al azar. El walk-forward puntúa los cinco principales (avgHits). Si un método gana en blancos pero falla siempre la Mega Ball, esa bola no infla el ranking: se cuenta aparte (<code>hitsSpecial</code>) como desempate. La Mega Ball se elige por frecuencia observada, no por la suma de los cinco.</p>
 
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Señales que usamos (y las que no)</h2>
   <p class="text-gray-300 leading-relaxed mb-3">Calientes: apariciones en ventana reciente del historial Mega Millions (hasta 1 000 filas del JSON). Fríos: baja frecuencia total en este pool de 70. Gap: sorteos desde la última vez que salió un número, comparado con el intervalo medio de un bombo 5/70. Markov: transiciones entre sorteos consecutivos con suavizado de Laplace. Ensemble: mezcla esas señales en un score.</p>
@@ -30,6 +44,42 @@
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
   <p class="text-gray-300 leading-relaxed mb-6">Números oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a> y megamillions.com. Dataset: data.ny.gov/resource/5xaw-6ayf. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento, sin garantía de premio. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
   <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+<!-- AUTO:probabilidades:START -->
+<section class="mb-8" id="probabilidades">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Probabilidades reales, calculadas</h2>
+<p class="text-gray-300 text-sm mb-2">Espacio total: C(70,5) × 24 = 12,103,014 × 24 = <strong>290,472,336</strong> jugadas posibles. Casos favorables para acertar exactamente <em>m</em> de los 5 números: C(5,m) · C(65,5−m); para la bola: 1 forma de acertarla o 23 de fallarla.</p>
+<div class="overflow-x-auto mb-4"><table class="w-full text-sm border border-gray-700 rounded-lg">
+<caption class="text-left text-xs text-gray-400 mb-2">Mega Millions: 5 de 70 + Mega Ball 1–24. Fuente de las cifras oficiales: <a class="text-cyan-300 hover:underline" href="https://www.megamillions.com/How-to-Play.aspx" rel="noopener noreferrer" target="_blank">megamillions.com — How to Play</a>.</caption>
+<thead class="bg-gray-800"><tr><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Resultado</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Casos favorables</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Probabilidad (cálculo propio)</th><th scope="col" class="px-3 py-2 text-left font-semibold text-gray-200">Cifra oficial publicada</th></tr></thead>
+<tbody><tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(65,0)·1 = 1</td><td class="px-3 py-2 text-gray-300 align-top">1 en 290,472,336.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 290,472,336</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">5 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,5)·C(65,0)·23 = 23</td><td class="px-3 py-2 text-gray-300 align-top">1 en 12,629,232.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 12,629,232</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(65,1)·1 = 325</td><td class="px-3 py-2 text-gray-300 align-top">1 en 893,761.03</td><td class="px-3 py-2 text-gray-300 align-top">1 en 893,761</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">4 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,4)·C(65,1)·23 = 7,475</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38,859.18</td><td class="px-3 py-2 text-gray-300 align-top">1 en 38,859</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(65,2)·1 = 20,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 13,965.02</td><td class="px-3 py-2 text-gray-300 align-top">1 en 13,965</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">3 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,3)·C(65,2)·23 = 478,400</td><td class="px-3 py-2 text-gray-300 align-top">1 en 607.17</td><td class="px-3 py-2 text-gray-300 align-top">1 en 607</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(65,3)·1 = 436,800</td><td class="px-3 py-2 text-gray-300 align-top">1 en 665.00</td><td class="px-3 py-2 text-gray-300 align-top">1 en 665</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">2 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,2)·C(65,3)·23 = 10,046,400</td><td class="px-3 py-2 text-gray-300 align-top">1 en 28.91</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(65,4)·1 = 3,385,200</td><td class="px-3 py-2 text-gray-300 align-top">1 en 85.81</td><td class="px-3 py-2 text-gray-300 align-top">1 en 86</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">1 número</td><td class="px-3 py-2 text-gray-300 align-top">C(5,1)·C(65,4)·23 = 77,859,600</td><td class="px-3 py-2 text-gray-300 align-top">1 en 3.73</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números + Mega Ball</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(65,5)·1 = 8,259,888</td><td class="px-3 py-2 text-gray-300 align-top">1 en 35.17</td><td class="px-3 py-2 text-gray-300 align-top">1 en 35</td></tr>
+<tr class="border-t border-gray-800"><td class="px-3 py-2 text-gray-300 align-top">0 números</td><td class="px-3 py-2 text-gray-300 align-top">C(5,0)·C(65,5)·23 = 189,977,424</td><td class="px-3 py-2 text-gray-300 align-top">1 en 1.53</td><td class="px-3 py-2 text-gray-300 align-top">sin premio</td></tr></tbody></table></div>
+<p class="text-gray-300 text-sm mb-2">Sumando las 9 combinaciones con premio, la probabilidad de ganar <em>algo</em> con una jugada es 1 en 23.07.</p>
+<p class="text-gray-400 text-sm mb-6">Fórmulas y el resto de juegos: <a class="text-cyan-300 hover:underline" href="/probabilidades-loteria.html">probabilidades reales de cada lotería</a>.</p>
+</section>
+<!-- AUTO:probabilidades:END -->
+<!-- AUTO:historial:START -->
+<section class="mb-8" id="historial-oficial">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Sobre el historial oficial disponible</h2>
+<p class="text-gray-300 text-sm mb-2">Revisamos el conjunto público de NY Open Data (<a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/5xaw-6ayf" rel="noopener noreferrer" target="_blank">5xaw-6ayf</a>) el 2026-09-30: desde el cambio de reglas del 8 de abril de 2025 hasta su último registro (2026-09-01) contiene <strong>17</strong> sorteos, cuando el calendario de martes y viernes implica unos <strong>147</strong>. Con un historial tan incompleto no publicamos frecuencias ni pruebas de azar para Mega Millions: serían engañosas.</p>
+<p class="text-gray-400 text-sm mb-3">Para resultados completos usa <a class="text-cyan-300 hover:underline" href="https://www.megamillions.com/Winning-Numbers/Previous-Drawings.aspx" rel="noopener noreferrer" target="_blank">megamillions.com</a> o <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>.</p>
+</section>
+<!-- AUTO:historial:END -->
 </main>
+<!-- PIE:START -->
+<footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
+  <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
+</footer>
+<!-- PIE:END -->
 </body>
 </html>
