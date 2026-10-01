@@ -41,3 +41,8 @@ Diagnóstico completo: `docs/ADSENSE-BAJO-VALOR-2026-09-30.md`. Criterio: calida
 2. Decidir el bloque de afiliado Jackpocket (compra online de lotería = contenido restringido de juegos de azar).
 3. `functions/index.js` sigue con Mega Ball 1–25 y M4L = kwxv-fwze: corregir y desplegar functions cuando lo autorices.
 4. Pedir la revisión en AdSense según el paso a paso de la nota de Obsidian (no antes de 48–72 h tras el deploy).
+
+## Publicación (autorizada por Amin)
+- Commit `aee51df` en `develop`, push a `origin/develop` OK. No entran `serviceAccountKey.json`, `.env`, `docs/AUDITORIA*`, `docs/SRS*`, `CLAUDE.md/`, `.claude/` ni notas internas sin seguimiento.
+- `firebase deploy --only hosting --project game-lottery-b0e90` → «Deploy complete».
+- curl en producción (www): 200 en `/`, `/probabilidades-loteria.html`, `/about.html`, `/contacto.html`, `/analisis/powerball.html`, `/analisis/win-4.html`, `/analisis/mega-millions.html`, `/guia-fuentes-loteria-deportes.html`, `/sitemap.xml` (20 `<loc>`), `/robots.txt`, `/ads.txt`, `/consent.js`; 404 en `/appcheck-test.html` y `/no-existe-xyz`. Home con el H1 nuevo, `consent.js` presente y sin «All rights reserved» de la NY Gaming Commission. `app.js` servido con `specialMax: 24`.
