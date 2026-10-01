@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Guía de fuentes oficiales: lotería USA, MLB, NFL y NBA | prediccionloteria.com</title>
-  <meta name="description" content="Cómo prediccionloteria.com usa datos públicos oficiales (NY Open Data, MLB Stats API, ESPN, NFL.com) para estadísticas de lotería y el dashboard deportivo. Transparencia y enlaces de verificación.">
+  <title>Guía de fuentes oficiales de lotería USA | prediccionloteria.com</title>
+  <meta name="description" content="Cómo prediccionloteria.com usa datos públicos oficiales de lotería, NY Open Data y páginas oficiales para estadísticas, resultados e historial verificable.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Guía de fuentes oficiales: lotería USA, MLB, NFL y NBA",
+    "headline": "Guía de fuentes oficiales de lotería USA",
     "dateModified": "2026-05-09",
     "author": { "@type": "Organization", "name": "prediccionloteria.com" },
     "publisher": { "@type": "Organization", "name": "prediccionloteria.com" }
@@ -30,8 +30,8 @@
     <span class="text-gray-400">Fuentes oficiales</span>
   </nav>
 
-  <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Guía de fuentes oficiales y metodología</h1>
-  <p class="text-gray-400 text-sm mb-8">Documentación para usuarios y revisores: de dónde salen los datos, cómo se actualizan y qué limitaciones tienen las herramientas de prediccionloteria.com.</p>
+  <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Guía de fuentes oficiales de lotería</h1>
+  <p class="text-gray-400 text-sm mb-8">Documentación para usuarios y revisores: de dónde salen los resultados de lotería, cómo se actualizan y qué limitaciones tienen las herramientas de prediccionloteria.com.</p>
 
   <section class="mb-8">
     <h2 class="text-lg font-semibold text-cyan-400 mb-3">1. Lotería de Estados Unidos (Powerball, Mega Millions, NY games)</h2>
@@ -48,32 +48,26 @@
   </section>
 
   <section class="mb-8">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-3">2. MLB — estadísticas de jugadores (ponches, hits, bases)</h2>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">2. Por qué usamos fuentes oficiales</h2>
     <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      Para el modo <strong class="text-white">Deportes → MLB</strong>, los valores recientes de temporadas (por ejemplo, ponches de un abridor o hits de un bateador) se obtienen principalmente de la <strong class="text-white">MLB Stats API</strong> (<code class="text-gray-400">statsapi.mlb.com</code>), la interfaz pública de estadísticas de Major League Baseball. Es la misma familia de datos que usan medios y analistas cuando citan líneas oficiales de juego.
-    </p>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      En la interfaz mostramos hasta diez partidos recientes cuando la API responde correctamente; la probabilidad del modelo deportivo combina ventana corta (L5), ventana larga (L10), volatilidad, contexto de rival y señales editoriales de línea. Los props reales dependen de la disponibilidad de cuotas vía proveedor agregador (The Odds API) en el servidor.
+      Una predicción solo tiene sentido si el historial de resultados es confiable. Por eso el sitio prioriza datos públicos verificables y enlaces oficiales. Cuando un usuario registra manualmente un sorteo, recomendamos comparar con la página oficial antes de guardar el resultado para evitar errores de fecha, horario o bola especial.
     </p>
     <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
-      Sitios de referencia para contrastar noticias y calendarios: <a href="https://www.mlb.com/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">MLB.com</a>.
+      También separamos los juegos por reglas. Powerball y Mega Millions tienen bola especial; Pick 10 usa un formato distinto; Take 5 y Win 4 tienen sorteos diurnos y nocturnos. Mezclar esos historiales bajaría la calidad del análisis.
     </p>
   </section>
 
   <section class="mb-8">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-3">3. NBA — diario de partidos y puntos</h2>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">3. Frecuencia de actualización</h2>
     <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      Las series temporales de puntos, rebotes y asistencias para construir PRA y puntos se obtienen desde feeds públicos de <strong class="text-white">ESPN</strong> (resumen de partidos por atleta). No somos filiales de ESPN; usamos estos datos como referencia estadística, igual que haría un fanático que revisa el mismo feed para preparar una quiniela de fantasía.
-    </p>
-    <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
-      La NBA publica reglas y resultados oficiales en <a href="https://www.nba.com/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">NBA.com</a>.
+      Algunas fuentes públicas actualizan los datos minutos u horas después del sorteo. Si el resultado aún no aparece, el usuario debe esperar o verificar directamente en la web oficial. prediccionloteria.com no modifica resultados ni inventa sorteos faltantes; si una fuente está temporalmente caída, se muestra la información disponible y se recomienda confirmar manualmente.
     </p>
   </section>
 
   <section class="mb-8">
-    <h2 class="text-lg font-semibold text-cyan-400 mb-3">4. NFL — contexto y límites actuales</h2>
+    <h2 class="text-lg font-semibold text-cyan-400 mb-3">4. Limitaciones del análisis</h2>
     <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      La National Football League concentra yardas, touchdowns y participaciones en plataformas con acuerdos de datos restrictivos. En prediccionloteria.com, la vista <strong class="text-white">NFL</strong> del dashboard combina líneas de mercado (cuando el agregador las entrega) con heurísticas de forma simulada cuando no hay historial jugador-a-jugador en tiempo real. Recomendamos contrastar cualquier decisión de apuesta con <a href="https://www.nfl.com/stats/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">NFL.com/stats</a> y las casas reguladas en su estado.
+      La calidad de una tabla histórica no elimina el azar. Los datos sirven para enseñar frecuencia, ventanas recientes y comparación de resultados, pero no cambian las probabilidades oficiales. El sitio debe entenderse como recurso educativo y de entretenimiento, no como garantía de premio.
     </p>
   </section>
 
@@ -87,7 +81,7 @@
   <section class="mb-6">
     <h2 class="text-lg font-semibold text-cyan-400 mb-3">6. Juego responsable</h2>
     <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
-      Solo mayores de edad según su jurisdicción. Las apuestas deportivas solo donde estén legalmente permitidas. Si necesita ayuda con conductas de juego problemático, en EE. UU. puede contactar la <a href="https://www.ncpgambling.org/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">National Council on Problem Gambling</a> (1-800-522-4700).
+      Solo mayores de edad según su jurisdicción. Las predicciones son entretenimiento estadístico y no garantizan premios. Si necesita ayuda con conductas de juego problemático, en EE. UU. puede contactar la <a href="https://www.ncpgambling.org/" class="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">National Council on Problem Gambling</a> (1-800-522-4700).
     </p>
   </section>
 
@@ -98,5 +92,6 @@
   </div>
   <p class="text-gray-500 text-xs mt-8">© 2026 prediccionloteria.com</p>
 </div>
+<p class="text-gray-400 text-xs text-center mt-6 max-w-3xl mx-auto px-4">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. <a href="/juego-responsable.html" class="text-cyan-400 underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-400 underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-400 underline">Privacidad</a></p>
 </body>
 </html>

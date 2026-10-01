@@ -41,9 +41,10 @@
       {
         "source": "/ads.txt",
         "headers": [
-          { "key": "Content-Type",   "value": "text/plain; charset=utf-8" },
-          { "key": "Cache-Control",  "value": "public, max-age=3600" },
-          { "key": "Link",           "value": "<https://www.prediccionloteria.com/ads.txt>; rel=\"canonical\"" }
+          { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+          { "key": "Cache-Control", "value": "public, max-age=3600" },
+          { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" },
+          { "key": "X-Robots-Tag", "value": "all" }
         ]
       },
       {
@@ -51,8 +52,7 @@
         "headers": [
           { "key": "Content-Type",   "value": "text/plain; charset=utf-8" },
           { "key": "Cache-Control",  "value": "public, max-age=3600" },
-          { "key": "X-Robots-Tag",   "value": "noindex" },
-          { "key": "Link",           "value": "<https://www.prediccionloteria.com/robots.txt>; rel=\"canonical\"" }
+          { "key": "X-Robots-Tag",   "value": "noindex" }
         ]
       },
       {
@@ -76,10 +76,6 @@
       {
         "source": "/sitemap.xml",
         "destination": "/sitemap.xml"
-      },
-      {
-        "source": "**",
-        "destination": "/index.html"
       }
     ]
   }

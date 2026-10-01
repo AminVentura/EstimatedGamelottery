@@ -1,4 +1,30 @@
 User-agent: *
 Allow: /
+Allow: /ads.txt
+Allow: /robots.txt
+Allow: /sitemap.xml
+
+User-agent: Mediapartners-Google
+Allow: /
+Allow: /ads.txt
+
+User-agent: AdsBot-Google
+Allow: /
+Allow: /ads.txt
+
+# Bloquear archivos de prueba y rutas internas
+Disallow: /appcheck-test.html
+Disallow: /exportar-logo-png.js
+Disallow: /sw.js
+
+# Bloquear bots de scraping agresivos
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
 
 Sitemap: https://www.prediccionloteria.com/sitemap.xml

@@ -1,5 +1,27 @@
 # Cambios realizados para cumplir con Google AdSense
 
+## Corrección adicional — 2026-05-20
+
+AdSense reportó **Contenido de bajo valor** y bloqueo de reintentos hasta el **26 may 2026**. Se aplicaron cambios para que la próxima revisión encuentre más contenido original, navegación editorial y menos señales de riesgo:
+
+- Home enfocada solo en lotería: se retiró de la navegación y del HTML público el módulo de apuestas deportivas/DraftKings.
+- Secciones editoriales principales visibles por defecto antes del primer anuncio (ya no cargan colapsadas).
+- Nuevas páginas indexables:
+  - `/metodologia-estadistica.html`
+  - `/guia-lectura-resultados.html`
+  - `/juego-responsable.html`
+- `sitemap.xml` regenerado con 10 URLs.
+- Verificación post-deploy:
+  - Home: 200
+  - Nuevas páginas: 200
+  - `/sitemap.xml`: 200 `application/xml`
+  - `/ads.txt`: 200 `text/plain`
+  - Home sin marcadores `DraftKings` / `sports-dashboard`.
+
+**Acción pendiente del CEO:** el 26 may 2026, en AdSense → Sitios → `prediccionloteria.com`, pulsar **Solicitar revisión**. En Search Console, reenviar `https://www.prediccionloteria.com/sitemap.xml` e inspeccionar las 3 nuevas URLs.
+
+---
+
 ## Problemas que reportaba AdSense
 
 1. **Anuncios en pantallas sin contenido de publicadores** – Los anuncios se mostraban antes o sin suficiente contenido propio.

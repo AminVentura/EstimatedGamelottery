@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis Millionaire For Life: pool 58, bola 1-5 y historial corto | prediccionloteria.com</title>
+  <meta name="description" content="Millionaire For Life (5 de 58 + bola 1-5) sustituye a Cash4Life. Dataset NY kwxv-fwze, baseline ≈ 0,43 de 5, walk-forward sin fingir años de historia. Sin jackpot garantizado." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/millionaire-for-life.html" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Millionaire For Life</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Millionaire For Life: juego nuevo, historial delicado</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Millionaire For Life (M4L) empezó en febrero 2026 y sustituye a Cash4Life. Formato en este sitio: cinco números del 1 al 58 y una bola del 1 al 5 (Millionaire Ball). Sorteo diario. El JSON público que aún usamos es el dataset NY <strong>kwxv-fwze</strong>, pensado originalmente para Cash4Life (campo <code>cash_ball</code>). Mientras NY no publique un recurso distinto, interpretamos <code>winning_numbers</code> + cash_ball/millionaire_ball con el mismo parser. Si el esquema cambia, las filas que no cumplan 5+1 en rango se descartan: preferimos un modelo corto a un modelo contaminado. No estamos afiliados a NY Lottery ni al operador multiestatal del juego.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Principales al azar: 5×5/58 ≈ <strong>0,43</strong> aciertos de 5. La bola especial solo tiene 5 valores: 20 % al azar. El premio vitalicio que se publicita en el juego oficial no cambia esa matemática. “Precisión” aquí es coincidencias parciales de la sugerencia del día contra el sorteo publicado, no una renta de por vida.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">La bola 1–5 se cuenta aparte (<code>hitsSpecial</code>). Una frecuencia “caliente” en la bola 3 es fácil de sobreinterpretar con muestras pequeñas. El agente del servidor modela esa bola por conteo, no por (suma % 5).</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Señales que usamos (y las que no)</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Calientes, fríos, gap, Markov y ensemble se aplican al pool 1–58 con el historial M4L cargado. Walk-forward pide un mínimo (~24 sorteos; 40 de prueba si hay más). Un juego que acaba de nacer no tiene años de historia. En ese caso el ranking no se finge: se usa el ensemble y se avisa que hay pocos datos.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">No mezclamos años de Cash4Life (reglas distintas: bola 1–4, pool distinto en épocas) con M4L sin etiquetar el cambio de reglas: inflaría frecuencias que ya no aplican. No vendemos “años de IA” sobre un juego de meses. No usamos sueños, cumpleaños ni números “atrasados que deben salir”.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo se elige la próxima combinación</h2>
+  <p class="text-gray-300 leading-relaxed mb-4">PREDECIR en la pestaña Millionaire For Life lanza los 8 métodos sobre el historial válido. Si hay suficientes sorteos, gana el de mayor avgHits en walk-forward. Si el historial es corto, el sello de próxima jugada cae al ensemble y la interfaz no inventa confianza. Detalle: <a class="text-cyan-300 hover:underline" href="/analisis/proxima-jugada.html">algoritmo de próxima jugada</a>. Métodos: <a class="text-cyan-300 hover:underline" href="/metodologia-estadistica.html">metodología estadística</a>.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
+  <p class="text-gray-300 leading-relaxed mb-6">Verifica en el operador de tu estado y en <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Dataset: data.ny.gov/resource/kwxv-fwze. Si el feed falla o una fila sale del rango 5+1, no inventamos un sorteo: se descarta la fila y se espera el próximo JSON válido. 18+. Entretenimiento. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+</main>
+</body>
+</html>

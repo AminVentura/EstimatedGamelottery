@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
@@ -37,7 +37,29 @@ const LOTTERY_CONFIG = {
 };
 
 const LOTTERY_IDS = Object.keys(LOTTERY_CONFIG);
-const INSIGHT_SUPPORTED_GAMES = new Set(['powerball', 'megamillions']);
+const INSIGHT_SUPPORTED_GAMES = new Set(LOTTERY_IDS);
+const GAME_DISPLAY_NAMES = {
+  powerball: 'Powerball',
+  millionaireforlife: 'Millionaire For Life',
+  megamillions: 'Mega Millions',
+  pick10: 'Pick 10',
+  take5day: 'Take 5 Day',
+  take5eve: 'Take 5 Eve',
+  win4day: 'Win 4 Day',
+  win4eve: 'Win 4 Eve'
+};
+const WALKFORWARD_METHOD_LABELS = {
+  'basado-en-frecuencia': 'Agente Frecuencia',
+  'cold-numbers': 'Agente Fríos (gap)',
+  'mixed-balanced': 'Agente Mixta',
+  'repeat-pattern': 'Agente Repetición',
+  'por-decenas': 'Agente Decenas',
+  'random-optimized': 'Agente Paridad/suma',
+  'markov-poisson-logistic': 'Agente Markov+Poisson',
+  'consenso-ensemble': 'Agente Ensemble'
+};
+const walkForwardByGame = {};
+let walkForwardDailyLottery = null;
 
 // Próximo sorteo: días de la semana (0=Dom, 1=Lun, ..., 6=Sab) y hora en ET (22:59 = 10:59 PM)
 // Powerball: Lun, Mié, Sáb 10:59 PM ET. Mega Millions: Mar, Vie 11:00 PM ET. Millionaire For Life: diario 11:15 PM ET (10:15 PM Central).
@@ -678,6 +700,162 @@ function buildLocalLotteryInsight(lottery, mainNumbers, specialNumber) {
   };
 }
 
+function getActiveLotteryId() {
+  const tab = document.querySelector('.lottery-tab.active');
+  return (tab && tab.dataset.lottery) || 'powerball';
+}
+
+function walkForwardConfidence(nextPlay) {
+  const top = nextPlay && nextPlay.backtest && nextPlay.backtest.ranking && nextPlay.backtest.ranking[0];
+  if (!top || !top.tests) return 5;
+  let c = 5;
+  if (top.vsRandom > 0) c += 2;
+  if (top.vsRandom > 0.15) c += 1;
+  if (nextPlay.backtest.tests >= 30) c += 1;
+  if (nextPlay.beatsRandom) c += 1;
+  return Math.max(1, Math.min(10, c));
+}
+
+function insightFromWalkForward(lottery, nextPlay) {
+  const rec = nextPlay && nextPlay.recommended;
+  const top = nextPlay && nextPlay.backtest && nextPlay.backtest.ranking && nextPlay.backtest.ranking[0];
+  if (!rec || !rec.mainNumbers) return null;
+  const vs = top && typeof top.vsRandom === 'number'
+    ? (top.vsRandom > 0 ? '+' + top.vsRandom : String(top.vsRandom))
+    : 'n/d';
+  const method = WALKFORWARD_METHOD_LABELS[nextPlay.winnerId] || nextPlay.winnerId || 'ensemble';
+  const mix = nextPlay.mixTune && nextPlay.mixTune.hotFraction != null
+    ? ' Mixta afinada al ' + Math.round(nextPlay.mixTune.hotFraction * 100) + '% calientes recientes.'
+    : '';
+  return {
+    play: formatLotteryPlayText(rec.mainNumbers, rec.special ?? null),
+    wisdom: 'Próxima jugada (walk-forward): gana ' + method + ' con ' + (top ? top.avgHits : '—') +
+      ' aciertos medios en ' + (nextPlay.backtest ? nextPlay.backtest.tests : 0) +
+      ' sorteos (' + vs + ' vs azar ≈ ' + (nextPlay.backtest ? nextPlay.backtest.baseline : '—') +
+      '). ' + (nextPlay.beatsRandom
+        ? 'Este método superó el azar en el historial cargado.'
+        : 'Ningún método superó de forma clara el azar: referencia, no certeza.') +
+      mix + ' Entretenimiento estadístico; no garantiza premio.',
+    confidence: walkForwardConfidence(nextPlay),
+    mainNumbers: rec.mainNumbers,
+    special: rec.special ?? null,
+    source: 'walk-forward'
+  };
+}
+
+function computeWalkForward(lottery) {
+  if (walkForwardByGame[lottery]) return walkForwardByGame[lottery];
+  const data = allHistoryData[lottery] || [];
+  const ranges = getLotteryRanges(lottery);
+  if (!window.lotteryAlgorithms || typeof window.lotteryAlgorithms.generateNextPlayRecommendation !== 'function') {
+    return null;
+  }
+  if (data.length < 24 || !ranges) return null;
+  const nextPlay = window.lotteryAlgorithms.generateNextPlayRecommendation(data, ranges, lottery);
+  walkForwardByGame[lottery] = nextPlay;
+  return nextPlay;
+}
+
+function pickDailyWalkForwardLottery() {
+  let bestId = null;
+  let bestVs = -Infinity;
+  LOTTERY_IDS.forEach(function (id) {
+    const wf = walkForwardByGame[id];
+    const top = wf && wf.backtest && wf.backtest.ranking && wf.backtest.ranking[0];
+    if (!top) return;
+    if (top.vsRandom > bestVs) {
+      bestVs = top.vsRandom;
+      bestId = id;
+    }
+  });
+  walkForwardDailyLottery = bestId;
+  return bestId;
+}
+
+function renderWalkForwardGamesBoard() {
+  const host = document.getElementById('lotteryWalkForwardGames');
+  if (!host) return;
+  host.innerHTML = '';
+  LOTTERY_IDS.forEach(function (id) {
+    const wf = walkForwardByGame[id];
+    const rec = wf && wf.recommended;
+    if (!rec) return;
+    const top = wf.backtest && wf.backtest.ranking && wf.backtest.ranking[0];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'text-left rounded-lg border border-gray-700 bg-gray-900/70 px-3 py-2 hover:border-cyan-600/60 transition-colors';
+    if (id === walkForwardDailyLottery) btn.classList.add('border-cyan-500/50');
+    btn.innerHTML =
+      '<p class="text-[10px] uppercase tracking-widest text-cyan-300 font-bold">' + escHtml(GAME_DISPLAY_NAMES[id] || id) +
+      (id === walkForwardDailyLottery ? ' · del día' : '') + '</p>' +
+      '<p class="text-white text-sm font-black tracking-wide mt-1">' + escHtml(formatLotteryPlayText(rec.mainNumbers, rec.special ?? null)) + '</p>' +
+      '<p class="text-[11px] text-gray-500 mt-1">' + escHtml(WALKFORWARD_METHOD_LABELS[wf.winnerId] || wf.winnerId || '') +
+      (top ? ' · ' + top.avgHits + ' vs azar ' + (top.vsRandom > 0 ? '+' : '') + top.vsRandom : '') + '</p>';
+    btn.addEventListener('click', function () {
+      const tab = document.querySelector('.lottery-tab[data-lottery="' + id + '"]');
+      if (tab) tab.click();
+    });
+    host.appendChild(btn);
+  });
+}
+
+function renderWalkForwardAgents(lottery, nextPlay) {
+  const host = document.getElementById('lotteryAgentsRoster');
+  if (!host) return;
+  host.innerHTML = '';
+  const ranking = (nextPlay && nextPlay.backtest && nextPlay.backtest.ranking) || [];
+  const combos = (nextPlay && nextPlay.combos) || [];
+  ranking.forEach(function (row, i) {
+    const combo = combos.find(function (c) { return c.method === row.id; });
+    const el = document.createElement('div');
+    el.className = 'rounded-lg border px-3 py-2 ' + (i === 0 ? 'border-cyan-500/50 bg-cyan-950/30' : 'border-gray-700 bg-gray-900/50');
+    const play = combo ? formatLotteryPlayText(combo.mainNumbers, combo.special ?? null) : '—';
+    el.innerHTML =
+      '<p class="text-[10px] uppercase tracking-widest ' + (i === 0 ? 'text-cyan-300' : 'text-gray-400') + ' font-bold">' +
+      (i === 0 ? 'Ganador · ' : (i + 1) + '. ') + escHtml(WALKFORWARD_METHOD_LABELS[row.id] || row.id) + '</p>' +
+      '<p class="text-white text-sm font-semibold tracking-wide mt-1">' + escHtml(play) + '</p>' +
+      '<p class="text-[11px] text-gray-500 mt-1">avgHits ' + escHtml(String(row.avgHits)) +
+      ' · vs azar ' + (row.vsRandom > 0 ? '+' : '') + escHtml(String(row.vsRandom)) + '</p>';
+    host.appendChild(el);
+  });
+}
+
+function parseFirebaseLotteryInsight(lottery, remote) {
+  if (!remote || typeof remote !== 'object') return null;
+  const rec = remote.smartPlay || remote.recommendation || remote.latestRecommendation || {};
+  const mains = remote.mainNumbers || rec.mainNumbers;
+  const special = remote.special != null ? remote.special : (rec.bonusNumber != null ? rec.bonusNumber : rec.special);
+  const play = remote.play || remote.jugada || remote.pick || (mains ? formatLotteryPlayText(mains, special) : null);
+  if (!play) return null;
+  let confidence = remote.confidence || remote.confidence10 || remote.score;
+  const accuracy = remote.modelMeta && remote.modelMeta.accuracy;
+  if (confidence == null && typeof accuracy === 'number') {
+    confidence = accuracy <= 1 ? Math.round(accuracy * 10) : Math.round(accuracy);
+  }
+  return {
+    play: play,
+    wisdom: remote.wisdom || remote.explanation || remote.reason || remote.summary || '',
+    confidence: confidence || 6,
+    source: 'firebase',
+    mainNumbers: mains,
+    special: special
+  };
+}
+
+function renderFirebaseAgentCard(insight) {
+  const box = document.getElementById('lotteryFirebaseAgent');
+  const playEl = document.getElementById('lotteryFirebasePlay');
+  const wisdomEl = document.getElementById('lotteryFirebaseWisdom');
+  if (!box || !playEl) return;
+  if (!insight) {
+    box.classList.add('hidden');
+    return;
+  }
+  box.classList.remove('hidden');
+  playEl.textContent = insight.play;
+  if (wisdomEl) wisdomEl.textContent = insight.wisdom || '';
+}
+
 function renderLotteryAgentPanel(lottery, insight) {
   const panel = document.getElementById('lotteryAgentInsightPanel');
   if (!panel) return;
@@ -700,7 +878,7 @@ function renderLotteryAgentPanel(lottery, insight) {
   playEl.textContent   = safeInsight.play    || 'No disponible';
   wisdomEl.textContent = safeInsight.wisdom  || 'Sin sabiduría disponible.';
   confEl.textContent   = `${conf}/10`;
-  gameEl.textContent   = (lottery || '').toUpperCase();
+  gameEl.textContent   = GAME_DISPLAY_NAMES[lottery] || (lottery || '').toUpperCase();
 
   if (tsEl) {
     const now = new Date();
@@ -725,21 +903,36 @@ function renderLotteryAgentPanel(lottery, insight) {
 }
 
 async function refreshLotteryAgentInsight(lottery, fallbackInsight) {
-  let insight = fallbackInsight || null;
+  const wf = computeWalkForward(lottery);
+  const walkInsight = insightFromWalkForward(lottery, wf);
+  let insight = walkInsight || fallbackInsight || null;
+
+  if (walkInsight) {
+    renderLotteryAgentPanel(lottery, walkInsight);
+    renderWalkForwardAgents(lottery, wf);
+    const meta = document.getElementById('lotteryWalkForwardMeta');
+    if (meta && wf && wf.backtest) {
+      const top3 = (wf.backtest.ranking || []).slice(0, 3).map(function (r, i) {
+        return (i + 1) + '. ' + (WALKFORWARD_METHOD_LABELS[r.id] || r.id) + ' ' + r.avgHits;
+      }).join(' · ');
+      meta.textContent = 'Top 3 walk-forward: ' + top3 + '. Mismo motor que PREDECIR / run-walkforward.mjs.';
+    }
+  }
+
+  let firebaseInsight = null;
   if (INSIGHT_SUPPORTED_GAMES.has(lottery) && window.firebaseServices && typeof window.firebaseServices.getLotteryAgentInsight === 'function') {
     try {
       const remote = await window.firebaseServices.getLotteryAgentInsight(lottery);
-      if (remote) {
-        insight = {
-          play: remote.play || remote.jugada || remote.pick || (remote.mainNumbers ? formatLotteryPlayText(remote.mainNumbers, remote.special) : null),
-          wisdom: remote.wisdom || remote.explanation || remote.reason || remote.summary,
-          confidence: remote.confidence || remote.confidence10 || remote.score,
-        };
-      }
+      firebaseInsight = parseFirebaseLotteryInsight(lottery, remote);
     } catch (_) {
-      // silent fallback
+      firebaseInsight = null;
     }
   }
+  if (!firebaseInsight && window._lotteryFirebaseBoard && window._lotteryFirebaseBoard[lottery]) {
+    firebaseInsight = parseFirebaseLotteryInsight(lottery, window._lotteryFirebaseBoard[lottery]);
+  }
+  renderFirebaseAgentCard(firebaseInsight);
+
   if (!insight) {
     const saved = localStorage.getItem(`prediction_${lottery}_${new Date().toISOString().split('T')[0]}`);
     if (saved) {
@@ -751,7 +944,37 @@ async function refreshLotteryAgentInsight(lottery, fallbackInsight) {
       }
     }
   }
-  renderLotteryAgentPanel(lottery, insight);
+  if (insight && !walkInsight) renderLotteryAgentPanel(lottery, insight);
+}
+
+function hydrateWalkForwardBoard(preferredLottery) {
+  const first = preferredLottery || getActiveLotteryId();
+  computeWalkForward(first);
+  refreshLotteryAgentInsight(first);
+  const rest = LOTTERY_IDS.filter(function (id) { return id !== first; });
+  let i = 0;
+  function step() {
+    if (i >= rest.length) {
+      pickDailyWalkForwardLottery();
+      renderWalkForwardGamesBoard();
+      const daily = walkForwardDailyLottery;
+      if (daily && getActiveLotteryId() === first && daily !== first && walkForwardByGame[daily]) {
+        const dailyInsight = insightFromWalkForward(daily, walkForwardByGame[daily]);
+        if (dailyInsight) {
+          dailyInsight.wisdom = 'Jugada del día = el juego con más ventaja vs azar en walk-forward (' +
+            (GAME_DISPLAY_NAMES[daily] || daily) + '). Cambia de pestaña para ver los otros agentes. ' +
+            dailyInsight.wisdom;
+          renderLotteryAgentPanel(daily, dailyInsight);
+          renderWalkForwardAgents(daily, walkForwardByGame[daily]);
+        }
+      }
+      return;
+    }
+    computeWalkForward(rest[i]);
+    i += 1;
+    setTimeout(step, 0);
+  }
+  setTimeout(step, 0);
 }
 
 function updatePrecisionDisplay() {
@@ -911,6 +1134,221 @@ function showLastPrediction(lottery) {
   }
 }
 
+function getPreferredGameLabel(lottery) {
+  return {
+    powerball: 'Powerball',
+    millionaireforlife: 'Millionaire For Life',
+    megamillions: 'Mega Millions',
+    pick10: 'Pick 10',
+    take5day: 'Take 5 Day',
+    take5eve: 'Take 5 Eve',
+    win4day: 'Win 4 Day',
+    win4eve: 'Win 4 Eve'
+  }[lottery] || lottery;
+}
+
+function hydratePreferredPredictionPanels() {
+  LOTTERY_IDS.forEach((lottery) => {
+    const section = document.getElementById(`${lottery}-section`);
+    const ranges = getLotteryRanges(lottery);
+    if (!section || !ranges || section.querySelector('.preferred-prediction-panel')) return;
+
+    const inputCount = ranges.mainCount;
+    const mainInputs = Array.from({ length: inputCount }, (_, idx) => `
+      <input
+        type="number"
+        class="preferred-main-input"
+        inputmode="numeric"
+        aria-label="Numero preferido ${idx + 1} para ${escHtml(getPreferredGameLabel(lottery))}"
+        min="${ranges.main.min}"
+        max="${ranges.main.max}"
+        data-index="${idx}"
+      >
+    `).join('');
+    const specialInput = ranges.hasSpecial ? `
+      <label class="preferred-special-label">
+        <span>${lottery === 'megamillions' ? 'Mega Ball' : lottery === 'millionaireforlife' ? 'Millionaire Ball' : 'Powerball'} (${ranges.special.min}-${ranges.special.max})</span>
+        <input type="number" class="preferred-special-input" inputmode="numeric" min="${ranges.special.min}" max="${ranges.special.max}">
+      </label>
+    ` : '';
+    const panel = document.createElement('div');
+    panel.className = 'preferred-prediction-panel';
+    panel.dataset.lottery = lottery;
+    panel.innerHTML = `
+      <div class="preferred-panel-heading">
+        <div>
+          <p class="preferred-eyebrow">Tu jugada preferida</p>
+          <h3>Evalua tus numeros para ${escHtml(getPreferredGameLabel(lottery))}</h3>
+        </div>
+        <span class="preferred-sample-badge">Historial</span>
+      </div>
+      <p class="preferred-help">Ingresa tus numeros y calcula un score historico con margen vs promedio del juego. No garantiza premios.</p>
+      <div class="preferred-main-grid" data-lottery="${escHtml(lottery)}">${mainInputs}</div>
+      ${specialInput}
+      <button class="preferred-estimate-btn" type="button" data-lottery="${escHtml(lottery)}">
+        <i class="fas fa-percent mr-1"></i>CALCULAR MARGEN
+      </button>
+      <div class="preferred-estimate-result hidden" data-lottery="${escHtml(lottery)}"></div>
+    `;
+
+    const buttonGrid = section.querySelector('.btn-grid-2');
+    if (buttonGrid && buttonGrid.parentNode) {
+      buttonGrid.parentNode.insertBefore(panel, buttonGrid.nextSibling);
+    }
+  });
+}
+
+function parsePreferredPredictionInput(lottery) {
+  const section = document.getElementById(`${lottery}-section`);
+  const ranges = getLotteryRanges(lottery);
+  const panel = section ? section.querySelector(`.preferred-prediction-panel[data-lottery="${lottery}"]`) : null;
+  if (!panel || !ranges) throw new Error('Panel no disponible.');
+
+  const numbers = Array.from(panel.querySelectorAll('.preferred-main-input')).map((input) => Number.parseInt(input.value, 10));
+  if (numbers.length !== ranges.mainCount || numbers.some((n) => !Number.isInteger(n))) {
+    throw new Error(`Ingresa ${ranges.mainCount} numeros principales.`);
+  }
+  if (!validateNumbers(numbers, ranges.main)) {
+    throw new Error(`Verifica el rango ${ranges.main.min}-${ranges.main.max}.`);
+  }
+  if (!lottery.startsWith('win4') && new Set(numbers).size !== numbers.length) {
+    throw new Error('Este juego no acepta numeros principales duplicados.');
+  }
+
+  let special = null;
+  if (ranges.hasSpecial) {
+    const specialInput = panel.querySelector('.preferred-special-input');
+    special = specialInput ? Number.parseInt(specialInput.value, 10) : NaN;
+    if (!Number.isInteger(special) || !validateNumber(special, ranges.special)) {
+      throw new Error(`Verifica el numero especial ${ranges.special.min}-${ranges.special.max}.`);
+    }
+  }
+
+  return { gameType: lottery, numbers, special };
+}
+
+function withPreferredCallableTimeout(promise, timeoutMs) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error('El calculo esta tardando demasiado. Intenta otra vez en unos segundos.'));
+    }, timeoutMs || 9000);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function getComparablePreferredNumbers(lottery, numbers) {
+  const clean = Array.isArray(numbers)
+    ? numbers.map((n) => Number(n)).filter((n) => Number.isInteger(n))
+    : [];
+  return lottery && lottery.startsWith('win4') ? clean : clean.sort((a, b) => a - b);
+}
+
+function enrichPreferredEstimateWithPredictionNote(lottery, payload, result) {
+  if (!result || !payload) return result;
+  const today = new Date().toISOString().split('T')[0];
+  const saved = localStorage.getItem(`prediction_${lottery}_${today}`);
+  if (!saved) return result;
+
+  try {
+    const prediction = JSON.parse(saved);
+    const picked = getComparablePreferredNumbers(lottery, payload.numbers);
+    const predicted = getComparablePreferredNumbers(lottery, prediction.mainNumbers);
+    const sameMain = picked.length === predicted.length && picked.every((n, idx) => n === predicted[idx]);
+    const sameSpecial = Number(payload.special ?? null) === Number(prediction.special ?? null);
+    if (!sameMain || !sameSpecial) return result;
+
+    const note = 'Coincide con tu prediccion de hoy. Si decides jugar, esta seleccion esta alineada con la jugada generada y el margen historico calculado; usala solo como referencia estadistica responsable.';
+    return {
+      ...result,
+      comment: result.comment ? note + ' ' + result.comment : note,
+    };
+  } catch (_) {
+    return result;
+  }
+}
+
+function renderPreferredEstimateResult(lottery, result) {
+  const section = document.getElementById(`${lottery}-section`);
+  const container = section ? section.querySelector(`.preferred-estimate-result[data-lottery="${lottery}"]`) : null;
+  if (!container || !result) return;
+  const confidenceText = {
+    low: 'Baja',
+    medium: 'Media',
+    high: 'Alta'
+  }[result.confidenceLabel] || 'Baja';
+  const numbers = Array.isArray(result.numbers) ? result.numbers : [];
+  const commentHtml = result.comment
+    ? `<p class="preferred-result-comment">${escHtml(result.comment)}</p>`
+    : '';
+  const numberRows = numbers.map((item) => `
+    <div class="preferred-number-score">
+      <span class="preferred-score-ball">${escHtml(item.number)}</span>
+      <span>Score ${escHtml(item.scorePct)}%</span>
+      <span>Margen ${Number(item.marginVsPoolPct) >= 0 ? '+' : ''}${escHtml(item.marginVsPoolPct)}%</span>
+    </div>
+  `).join('');
+  const specialRow = result.special ? `
+    <div class="preferred-number-score preferred-special-score">
+      <span class="preferred-score-ball">${escHtml(result.special.number)}</span>
+      <span>Especial ${escHtml(result.special.scorePct)}%</span>
+      <span>Margen ${Number(result.special.marginVsPoolPct) >= 0 ? '+' : ''}${escHtml(result.special.marginVsPoolPct)}%</span>
+    </div>
+  ` : '';
+
+  container.innerHTML = `
+    <div class="preferred-result-summary">
+      <div><span>Score historico</span><strong>${escHtml(result.setScorePct)}%</strong></div>
+      <div><span>Margen vs promedio</span><strong>${Number(result.setMarginVsPoolPct) >= 0 ? '+' : ''}${escHtml(result.setMarginVsPoolPct)}%</strong></div>
+      <div><span>Muestra</span><strong>${escHtml(result.sampleSize)} sorteos</strong></div>
+      <div><span>Confianza</span><strong>${confidenceText}</strong></div>
+    </div>
+    ${commentHtml}
+    <div class="preferred-score-list">${numberRows}${specialRow}</div>
+    <p class="preferred-disclaimer">${escHtml(result.disclaimer || 'Referencia estadistica. No garantiza premios.')}</p>
+  `;
+  container.classList.remove('hidden');
+}
+
+async function handlePreferredEstimate(lottery) {
+  let payload;
+  try {
+    payload = parsePreferredPredictionInput(lottery);
+  } catch (err) {
+    showMessage(err instanceof Error ? err.message : 'Verifica tus numeros.', 'bg-red-500 text-white');
+    return;
+  }
+
+  const section = document.getElementById(`${lottery}-section`);
+  const resultEl = section ? section.querySelector(`.preferred-estimate-result[data-lottery="${lottery}"]`) : null;
+  const btn = section ? section.querySelector(`.preferred-estimate-btn[data-lottery="${lottery}"]`) : null;
+  if (resultEl) {
+    resultEl.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+    resultEl.classList.remove('hidden');
+  }
+  if (btn) btn.disabled = true;
+
+  try {
+    const bridge = window.firebaseServices || {};
+    if (typeof bridge.estimatePreferredNumbers !== 'function') {
+      throw new Error('El motor protegido aun no esta listo. Intenta de nuevo en unos segundos.');
+    }
+    const result = await withPreferredCallableTimeout(bridge.estimatePreferredNumbers(payload), 9000);
+    if (!result) {
+      throw new Error('No se pudo autenticar la consulta. Actualiza la pagina e intenta otra vez.');
+    }
+    renderPreferredEstimateResult(lottery, enrichPreferredEstimateWithPredictionNote(lottery, payload, result));
+  } catch (err) {
+    if (resultEl) {
+      resultEl.innerHTML = `<p class="preferred-result-error">${escHtml(err instanceof Error ? err.message : 'No se pudo calcular el margen.')}</p>`;
+      resultEl.classList.remove('hidden');
+    }
+    showMessage(err instanceof Error ? err.message : 'No se pudo calcular el margen.', 'bg-red-500 text-white');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 const setupEventListeners = () => {
   document.querySelectorAll('.lottery-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -998,31 +1436,72 @@ const setupEventListeners = () => {
 
       setTimeout(() => {
         try {
-          const combos = window.lotteryAlgorithms.generateMultipleCombinations(data, ranges, lottery);
+          const nextPlay = window.lotteryAlgorithms.generateNextPlayRecommendation
+            ? window.lotteryAlgorithms.generateNextPlayRecommendation(data, ranges, lottery)
+            : { combos: window.lotteryAlgorithms.generateMultipleCombinations(data, ranges, lottery), recommended: null, backtest: null, winnerId: null, beatsRandom: false, disclaimer: '' };
+          const combos = nextPlay.combos || [];
           container.innerHTML = '';
-          const titles = [
-            '1. Basado en Frecuencia',
-            '2. Números Fríos',
-            '3. Mixta Equilibrada',
-            '4. Patrones de Repetición',
-            '5. Por decenas (1-9, 10-19, 20-29…)',
-            '6. IA Aleatoria',
-            '7. Markov+Poisson+Logística',
-            '8. ⭐ Consenso Ensemble (Mejor Jugada)'
-          ];
+          if (nextPlay.backtest && nextPlay.backtest.ranking && nextPlay.backtest.ranking.length) {
+            const banner = document.createElement('div');
+            banner.className = 'mb-4 p-3 rounded-lg border border-cyan-700/50 bg-cyan-950/40 text-left';
+            const top = nextPlay.backtest.ranking[0];
+            const vs = top.vsRandom > 0 ? ('+' + top.vsRandom + ' vs azar') : (top.vsRandom + ' vs azar');
+            const mix = nextPlay.mixTune && nextPlay.mixTune.hotFraction != null
+              ? ' Mixta afinada al ' + Math.round(nextPlay.mixTune.hotFraction * 100) + '% calientes recientes / ' + Math.round((1 - nextPlay.mixTune.hotFraction) * 100) + '% rezagados (gap).'
+              : '';
+            const rankBits = nextPlay.backtest.ranking.slice(0, 3).map(function (r, i) {
+              return (i + 1) + '. ' + r.id + ' ' + r.avgHits;
+            }).join(' · ');
+            banner.innerHTML =
+              '<p class="text-cyan-200 text-sm font-semibold mb-1">Próxima jugada (walk-forward)</p>' +
+              '<p class="text-gray-300 text-xs leading-relaxed">Método ganador en los últimos ' + nextPlay.backtest.tests +
+              ' sorteos: <strong class="text-white">' + (nextPlay.winnerId || 'consenso') +
+              '</strong> · aciertos medios ' + top.avgHits + ' (' + vs +
+              '). Azar esperado ≈ ' + nextPlay.backtest.baseline +
+              '. ' + (nextPlay.beatsRandom ? 'Este método superó el azar en el historial cargado.' : 'Ningún método superó de forma clara el azar: úsalo como referencia, no como certeza.') +
+              mix + '</p>' +
+              '<p class="text-gray-500 text-xs mt-1">Top 3: ' + rankBits + '</p>' +
+              '<p class="text-gray-500 text-xs mt-2">' + (nextPlay.disclaimer || '') + '</p>';
+            container.appendChild(banner);
+          }
+          const titlesByMethod = {
+            'basado-en-frecuencia': 'Basado en Frecuencia',
+            'cold-numbers': 'Números Fríos',
+            'mixed-balanced': 'Mixta Equilibrada',
+            'repeat-pattern': 'Patrones de Repetición',
+            'por-decenas': 'Por decenas (1-9, 10-19, 20-29…)',
+            'random-optimized': 'IA Aleatoria',
+            'markov-poisson-logistic': 'Markov+Poisson+Logística',
+            'consenso-ensemble': 'Consenso Ensemble'
+          };
           const methodHints = {
             'basado-en-frecuencia': '📊 Frecuencia ponderada por fecha: sorteos recientes cuentan más para la próxima jugada.',
-            'cold-numbers': '❄️ Números que menos han salido (fríos).',
-            'mixed-balanced': '⚖️ Mezcla de números calientes y fríos.',
+            'cold-numbers': '❄️ Rezagados: mayor gap (sorteos sin aparecer), no solo los de menor frecuencia total.',
+            'mixed-balanced': '⚖️ Calientes de los últimos 50 sorteos + rezagados por gap. El % caliente se afina con walk-forward (0.4–0.8).',
             'repeat-pattern': '🔁 Números que se repiten de un sorteo al siguiente.',
             'por-decenas': '📐 Por decenas (1-9, 10-19, 20-29…) con ponderación por fecha: sorteos recientes pesan más.',
             'random-optimized': '🎲 Paridad óptima (impar/par) y ajuste de suma histórica.',
             'markov-poisson-logistic': '📈 Modelo Markov (con suavizado Laplace) + Poisson por gap + Regresión Logística.',
             'consenso-ensemble': '🏆 Ensemble: combina frecuencia (30%), frecuencia ponderada (25%), EMA reciente (25%), gap analysis (10%) y Markov (10%) para seleccionar la jugada con mayor puntaje estadístico global.'
           };
-          combos.forEach((combo, i) => {
-            displayCombination(container, titles[i] || (i + 1) + '.', combo.mainNumbers, combo.special ?? null, lottery);
-            const hintText = methodHints[combo.method];
+          const ordered = [...combos].sort((a, b) => {
+            if (nextPlay.winnerId && a.method === nextPlay.winnerId) return -1;
+            if (nextPlay.winnerId && b.method === nextPlay.winnerId) return 1;
+            return 0;
+          });
+          ordered.forEach((combo, i) => {
+            const label = (i === 0 && nextPlay.winnerId === combo.method)
+              ? '⭐ Próxima jugada — ' + (titlesByMethod[combo.method] || combo.method)
+              : ((i + 1) + '. ' + (titlesByMethod[combo.method] || combo.method));
+            displayCombination(container, label, combo.mainNumbers, combo.special ?? null, lottery);
+            let hintText = methodHints[combo.method];
+            if (combo.method === 'mixed-balanced' && combo.hotFraction != null) {
+              hintText = '⚖️ ' + Math.round(combo.hotFraction * 100) + '% calientes recientes'
+                + (combo.hotNumbers && combo.hotNumbers.length ? ' (' + combo.hotNumbers.join(', ') + ')' : '')
+                + ' + rezagados por gap'
+                + (combo.overdueNumbers && combo.overdueNumbers.length ? ' (' + combo.overdueNumbers.join(', ') + ')' : '')
+                + '.';
+            }
             if (hintText) {
               const hint = document.createElement('div');
               hint.className = 'text-xs text-gray-400 mt-2';
@@ -1030,9 +1509,10 @@ const setupEventListeners = () => {
               container.lastElementChild.appendChild(hint);
             }
           });
-          if (combos.length > 0) {
-            saveUserPrediction(lottery, combos[0].mainNumbers, combos[0].special ?? null);
-            refreshLotteryAgentInsight(lottery, buildLocalLotteryInsight(lottery, combos[0].mainNumbers, combos[0].special ?? null));
+          const saveCombo = nextPlay.recommended || combos[0];
+          if (saveCombo) {
+            saveUserPrediction(lottery, saveCombo.mainNumbers, saveCombo.special ?? null);
+            refreshLotteryAgentInsight(lottery, buildLocalLotteryInsight(lottery, saveCombo.mainNumbers, saveCombo.special ?? null));
           } else {
             refreshLotteryAgentInsight(lottery);
           }
@@ -1040,7 +1520,7 @@ const setupEventListeners = () => {
           const totalPredEl = document.getElementById('totalPredictions');
           if (totalPredEl) totalPredEl.textContent = totalPredictions;
           updateStatistics();
-          showMessage('Predicciones generadas.', 'bg-blue-500 text-white');
+          showMessage('Predicciones generadas con el método que mejor acertó en el historial.', 'bg-blue-500 text-white');
         } catch (err) {
           console.error('Error al generar predicciones:', err);
           container.innerHTML = '';
@@ -1079,6 +1559,13 @@ const setupEventListeners = () => {
         displayPairs(analysis.querySelector('.hot-pairs'), pairs);
         analysis.style.display = 'block';
       }
+    });
+  });
+
+  document.querySelectorAll('.preferred-estimate-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const lottery = (e.currentTarget || e.target).dataset.lottery;
+      if (lottery) handlePreferredEstimate(lottery);
     });
   });
 
@@ -1270,13 +1757,16 @@ async function fetchNYOpenData() {
     }
 
     // Sin logs de éxito para mantener consola limpia en producción.
+    return totalNew;
 
   } catch (err) {
     console.warn('⚠️ Error cargando NY Open Data:', err.message || err);
+    return 0;
   }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  hydratePreferredPredictionPanels();
   setupEventListeners();
   setupAutoTabForDrawingInputs();
   startNextDrawingCountdown();
@@ -1287,7 +1777,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   hideLoadingSpinners();
-  fetchNYOpenData();
+  fetchNYOpenData().then(function () {
+    hydrateWalkForwardBoard(getActiveLotteryId());
+  }).catch(function () {
+    hydrateWalkForwardBoard(getActiveLotteryId());
+  });
 
   // Mostrar "Tu predicción de hoy" para todos los juegos que tengan una guardada (no solo Powerball)
   LOTTERY_IDS.forEach(lottery => showLastPrediction(lottery));
@@ -1316,11 +1810,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userCredential = await signInAnonymously(auth);
     userId = userCredential.user.uid;
     var _appCheckThrottled = false;
+
+    // Resolves when auth has a real user (waits up to 8 s for onAuthStateChanged).
+    const waitForAuthUser = function (timeoutMs) {
+      if (auth.currentUser) return Promise.resolve(auth.currentUser);
+      return new Promise(function (resolve) {
+        var timer = setTimeout(function () { resolve(null); }, timeoutMs || 8000);
+        var unsubscribe = onAuthStateChanged(auth, function (user) {
+          if (user) {
+            clearTimeout(timer);
+            unsubscribe();
+            resolve(user);
+          }
+        });
+      });
+    };
+
     const waitForAuthAndWarmTokens = async function () {
-      if (!auth.currentUser) return;
+      var user = await waitForAuthUser(8000);
+      if (!user) return;               // still no user after 8 s — proceed anyway
       if (_appCheckThrottled) return;
       try {
-        await auth.currentUser.getIdToken(true);
+        await user.getIdToken(true);
       } catch (tokenErr) {
         var msg = String((tokenErr && tokenErr.message) || '');
         if (/throttled/i.test(msg) || /appCheck/i.test(msg)) {
@@ -1364,17 +1875,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (userIdDisplay) userIdDisplay.textContent = friendlyId;
 
     // ── Bridge for sports-dashboard.js (non-module IIFE) ────────────────────
-    const _getSportsOdds  = httpsCallable(functions, 'getSportsOdds');
-    const _getSportsEvents = httpsCallable(functions, 'getSportsEvents');
-    const _getStandings   = httpsCallable(functions, 'getStandings');
-    const _getAgentPrediction = httpsCallable(functions, 'getAgentPrediction');
-    const _getMlbAgentPrediction = httpsCallable(functions, 'getMlbAgentPrediction');
-    const _getMLBAgentPrediction = httpsCallable(functions, 'getMLBAgentPrediction');
-    const _getLotteryAgentInsight = httpsCallable(functions, 'getLotteryAgentInsight');
-    const _getUserPlan    = httpsCallable(functions, 'getUserPlan');
-    const _seedStandings  = httpsCallable(functions, 'seedStandings');
-    const _createCheckoutSession = httpsCallable(functions, 'createCheckoutSession');
-    const _createCustomerPortalSession = httpsCallable(functions, 'createCustomerPortalSession');
+    const callableOptions = { limitedUseAppCheckTokens: true };
+    const _getSportsOdds  = httpsCallable(functions, 'getSportsOdds', callableOptions);
+    const _getSportsEvents = httpsCallable(functions, 'getSportsEvents', callableOptions);
+    const _getStandings   = httpsCallable(functions, 'getStandings', callableOptions);
+    const _getPlayerStatsHistory = httpsCallable(functions, 'getPlayerStatsHistory', callableOptions);
+    const _getAgentPrediction = httpsCallable(functions, 'getAgentPrediction', callableOptions);
+    const _getMlbAgentPrediction = httpsCallable(functions, 'getMlbAgentPrediction', callableOptions);
+    const _getMLBAgentPrediction = httpsCallable(functions, 'getMLBAgentPrediction', callableOptions);
+    const _getLotteryAgentInsight = httpsCallable(functions, 'getLotteryAgentInsight', callableOptions);
+    const _getLotteryAgentsBoard = httpsCallable(functions, 'getLotteryAgentsBoard', callableOptions);
+    const _estimatePreferredNumbers = httpsCallable(functions, 'estimatePreferredNumbers', callableOptions);
+    const _getUserPlan    = httpsCallable(functions, 'getUserPlan', callableOptions);
+    const _seedStandings  = httpsCallable(functions, 'seedStandings', callableOptions);
+    const _createCheckoutSession = httpsCallable(functions, 'createCheckoutSession', callableOptions);
+    const _createCustomerPortalSession = httpsCallable(functions, 'createCustomerPortalSession', callableOptions);
 
     var _sportsBridge = {
       // Calls getSportsOdds Cloud Function; returns odds array or null on error/quota.
@@ -1439,6 +1954,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           return { sport: sport, source: 'error', events: [] };
         }
       },
+
+      // Real player stats history from MLB Stats API or ESPN NBA
+      getPlayerStatsHistory: async function (sport, playerId, metric, lastN) {
+        try {
+          const result = await runCallableWithAuthRetry(
+            _getPlayerStatsHistory,
+            { sport, playerId: String(playerId), metric: metric || 'points', lastN: lastN || 10 },
+            { maxRetries: 1, retryDelayMs: 200 }
+          );
+          return result.data || { last5: [], last10: [], seasonAvg: null, source: 'error' };
+        } catch (e) {
+          return { last5: [], last10: [], seasonAvg: null, source: 'error' };
+        }
+      },
       getAgentPrediction: async function (payload) {
         var safePayload = payload || {};
         try {
@@ -1493,6 +2022,31 @@ document.addEventListener('DOMContentLoaded', async () => {
           return result && result.data ? result.data : null;
         } catch (_) {
           return null;
+        }
+      },
+      getLotteryAgentsBoard: async function () {
+        try {
+          const result = await runCallableWithAuthRetry(
+            _getLotteryAgentsBoard,
+            {},
+            { maxRetries: 1, retryDelayMs: 400 }
+          );
+          return result && result.data ? result.data : null;
+        } catch (_) {
+          return null;
+        }
+      },
+
+      estimatePreferredNumbers: async function (payload) {
+        try {
+          const result = await runCallableWithAuthRetry(
+            _estimatePreferredNumbers,
+            payload || {},
+            { maxRetries: 2, retryDelayMs: 300 }
+          );
+          return result && result.data ? result.data : null;
+        } catch (e) {
+          throw new Error(e && e.message ? e.message : 'No se pudo calcular el margen historico.');
         }
       },
 
@@ -1567,6 +2121,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     _sportsBridge.getSportsOdds = _sportsBridge.callSportsOdds;
     window.firebaseServices = _sportsBridge;
 
+    refreshLotteryAgentInsight(getActiveLotteryId());
+    if (typeof _sportsBridge.getLotteryAgentsBoard === 'function') {
+      _sportsBridge.getLotteryAgentsBoard().then(function (board) {
+        if (!board || !board.games) return;
+        window._lotteryFirebaseBoard = board.games;
+        const active = getActiveLotteryId();
+        if (board.games[active]) {
+          renderFirebaseAgentCard(parseFirebaseLotteryInsight(active, board.games[active]));
+        }
+      }).catch(function () {});
+    }
+
     // Expose UID for rate-limit UI
     window._sportsUserId = userId;
 
@@ -1585,14 +2151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     window.firebaseServices.seedStandings = window.seedStandings;
 
-    // Kick off global accuracy widget
-    window.firebaseServices.watchGlobalAccuracy(function (data) {
-      const yes   = data.yes  || 0;
-      const no    = data.no   || 0;
-      const total = yes + no;
-      const pct   = total > 0 ? Math.round((yes / total) * 100) : null;
-      _updateAccuracyWidget(pct, total);
-    });
+    // 2026-09-29: retirado el widget «X% de efectividad» (votos de usuarios sobre deportes presentados como acierto de la IA).
 
     if (typeof _resolveFirebaseSportsBridge === 'function') {
       _resolveFirebaseSportsBridge(true);
@@ -1608,10 +2167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     hideLoadingSpinners();
 
-    setTimeout(() => {
-      const activeUsers = document.getElementById('activeUsers');
-      if (activeUsers) activeUsers.textContent = Math.floor(Math.random() * 50) + 20;
-    }, 300);
+    // 2026-09-29: retirado el contador de «usuarios activos» (era un número aleatorio, no un dato real).
 
   } catch (e) {
     console.error("Firebase Error:", e);
@@ -1629,60 +2185,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Updates the Global Accuracy Widget in the HTML with live Firestore data
-// Updates the Global Accuracy Widget in the HTML with live Firestore data
-function _updateAccuracyWidget(pct, total) {
-  const pctEl       = document.getElementById('ga-widget-pct');
-  const pctInlineEl = document.getElementById('ga-widget-pct-inline');
-  const barEl       = document.getElementById('ga-widget-bar');
-  const votesEl     = document.getElementById('ga-widget-votes');
-  const circleEl    = document.getElementById('ga-widget-circle');
-  if (!pctEl) return;
-
-  if (pct === null) {
-    pctEl.textContent    = '--';
-    if (pctInlineEl) pctInlineEl.textContent = '--';
-    if (votesEl)     votesEl.textContent      = 'Sé el primero en votar';
-    return;
-  }
-
-  if (votesEl) votesEl.textContent = total.toLocaleString() + ' predicciones evaluadas';
-
-  // Animate from current displayed value to new pct
-  const current = parseInt(pctEl.textContent) || 0;
-  const step    = pct > current ? 1 : -1;
-  let   cur     = current;
-  const dash    = 251; // 2π × r=40
-  const interval = setInterval(function () {
-    if (cur === pct) { clearInterval(interval); return; }
-    cur += step;
-    pctEl.textContent = cur;
-    if (pctInlineEl) pctInlineEl.textContent = cur;
-    if (barEl)    barEl.style.width               = cur + '%';
-    if (circleEl) circleEl.style.strokeDashoffset = dash - (dash * cur / 100);
-  }, 20);
-}
-
 function updateStatistics() {
   const totalDrawings = LOTTERY_IDS.reduce((sum, id) => sum + (allHistoryData[id]?.length || 0), 0);
   const elDrawings = document.getElementById('totalDrawings');
   const elPredictions = document.getElementById('totalPredictions');
-  const elAccuracy = document.getElementById('avgAccuracy');
 
   if (elDrawings) elDrawings.textContent = totalDrawings;
   if (elPredictions) elPredictions.textContent = totalPredictions;
 
-  let calculatedAccuracy = 0;
-  if (totalDrawings > 0) {
-    calculatedAccuracy = Math.min(98.5, 60 + (Math.log(totalDrawings) * 8));
-  }
-
-  if (elAccuracy) {
-    elAccuracy.textContent = `${calculatedAccuracy.toFixed(1)}%`;
-    elAccuracy.className = calculatedAccuracy > 80 ? "text-xl font-bold text-green-400" :
-      calculatedAccuracy > 70 ? "text-xl font-bold text-yellow-400" :
-        "text-xl font-bold text-gray-400";
-  }
+  // 2026-09-29: retirada la «Precisión Est.» (fórmula 60 + log(sorteos)·8, no medía aciertos).
 }
 
 window.addEventListener('DOMContentLoaded', () => {

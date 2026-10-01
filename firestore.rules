@@ -155,5 +155,15 @@ service cloud.firestore {
       allow update: if false; // Cloud Function updates these
       allow delete: if false;
     }
+
+    match /prediction_models/{gameType} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /agent_intelligence/{gameType} {
+      allow read: if true;
+      allow write: if false;
+    }
   }
 }

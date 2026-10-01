@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis Take 5 día y noche: 5 de 39 sin mezclar sesiones | prediccionloteria.com</title>
+  <meta name="description" content="Take 5 NY: 5 de 39, sesión diurna y nocturna. Dataset dg63-4siq. Azar ≈ 0,64 de 5. Walk-forward por sesión, no concatenado. Sin jackpot garantizado." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/take-5.html" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Take 5</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Take 5: dos sesiones, dos modelos</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Take 5 extrae cinco números del 1 al 39. Hay sorteo diurno y nocturno. El dataset NY <strong>dg63-4siq</strong> trae <code>midday_winning_numbers</code> y <code>evening_winning_numbers</code> en la misma fila de fecha. En el sitio eso se parte en <code>take5day</code> y <code>take5eve</code>. Un error habitual en páginas de “predicción Take 5” es unificar ambos en una sola tabla de calientes: el 17 puede estar caliente de noche y frío de día. Aquí no se mezclan. No estamos afiliados a NY Lottery.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">5×5/39 ≈ <strong>0,64</strong> aciertos esperados al azar. Es el juego de matriz en el que un método “bueno” se nota antes que en Powerball, pero también donde la gente se emociona con 2 aciertos (evento común). “Precisión” cuenta coincidencias parciales de la quina sugerida contra los cinco oficiales de <em>esa</em> sesión, no un premio mayor de otro juego.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">El walk-forward usa 40 sorteos de esa sesión, no 20 day + 20 eve concatenados. Si registras un resultado diurno en la pestaña nocturna, el ranking de “próxima jugada” se entrena con la sesión equivocada. La UI tiene Take 5 Day y Take 5 Eve aparte por eso.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Señales que usamos (y las que no)</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Calientes, fríos y gap se calculan dentro de day o dentro de eve. Con 39 números las decenas son 1–9, 10–19, 20–29, 30–39: el método por decenas intenta no dejar el ticket entero en 30–39. Los pares (dos números que salieron juntos) son más interpretables que en un pool de 69 porque hay más repetición relativa. Markov usa transiciones de esa misma sesión.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Un par frecuente no “debe” repetirse: es descripción del pasado. No usamos sueños ni “el 17 está atrasado”. Cualquier copia de esta página que hable de “los calientes de Take 5” sin decir mediodía o noche está mezclando dos procesos aleatorios distintos. El dataset oficial no usa “Take 5” como un solo campo: son dos columnas.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo se elige la próxima combinación</h2>
+  <p class="text-gray-300 leading-relaxed mb-4">PREDECIR en Take 5 Day lanza ranking propio; PREDECIR en Take 5 Eve, otro. Cada uno guarda su predicción del día. El método ganador es el de mayor avgHits en walk-forward de esa sesión. Detalle: <a class="text-cyan-300 hover:underline" href="/analisis/proxima-jugada.html">algoritmo de próxima jugada</a>. Métodos: <a class="text-cyan-300 hover:underline" href="/metodologia-estadistica.html">metodología estadística</a>.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
+  <p class="text-gray-300 leading-relaxed mb-6">Oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Dataset: data.ny.gov/resource/dg63-4siq. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+</main>
+</body>
+</html>

@@ -3,36 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/consent.js"></script>
   <title>Política de Cookies - Predicción de Lotería</title>
   <meta name="robots" content="index, follow">
-  <meta name="description" content="Política de cookies de prediccionloteria.com: cookies técnicas, AdSense y consentimiento.">
+  <meta name="description" content="Política de cookies de prediccionloteria.com: almacenamiento técnico, Google AdSense con consentimiento y cómo cambiar tus preferencias.">
+  <meta name="google-adsense-account" content="ca-pub-8721021745606812">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="canonical" href="https://www.prediccionloteria.com/politica-cookies.html">
 </head>
-<body class="p-8 bg-gray-900 text-gray-300">
-  <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
+<body class="p-4 sm:p-8 bg-gray-900 text-gray-300">
+  <main class="max-w-4xl mx-auto bg-gray-800 p-5 sm:p-8 rounded-lg">
     <p class="mb-4"><a href="/" class="text-cyan-400 hover:underline">← Volver al inicio</a></p>
     <h1 class="text-2xl font-bold text-white mb-4">Política de Cookies</h1>
-    <p class="mb-4"><strong>Última actualización:</strong> 23 de enero de 2026</p>
-    
+    <p class="mb-4"><strong>Última actualización:</strong> 29 de septiembre de 2026</p>
+
     <h2 class="text-xl font-semibold text-white mt-6 mb-3">¿Qué son las cookies?</h2>
-    <p class="mb-3">Son pequeños archivos de texto que se guardan en tu navegador para recordar preferencias.</p>
-    
-    <h2 class="text-xl font-semibold text-white mt-6 mb-3">Cookies que usamos</h2>
-    <ul class="list-disc list-inside mb-3 space-y-2">
-      <li><strong>Técnicas:</strong> localStorage para guardar tus predicciones</li>
-      <li><strong>Analíticas:</strong> Google Analytics (si lo añades)</li>
-      <li><strong>Publicidad:</strong> Google AdSense para personalizar anuncios</li>
-    </ul>
-    
-    <h2 class="text-xl font-semibold text-white mt-6 mb-3">Gestionar cookies</h2>
-    <p class="mb-3">Puedes bloquear cookies en tu navegador, pero parte de la funcionalidad podría no funcionar.</p>
-    
-    <h2 class="text-xl font-semibold text-white mt-6 mb-3">Consentimiento</h2>
-    <p class="mb-3">Al aceptar el banner de cookies, consientes el uso de estas tecnologías.</p>
-    
-    <p class="mt-6 text-sm text-gray-500">© 2026 Predicción de Lotería Profesional</p>
-  </div>
+    <p class="mb-3">Son pequeños archivos o registros que el navegador guarda para recordar datos entre visitas. Aquí llamamos «cookies» también al almacenamiento local del navegador (localStorage e IndexedDB).</p>
+
+    <h2 class="text-xl font-semibold text-white mt-6 mb-3">Qué usamos y cuándo</h2>
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left border border-gray-700">
+      <thead class="bg-gray-900 text-white"><tr><th class="p-2">Tipo</th><th class="p-2">Quién</th><th class="p-2">Para qué</th><th class="p-2">¿Necesita tu permiso?</th></tr></thead>
+      <tbody>
+        <tr class="border-t border-gray-700"><td class="p-2">Técnicas (localStorage)</td><td class="p-2">Este sitio</td><td class="p-2">Guardar tus predicciones, tus coincidencias por juego, un identificador anónimo y tu elección de cookies (<code>cookieConsentPrefs</code>).</td><td class="p-2">No (necesarias)</td></tr>
+        <tr class="border-t border-gray-700"><td class="p-2">Técnicas (IndexedDB)</td><td class="p-2">Google Firebase (Authentication anónima, Firestore, Cloud Functions)</td><td class="p-2">Sesión anónima y datos de sorteos en tiempo real.</td><td class="p-2">No (necesarias)</td></tr>
+        <tr class="border-t border-gray-700"><td class="p-2">Seguridad</td><td class="p-2">Google reCAPTCHA Enterprise (Firebase App Check)</td><td class="p-2">Proteger las funciones del servidor contra abuso automatizado.</td><td class="p-2">No (seguridad)</td></tr>
+        <tr class="border-t border-gray-700"><td class="p-2">Publicidad</td><td class="p-2">Google AdSense y sus socios</td><td class="p-2">Mostrar y medir anuncios; si lo permites, personalizarlos.</td><td class="p-2"><strong>Sí.</strong> El script de AdSense no se carga hasta que aceptas.</td></tr>
+        <tr class="border-t border-gray-700"><td class="p-2">Traducción</td><td class="p-2">Google Translate</td><td class="p-2">Solo se carga si pulsas el selector de idioma.</td><td class="p-2">Se activa por tu acción</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="mt-3 mb-3">Recursos que reciben tu dirección IP al cargar la página: Google Fonts, cdnjs (Font Awesome), cdn.tailwindcss.com y data.ny.gov (resultados de NY Open Data). No usamos herramientas de analítica.</p>
+
+    <h2 id="preferencias" class="text-xl font-semibold text-white mt-6 mb-3">Cambiar tus preferencias</h2>
+    <p class="mb-3">Usamos Google Consent Mode v2: por defecto el almacenamiento publicitario está denegado. Puedes aceptar, rechazar o configurar (publicidad sí/no, personalización sí/no) y cambiarlo cuando quieras:</p>
+    <p class="mb-3"><button type="button" data-cookie-prefs class="cookie-btn">Abrir preferencias de cookies</button></p>
+    <p class="mb-3">También puedes borrar los datos del sitio desde tu navegador o revisar la configuración de anuncios de Google en <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">adssettings.google.com</a>. Si retiras el permiso con anuncios ya cargados, la página se recarga sin AdSense.</p>
+
+    <p class="mt-6 text-sm text-gray-400">Ver también: <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a> · <a href="/terminos.html" class="text-cyan-400 hover:underline">Términos de uso</a> · <a href="/juego-responsable.html" class="text-cyan-400 hover:underline">Juego responsable</a></p>
+    <p class="mt-2 text-sm text-gray-400">© 2026 Predicción de Lotería Profesional · Solo mayores de 18 años. Sin garantía de premio.</p>
+  </main>
 </body>
 </html>

@@ -305,10 +305,15 @@ function generateWin4StyleCombination(allHistoryData, ranges, order = 'desc', me
       method
     };
   }
-  allHistoryData.forEach(item => {
+  // Recientes pesan más: duplicar los últimos 30 sorteos en el conteo por posición.
+  const recentBoost = Math.min(30, allHistoryData.length);
+  allHistoryData.forEach((item, idx) => {
     const parsed = parseDrawingData(item.data);
     if (parsed.mainNumbers && parsed.mainNumbers.length >= 4) {
-      for (let p = 0; p < 4; p++) positions[p].push(parsed.mainNumbers[p]);
+      const copies = idx < recentBoost ? 2 : 1;
+      for (let c = 0; c < copies; c++) {
+        for (let p = 0; p < 4; p++) positions[p].push(parsed.mainNumbers[p]);
+      }
     }
   });
   const mainNumbers = [];
@@ -423,7 +428,12 @@ function generateColdNumbersCombination(allHistoryData, ranges, lottery) {
   });
 
   const mainFreq = calculateFrequency(allMainNumbers, max, min);
-  const coldMain = getSortedNumbers(mainFreq, 'asc', mainCount).filter(n => n >= min && n <= max);
+  let coldMain = overdueNumbers(allHistoryData, min, max, [], mainCount);
+  if (!coldMain.length) {
+    coldMain = getSortedNumbers(mainFreq, 'asc', mainCount).filter(function (n) {
+      return n >= min && n <= max;
+    });
+  }
 
   // Relleno determinista
   for (let i = min; i <= max && coldMain.length < mainCount; i++) {
@@ -441,65 +451,80 @@ function generateColdNumbersCombination(allHistoryData, ranges, lottery) {
   return { mainNumbers: coldMain.sort((a, b) => a - b).slice(0, mainCount), special, method: 'cold-numbers' };
 }
 
-// --- MIXTA EQUILIBRADA ---
-function generateMixedCombination(allHistoryData, ranges, lottery) {
+function overdueNumbers(allHistoryData, min, max, exclude, count) {
+  const gap = calculateGapAnalysis(allHistoryData, max, min);
+  const skip = exclude || [];
+  return Object.keys(gap).map(function (k) {
+    return { n: Number(k), g: gap[k] };
+  }).filter(function (x) {
+    return x.n >= min && x.n <= max && skip.indexOf(x.n) < 0;
+  }).sort(function (a, b) {
+    return b.g - a.g || a.n - b.n;
+  }).slice(0, count).map(function (x) {
+    return x.n;
+  });
+}
+
+function recentWindow(allHistoryData, size) {
+  if (!Array.isArray(allHistoryData) || allHistoryData.length === 0) return [];
+  return allHistoryData.slice(0, Math.min(size || 50, allHistoryData.length));
+}
+
+// --- MIXTA EQUILIBRADA (WFO) ---
+// Calientes = frecuencia ponderada de la ventana reciente (50 sorteos).
+// Fríos = mayor gap (rezagados), no los de menor frecuencia histórica.
+// hotFraction se puede afinar con tuneMixedHotFraction antes de la próxima jugada.
+function generateMixedCombination(allHistoryData, ranges, lottery, options) {
   const mainCount = getMainCount(ranges);
   const hasSpecial = getHasSpecial(ranges);
   const { min, max } = getMinMax(ranges);
   const rng = createRNG(getDataSeed(allHistoryData) + 2);
+  const hotFraction = (options && typeof options.hotFraction === 'number') ? options.hotFraction : 0.6;
 
   if (mainCount === 4 && min === 0 && max === 9)
     return generateBasicCombination(allHistoryData, ranges, lottery, 'mixed-balanced');
   if (!Array.isArray(allHistoryData) || allHistoryData.length === 0)
     return generateBasicCombination(allHistoryData, ranges, lottery, 'mixed-balanced');
 
-  const allMainNumbers = [];
   const allSpecials = [];
-  allHistoryData.forEach(item => {
-    let mainNums = [];
-    let specialNum = null;
-    if (item.data && item.data.mainNumbers) {
-      try {
-        mainNums = Array.isArray(item.data.mainNumbers)
-          ? item.data.mainNumbers
-          : JSON.parse(item.data.mainNumbers);
-      } catch (_) { mainNums = []; }
+  allHistoryData.forEach(function (item) {
+    if (item.data && typeof item.data.special === 'number' && !isNaN(item.data.special)) {
+      allSpecials.push(item.data.special);
     }
-    if (item.data && item.data.special !== undefined) specialNum = item.data.special;
-    if (Array.isArray(mainNums)) allMainNumbers.push(...mainNums);
-    if (typeof specialNum === 'number' && !isNaN(specialNum)) allSpecials.push(specialNum);
   });
 
-  const mainFreq = calculateFrequency(allMainNumbers, max, min);
-  const hotCount = Math.max(1, Math.floor(mainCount * 0.6));
+  const hotCount = Math.max(1, Math.floor(mainCount * hotFraction));
   const coldCount = mainCount - hotCount;
+  const hotFreq = calculateFrequencyWeighted(recentWindow(allHistoryData, 50), max, min);
+  const hotMain = getSortedNumbers(hotFreq, 'desc', hotCount).filter(function (n) {
+    return n >= min && n <= max;
+  });
+  const coldMain = overdueNumbers(allHistoryData, min, max, hotMain, coldCount);
 
-  const hotMain = getSortedNumbers(mainFreq, 'desc', hotCount).filter(n => n >= min && n <= max);
-  // Fríos que no coincidan con los calientes
-  const coldMain = getSortedNumbers(mainFreq, 'asc', coldCount + 5)
-    .filter(n => n >= min && n <= max && !hotMain.includes(n))
-    .slice(0, coldCount);
-
-  const finalMixedMain = [...hotMain];
-  for (const n of coldMain) {
-    if (finalMixedMain.length >= mainCount) break;
-    finalMixedMain.push(n);
-  }
-  // Relleno determinista
+  const finalMixedMain = hotMain.slice();
+  coldMain.forEach(function (n) {
+    if (finalMixedMain.length >= mainCount) return;
+    if (finalMixedMain.indexOf(n) < 0) finalMixedMain.push(n);
+  });
   for (let i = min; i <= max && finalMixedMain.length < mainCount; i++) {
-    if (!finalMixedMain.includes(i)) finalMixedMain.push(i);
+    if (finalMixedMain.indexOf(i) < 0) finalMixedMain.push(i);
   }
 
   let special = null;
   if (hasSpecial && ranges.special) {
-    const specialFreq = calculateFrequency(allSpecials, ranges.special.max, ranges.special.min);
+    const specialFreq = calculateFrequencyWeighted(
+      allHistoryData, ranges.special.max, ranges.special.min, { useSpecial: true }
+    );
     special = getSortedNumbers(specialFreq, 'desc', 1)[0]
       || Math.floor(rng() * (ranges.special.max - ranges.special.min + 1)) + ranges.special.min;
   }
   return {
-    mainNumbers: finalMixedMain.sort((a, b) => a - b).slice(0, mainCount),
-    special,
-    method: 'mixed-balanced'
+    mainNumbers: finalMixedMain.sort(function (a, b) { return a - b; }).slice(0, mainCount),
+    special: special,
+    method: 'mixed-balanced',
+    hotFraction: hotFraction,
+    hotNumbers: hotMain.slice(),
+    overdueNumbers: coldMain.slice()
   };
 }
 
@@ -1017,6 +1042,166 @@ function generateMultipleCombinations(allHistoryData, ranges, lottery) {
   ];
 }
 
+function isWin4Ranges(ranges) {
+  const { min, max } = getMinMax(ranges);
+  return getMainCount(ranges) === 4 && min === 0 && max === 9;
+}
+
+function countHits(predicted, actual, positional) {
+  if (!Array.isArray(predicted) || !Array.isArray(actual)) return 0;
+  if (positional) {
+    const n = Math.min(predicted.length, actual.length);
+    let hits = 0;
+    for (let i = 0; i < n; i++) if (predicted[i] === actual[i]) hits += 1;
+    return hits;
+  }
+  const set = new Set(actual);
+  return predicted.filter((n) => set.has(n)).length;
+}
+
+function expectedHitsRandom(ranges) {
+  const mainCount = getMainCount(ranges);
+  const { min, max } = getMinMax(ranges);
+  const pool = max - min + 1;
+  if (isWin4Ranges(ranges)) return mainCount / pool;
+  const drawSize = ranges && ranges.drawResultCount ? ranges.drawResultCount : mainCount;
+  return (mainCount * drawSize) / pool;
+}
+
+function walkForwardBacktest(allHistoryData, ranges, lottery, maxTests) {
+  maxTests = maxTests || 40;
+  const empty = { ranking: [], tests: 0, baseline: expectedHitsRandom(ranges), positional: isWin4Ranges(ranges) };
+  if (!Array.isArray(allHistoryData) || allHistoryData.length < 24) return empty;
+
+  const chrono = allHistoryData.slice().sort(function (a, b) {
+    const da = (a.data && a.data.date) ? new Date(a.data.date).getTime() : 0;
+    const db = (b.data && b.data.date) ? new Date(b.data.date).getTime() : 0;
+    return da - db;
+  });
+
+  const methods = [
+    { id: 'basado-en-frecuencia', fn: function (h) { return generateBasicCombination(h, ranges, lottery, 'basado-en-frecuencia'); } },
+    { id: 'cold-numbers', fn: function (h) { return generateColdNumbersCombination(h, ranges, lottery); } },
+    { id: 'mixed-balanced', fn: function (h) { return generateMixedCombination(h, ranges, lottery); } },
+    { id: 'repeat-pattern', fn: function (h) { return generateRepeatPatternCombination(h, ranges, lottery); } },
+    { id: 'por-decenas', fn: function (h) { return generateDecadesCombination(h, ranges, lottery); } },
+    { id: 'random-optimized', fn: function (h) { return generateRandomOptimizedCombination(h, ranges, lottery); } },
+    { id: 'markov-poisson-logistic', fn: function (h) { return generateMarkovPoissonLogisticCombination(h, ranges, lottery); } },
+    { id: 'consenso-ensemble', fn: function (h) { return generateConsensusCombination(h, ranges, lottery); } }
+  ];
+
+  const stats = methods.map(function (m) {
+    return { id: m.id, tests: 0, hits: 0, hitsSpecial: 0, avgHits: 0, hitRate: 0, vsRandom: 0 };
+  });
+  const minHistory = 20;
+  const start = Math.max(minHistory, chrono.length - maxTests);
+  const positional = isWin4Ranges(ranges);
+  const mainCount = getMainCount(ranges);
+
+  for (let i = start; i < chrono.length; i++) {
+    const historyNewestFirst = chrono.slice(0, i).reverse();
+    const actual = parseDrawingData(chrono[i].data);
+    methods.forEach(function (m, mi) {
+      const pred = m.fn(historyNewestFirst);
+      stats[mi].tests += 1;
+      stats[mi].hits += countHits(pred.mainNumbers, actual.mainNumbers, positional);
+      if (pred.special != null && actual.special != null && Number(pred.special) === Number(actual.special)) {
+        stats[mi].hitsSpecial += 1;
+      }
+    });
+  }
+
+  const baseline = expectedHitsRandom(ranges);
+  stats.forEach(function (r) {
+    r.avgHits = r.tests ? r.hits / r.tests : 0;
+    r.hitRate = r.tests && mainCount ? r.avgHits / mainCount : 0;
+    r.vsRandom = r.avgHits - baseline;
+    r.avgHits = Number(r.avgHits.toFixed(3));
+    r.hitRate = Number(r.hitRate.toFixed(4));
+    r.vsRandom = Number(r.vsRandom.toFixed(3));
+  });
+  stats.sort(function (a, b) { return b.avgHits - a.avgHits || b.hitsSpecial - a.hitsSpecial; });
+  return { ranking: stats, tests: stats[0] ? stats[0].tests : 0, baseline: Number(baseline.toFixed(3)), positional };
+}
+
+function tuneMixedHotFraction(allHistoryData, ranges, lottery, maxTests) {
+  const fractions = [0.4, 0.5, 0.6, 0.7, 0.8];
+  const fallback = { hotFraction: 0.6, ranking: [] };
+  if (!Array.isArray(allHistoryData) || allHistoryData.length < 24) return fallback;
+
+  const chrono = allHistoryData.slice().sort(function (a, b) {
+    const da = (a.data && a.data.date) ? new Date(a.data.date).getTime() : 0;
+    const db = (b.data && b.data.date) ? new Date(b.data.date).getTime() : 0;
+    return da - db;
+  });
+  maxTests = maxTests || 40;
+  const start = Math.max(20, chrono.length - maxTests);
+  const positional = isWin4Ranges(ranges);
+  let best = { hotFraction: 0.6, avgHits: -1 };
+  const ranking = [];
+
+  fractions.forEach(function (frac) {
+    let hits = 0;
+    let tests = 0;
+    for (let i = start; i < chrono.length; i++) {
+      const hist = chrono.slice(0, i).reverse();
+      const pred = generateMixedCombination(hist, ranges, lottery, { hotFraction: frac });
+      const actual = parseDrawingData(chrono[i].data);
+      hits += countHits(pred.mainNumbers, actual.mainNumbers, positional);
+      tests += 1;
+    }
+    const avgHits = tests ? hits / tests : 0;
+    ranking.push({ hotFraction: frac, avgHits: Number(avgHits.toFixed(3)), tests: tests });
+    if (avgHits > best.avgHits) best = { hotFraction: frac, avgHits: avgHits };
+  });
+  ranking.sort(function (a, b) { return b.avgHits - a.avgHits; });
+  return { hotFraction: best.hotFraction, ranking: ranking };
+}
+
+function generateNextPlayRecommendation(allHistoryData, ranges, lottery) {
+  const mixTune = tuneMixedHotFraction(allHistoryData, ranges, lottery, 40);
+  const combos = generateMultipleCombinations(allHistoryData, ranges, lottery);
+  const mixedIdx = combos.findIndex(function (c) { return c.method === 'mixed-balanced'; });
+  if (mixedIdx >= 0) {
+    combos[mixedIdx] = generateMixedCombination(allHistoryData, ranges, lottery, {
+      hotFraction: mixTune.hotFraction
+    });
+  }
+  const backtest = walkForwardBacktest(allHistoryData, ranges, lottery, 40);
+  const winnerId = backtest.ranking[0] ? backtest.ranking[0].id : 'consenso-ensemble';
+  const recommended = combos.find(function (c) { return c.method === winnerId; }) || combos[combos.length - 1];
+
+  const votes = {};
+  const survivors = (backtest.ranking || []).filter(function (r) { return r.vsRandom > 0; });
+  const voteSource = survivors.length >= 2
+    ? combos.filter(function (c) {
+      return survivors.some(function (s) { return s.id === c.method; });
+    })
+    : combos;
+  voteSource.forEach(function (c) {
+    (c.mainNumbers || []).forEach(function (n) { votes[n] = (votes[n] || 0) + 1; });
+  });
+  const consensusVotes = Object.keys(votes).map(function (n) {
+    return { number: Number(n), methods: votes[n] };
+  }).filter(function (x) { return x.methods >= 2; }).sort(function (a, b) {
+    return b.methods - a.methods || a.number - b.number;
+  });
+
+  const winner = backtest.ranking[0] || null;
+  const beatsRandom = !!(winner && winner.vsRandom > 0);
+  return {
+    recommended: recommended,
+    combos: combos,
+    backtest: backtest,
+    winnerId: winnerId,
+    beatsRandom: beatsRandom,
+    consensusVotes: consensusVotes,
+    mixTune: mixTune,
+    survivors: survivors.map(function (s) { return s.id; }),
+    disclaimer: 'Referencia estadística con walk-forward sobre el historial cargado. Cada sorteo es independiente; esto no garantiza premios.'
+  };
+}
+
 // ==========================================
 // EXPONER GLOBAL
 // ==========================================
@@ -1043,5 +1228,11 @@ window.lotteryAlgorithms = {
   generateMarkovPoissonLogisticCombination,
   generateConsensusCombination,
   generateMultipleCombinations,
+  walkForwardBacktest,
+  generateNextPlayRecommendation,
+  tuneMixedHotFraction,
+  overdueNumbers,
+  expectedHitsRandom,
+  countHits,
   parseDrawingData
 };

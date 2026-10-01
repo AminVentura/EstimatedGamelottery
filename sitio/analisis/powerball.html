@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis Powerball: frecuencia, gaps y próxima jugada | prediccionloteria.com</title>
+  <meta name="description" content="Cómo analizamos Powerball (5 de 69 + Powerball 1-26) con historial NY Open Data d6yy-54nr. Baseline de azar ≈ 0,36 aciertos de 5. Walk-forward, no jackpot garantizado." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/powerball.html" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Powerball</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Powerball: cómo leemos el sorteo para la próxima jugada</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Powerball se juega el lunes, miércoles y sábado. El jugador elige cinco números del 1 al 69 y una Powerball del 1 al 26. En prediccionloteria.com el historial llega del dataset público de New York <strong>d6yy-54nr</strong> (campo winning_numbers: cinco principales más la bola). No estamos afiliados a Multi-State Lottery Association ni a NY Lottery.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Si eliges 5 números de 69 y el sorteo también saca 5 de 69, el valor esperado de coincidencias si eliges al azar es 5×5/69 ≈ <strong>0,36</strong>. Tres aciertos principales ya es un evento infrecuente; el jackpot exige los cinco más la Powerball. Cuando el panel dice “precisión”, cuenta coincidencias parciales de tu predicción del día contra el resultado oficial, no el premio mayor.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">La Powerball se modela aparte: frecuencia de la sexta cifra en el historial, con un poco más de peso en sorteos recientes. Antes el agente del servidor usaba (suma de principales módulo 26), que no tiene relación con cómo se extrae la bola. Eso se corrigió.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Señales que usamos (y las que no)</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Calientes: apariciones en ventana reciente (ponderada por fecha). Fríos: baja frecuencia total. Gap: sorteos desde la última vez que salió un número; se compara con el intervalo medio del pool (69 números, 5 por sorteo). Markov: transiciones entre sorteos consecutivos con suavizado de Laplace para no asignar probabilidad cero. Ensemble: mezcla esas señales en un score.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">No usamos sueños, fechas de cumpleaños ni “números atrasados que deben salir”. Un gap alto no crea obligación. En un sorteo justo, el 32 que lleva 40 draws sin aparecer tiene la misma chance legal que el 32 que salió ayer.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo se elige la próxima combinación</h2>
+  <p class="text-gray-300 leading-relaxed mb-4">Al pulsar PREDECIR en la pestaña Powerball, el navegador corre walk-forward sobre el historial cargado (hasta 40 sorteos de prueba). El método con más avgHits se etiqueta “próxima jugada” y se guarda como tu predicción para comparar cuando se publique el resultado oficial. Detalle del procedimiento: <a class="text-cyan-300 hover:underline" href="/analisis/proxima-jugada.html">algoritmo de próxima jugada</a>.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
+  <p class="text-gray-300 leading-relaxed mb-6">Números oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a> y powerball.com. Dataset: data.ny.gov/resource/d6yy-54nr. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento.</p>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+</main>
+</body>
+</html>

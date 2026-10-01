@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis Win 4 día y noche: dígitos por posición | prediccionloteria.com</title>
+  <meta name="description" content="Win 4 NY: 4 dígitos 0-9 por posición, day y evening. Dataset hsys-3def. Azar ≈ 0,4 de 4 en straight. Walk-forward posicional, sin ordenar como Take 5." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/win-4.html" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Win 4</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Win 4: el orden y los ceros importan</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Win 4 no es “cuatro números del 0 al 9 mezclados”. Cada cifra tiene posición: millar, centena, decena, unidad. Se permiten repeticiones (7-7-0-3 es legal). El dataset NY <strong>hsys-3def</strong> trae <code>midday_win_4</code> y <code>evening_win_4</code>; los parseamos con <code>padStart(4,'0')</code> para no perder ceros a la izquierda. Si un modelo ordena 0,3,7,7 “de menor a mayor”, destruye el juego. Por eso Win 4 tiene rama propia (<code>generateWin4StyleCombination</code>) y el backtest cuenta aciertos <strong>por posición</strong>. No estamos afiliados a NY Lottery.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Cada posición es 1/10 si el dígito es independiente. Cuatro posiciones → ≈ <strong>0,4</strong> aciertos exactos de 4 al azar. Straight (las 4 en orden) es 1/10 000. El % de “precisión” del panel, si se calculaba como conjunto sin posición, mentía: un 1-2-3-4 vs 4-3-2-1 no es cuatro aciertos en Win 4 straight. El walk-forward compara índice a índice.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Box (los mismos dígitos en cualquier orden) no es lo que mide este ranking: el walk-forward es straight por posición. Si juegas box, las reglas oficiales las define NY Lottery, no esta página. No conviertas 3-8-1-0 en 0-1-3-8 “porque queda más ordenado”: eso cambia el ticket.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Señales que usamos (y las que no)</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Por cada posición se cuenta el dígito más frecuente; los últimos 30 sorteos de esa sesión (day u eve) pesan doble. Day y evening no se mezclan: el 5 puede dominar la unidad de mediodía y no la de la noche. Los métodos de “decenas” y Markov de pool continuo se degradan a esta rama posicional para no generar combinaciones ilegales.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">No usamos sueños, “números atrasados” ni tablas de Take 5. Un 7 caliente en la unidad de Take 5 Eve no informa la unidad de Win 4 Day. Repeticiones (pares de dígitos iguales) son legales y se respetan; no se “arreglan” para que los cuatro dígitos sean distintos.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo se elige la próxima combinación</h2>
+  <p class="text-gray-300 leading-relaxed mb-4">PREDECIR en Win 4 Day y Win 4 Eve lanza cada uno su ranking. Gana el método con más aciertos posicionales en walk-forward de esa sesión. La combinación se guarda con ceros a la izquierda si aplica. Detalle: <a class="text-cyan-300 hover:underline" href="/analisis/proxima-jugada.html">algoritmo de próxima jugada</a>. Métodos: <a class="text-cyan-300 hover:underline" href="/metodologia-estadistica.html">metodología estadística</a>.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
+  <p class="text-gray-300 leading-relaxed mb-6">Oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Dataset: data.ny.gov/resource/hsys-3def. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento, no caja. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+</main>
+</body>
+</html>

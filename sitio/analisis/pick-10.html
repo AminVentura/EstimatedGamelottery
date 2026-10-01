@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis Pick 10 NY: 10 elegidos contra 20 oficiales | prediccionloteria.com</title>
+  <meta name="description" content="Pick 10: marcas 10; el sorteo saca 20 de 80. Dataset NY bycu-cw7c. Azar esperado ≈ 2,5 aciertos. Walk-forward elige la próxima décima. Sin jackpot garantizado." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/pick-10.html" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Pick 10</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Pick 10: 10 elegidos contra 20 oficiales</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Pick 10 (New York Lottery) no funciona como Powerball. Tú marcas 10 números del 1 al 80. El sorteo extrae <strong>20</strong> ganadores. El premio oficial depende de cuántos de tus 10 están en esos 20. Por eso el historial que guardamos son los 20 oficiales (dataset <strong>bycu-cw7c</strong>, <code>winning_numbers</code>) y la predicción que ofrecemos son 10 números para jugar, no 20. No estamos afiliados a NY Lottery. Diario.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué significa “acertar” en este sitio</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Si eliges 10 al azar, el valor esperado de aciertos contra 20 de 80 es 10×(20/80) = <strong>2,5</strong>. Un método que promedia 2,4 no “funciona peor que el azar” de forma dramática; uno que promedia 3,1 en 40 sorteos de prueba merece el sello de próxima jugada, pero sigue siendo ruido posible. El walk-forward usa <code>countHits</code> contra el conjunto de 20, no contra 10. Comparar Pick 10 con un % de Powerball es un error: el 69 no existe aquí.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Pick 10 paga según cuántos de tus 10 están en el grupo de 20, no según un orden. Un método que acierta 3 de 10 contra 20 está cerca del azar (2,5); 5 de 10 ya es notable en 40 pruebas, no una prueba de jackpot. “Precisión” en el panel es esa coincidencia de conjunto, no un premio mayor que este juego ni siquiera vende como Powerball.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Señales que usamos (y las que no)</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Frecuencia y ensemble destacan números que salen a menudo entre los 20. Fríos buscan los que casi no entran al bombo de 20: en Pick 10 un “frío” puede ser útil para quien persigue combinaciones distintas, pero el ranking de próxima jugada premia hits, no originalidad. Por decenas reparte el ticket entre bloques 1–9 … 70–80 para no concentrar los 10 en una sola decena. Markov se aplica al historial de conjuntos de 20, no a un orden de extracción que el feed no trae.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">No usamos sueños ni cumpleaños. El formulario de “registrar sorteo” pide los 20 oficiales, no tus 10. Si registras solo 10, las estadísticas se sesgan: la UI lo recuerda con 20 casillas. No copies tablas de Powerball a esta página.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo se elige la próxima combinación</h2>
+  <p class="text-gray-300 leading-relaxed mb-4">PREDECIR en la pestaña Pick 10 lanza los 8 métodos, rankea con walk-forward (hasta 40 sorteos ya ocurridos) y coloca al frente el de mayor avgHits contra el conjunto de 20. Esa décima se guarda como tu predicción del día. Detalle: <a class="text-cyan-300 hover:underline" href="/analisis/proxima-jugada.html">algoritmo de próxima jugada</a>. Métodos: <a class="text-cyan-300 hover:underline" href="/metodologia-estadistica.html">metodología estadística</a>.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Cómo verificar</h2>
+  <p class="text-gray-300 leading-relaxed mb-6">Oficiales: <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>. Dataset: data.ny.gov/resource/bycu-cw7c. Si el feed falla, no inventamos un sorteo: el modelo espera al próximo JSON válido. 18+. Entretenimiento. <a class="text-cyan-300 hover:underline" href="/juego-responsable.html">Juego responsable</a>.</p>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Índice de análisis</a></p>
+</main>
+</body>
+</html>

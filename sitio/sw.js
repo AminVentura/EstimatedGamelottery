@@ -1,8 +1,9 @@
 'use strict';
-const CACHE_NAME = 'plv1-cache-v3';
+const CACHE_NAME = 'plv1-cache-v8';
 const PRECACHE = [
   '/',
   '/styles.css',
+  '/consent.js',
   '/app.js',
   '/sports-dashboard.js',
   '/lottery-algorithms.js',
@@ -35,14 +36,15 @@ self.addEventListener('fetch', e => {
   // and the SW's fetch() does not conflict with connect-src restrictions.
   if (url.origin !== self.location.origin) return;
   e.respondWith(
-    caches.match(e.request)
-      .then(cached => cached || fetch(e.request).then(res => {
+    fetch(e.request)
+      .then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
         }
         return res;
-      }))
+      })
+      .catch(() => caches.match(e.request))
       .catch(() => caches.match('/'))
   );
 });

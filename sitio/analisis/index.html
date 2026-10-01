@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análisis por juego de lotería USA | prediccionloteria.com</title>
+  <meta name="description" content="Análisis original de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4: reglas, fuentes NY Open Data y cómo elegimos la próxima jugada con walk-forward. Entretenimiento, 18+." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"CollectionPage","name":"Análisis de loterías USA","url":"https://www.prediccionloteria.com/analisis/","inLanguage":"es","publisher":{"@type":"Organization","name":"Businessskore LLC"}}
+  </script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / Análisis</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Análisis por juego: cómo leemos cada sorteo</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">prediccionloteria.com no es un generador de “números mágicos”. Es una herramienta de referencia que organiza historial oficial (NY Open Data) y compara varios métodos estadísticos contra sorteos ya ocurridos. Esta sección existe para que Google y el lector vean, en páginas propias, cómo se analiza cada juego y qué no prometemos.</p>
+  <p class="text-gray-400 text-sm leading-relaxed mb-6">La lotería es azar independiente. Un “acierto” aquí significa coincidencias parciales (por ejemplo 2 de 5), no el premio mayor. Solo para mayores de 18 años. Juega con moderación.</p>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">Por qué hay una URL por juego</h2>
+    <p class="text-gray-300 leading-relaxed mb-3">Powerball (5/69 + bola 1–26) no se lee igual que Win 4 (cuatro dígitos 0–9 por posición) ni que Pick 10 (tú eliges 10; el sorteo saca 20 de 80). Mezclar esas reglas en un solo párrafo es exactamente el tipo de contenido genérico que AdSense marca como de poco valor. Cada artículo de esta carpeta explica el pool, la fuente pública, el baseline de azar y cómo el sitío elige el método de la próxima jugada.</p>
+    <p class="text-gray-300 leading-relaxed">El procedimiento común se llama walk-forward: para cada sorteo pasado reciente, se genera una sugerencia usando solo el historial anterior y se cuenta cuántos números coincidieron. El método con más aciertos medios se marca como “próxima jugada”. Si nadie supera el azar, lo decimos.</p>
+  </section>
+
+  <ul class="space-y-3 mb-8">
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/powerball.html">Powerball</a> — Lun / Mié / Sáb · dataset d6yy-54nr</li>
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/mega-millions.html">Mega Millions</a> — Mar / Vie · dataset 5xaw-6ayf</li>
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/millionaire-for-life.html">Millionaire For Life</a> — diario · dataset kwxv-fwze</li>
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/pick-10.html">Pick 10</a> — diario · dataset bycu-cw7c</li>
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/take-5.html">Take 5 día y noche</a> — dataset dg63-4siq</li>
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/win-4.html">Win 4 día y noche</a> — dataset hsys-3def</li>
+    <li><a class="text-cyan-300 hover:underline font-medium" href="/analisis/proxima-jugada.html">Cómo elige el algoritmo la próxima jugada</a></li>
+  </ul>
+
+  <p class="text-sm text-gray-500">También: <a class="text-cyan-400 hover:underline" href="/metodologia-estadistica.html">metodología</a> · <a class="text-cyan-400 hover:underline" href="/guia-fuentes-loteria-deportes.html">fuentes</a> · <a class="text-cyan-400 hover:underline" href="/juego-responsable.html">juego responsable</a>.</p>
+</main>
+</body>
+</html>

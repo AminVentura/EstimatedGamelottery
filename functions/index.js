@@ -1478,16 +1478,61 @@ exports.updateStandings = onSchedule(
 // Lottery Agent Brain — adaptive training + ingestion + insights
 // ════════════════════════════════════════════════════════════════════════════
 const LOTTERY_GAMES = {
-  powerball: { mainPool: 69, mainCount: 5, bonusPool: 26, bonusField: 'powerball' },
-  megamillions: { mainPool: 70, mainCount: 5, bonusPool: 25, bonusField: 'megaBall' },
+  powerball: { mainPool: 69, mainCount: 5, drawResultCount: 5, bonusPool: 26, bonusField: 'powerball', minNumber: 1 },
+  megamillions: { mainPool: 70, mainCount: 5, drawResultCount: 5, bonusPool: 25, bonusField: 'megaBall', minNumber: 1 },
+  millionaireforlife: { mainPool: 58, mainCount: 5, drawResultCount: 5, bonusPool: 5, bonusField: 'cash_ball', minNumber: 1 },
+  pick10: { mainPool: 80, mainCount: 10, drawResultCount: 20, bonusPool: 0, bonusField: null, minNumber: 1 },
+  take5day: { mainPool: 39, mainCount: 5, drawResultCount: 5, bonusPool: 0, bonusField: null, minNumber: 1 },
+  take5eve: { mainPool: 39, mainCount: 5, drawResultCount: 5, bonusPool: 0, bonusField: null, minNumber: 1 },
+  win4day: { mainPool: 9, mainCount: 4, drawResultCount: 4, bonusPool: 0, bonusField: null, minNumber: 0, positional: true, allowRepeats: true },
+  win4eve: { mainPool: 9, mainCount: 4, drawResultCount: 4, bonusPool: 0, bonusField: null, minNumber: 0, positional: true, allowRepeats: true },
 };
 const LOTTERY_WINDOWS = [100, 500, 1000];
 const LOTTERY_MIN_BACKTEST_DRAWS = 40;
 
+const PREFERRED_LOTTERY_RANGES = {
+  powerball: { mainCount: 5, mainMin: 1, mainMax: 69, hasSpecial: true, specialMin: 1, specialMax: 26 },
+  millionaireforlife: { mainCount: 5, mainMin: 1, mainMax: 58, hasSpecial: true, specialMin: 1, specialMax: 5 },
+  megamillions: { mainCount: 5, mainMin: 1, mainMax: 70, hasSpecial: true, specialMin: 1, specialMax: 25 },
+  pick10: { mainCount: 10, mainMin: 1, mainMax: 80, hasSpecial: false },
+  take5day: { mainCount: 5, mainMin: 1, mainMax: 39, hasSpecial: false },
+  take5eve: { mainCount: 5, mainMin: 1, mainMax: 39, hasSpecial: false },
+  win4day: { mainCount: 4, mainMin: 0, mainMax: 9, hasSpecial: false, allowRepeats: true, preserveOrder: true },
+  win4eve: { mainCount: 4, mainMin: 0, mainMax: 9, hasSpecial: false, allowRepeats: true, preserveOrder: true },
+};
+
+const PREFERRED_DRAWING_PATHS = Object.fromEntries(
+  Object.keys(PREFERRED_LOTTERY_RANGES).map((gameType) => [
+    gameType,
+    'artifacts/EstimatedGamelottery-app/public/data/' + gameType + '_drawings',
+  ])
+);
+
+const PREFERRED_DISCLAIMER = 'Referencia estadistica basada en historial disponible. La loteria es aleatoria; este score no garantiza premios ni resultados futuros.';
+
 function normalizeGameType(value) {
-  const key = String(value || '').toLowerCase().replace(/[^a-z]/g, '');
+  const key = String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   if (key === 'powerball') return 'powerball';
-  if (key === 'megamillions') return 'megamillions';
+  if (key === 'megamillions' || key === 'mega') return 'megamillions';
+  if (key === 'millionaireforlife' || key === 'm4l') return 'millionaireforlife';
+  if (key === 'pick10') return 'pick10';
+  if (key === 'take5day' || key === 't5day') return 'take5day';
+  if (key === 'take5eve' || key === 'take5evening' || key === 't5eve') return 'take5eve';
+  if (key === 'win4day' || key === 'w4day') return 'win4day';
+  if (key === 'win4eve' || key === 'win4evening' || key === 'w4eve') return 'win4eve';
+  return null;
+}
+
+function normalizePreferredGameType(value) {
+  const key = String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (key === 'powerball') return 'powerball';
+  if (key === 'millionaireforlife' || key === 'm4l') return 'millionaireforlife';
+  if (key === 'megamillions' || key === 'mega') return 'megamillions';
+  if (key === 'pick10') return 'pick10';
+  if (key === 'take5day' || key === 't5day') return 'take5day';
+  if (key === 'take5eve' || key === 'take5evening' || key === 't5eve') return 'take5eve';
+  if (key === 'win4day' || key === 'w4day') return 'win4day';
+  if (key === 'win4eve' || key === 'win4evening' || key === 'w4eve') return 'win4eve';
   return null;
 }
 
@@ -1516,15 +1561,23 @@ function normalizeDraw(rawDraw, gameType, now = new Date()) {
   const drawDate = new Date(drawDateRaw);
   if (Number.isNaN(drawDate.getTime())) return null;
 
+  const minN = cfg.minNumber == null ? 1 : cfg.minNumber;
+  const expectedCount = cfg.drawResultCount || cfg.mainCount;
   const mainNumbersRaw = Array.isArray(rawDraw.mainNumbers) ? rawDraw.mainNumbers : rawDraw.numbers;
-  const mainNumbers = (mainNumbersRaw || [])
+  let mainNumbers = (mainNumbersRaw || [])
     .map((n) => Number(n))
-    .filter((n) => Number.isInteger(n) && n >= 1 && n <= cfg.mainPool)
-    .sort((a, b) => a - b);
-  if (mainNumbers.length !== cfg.mainCount) return null;
+    .filter((n) => Number.isInteger(n) && n >= minN && n <= cfg.mainPool);
 
-  const bonusNumber = Number(rawDraw.bonusNumber || rawDraw[cfg.bonusField]);
-  if (!Number.isInteger(bonusNumber) || bonusNumber < 1 || bonusNumber > cfg.bonusPool) return null;
+  if (!cfg.positional && !cfg.allowRepeats) {
+    mainNumbers = [...new Set(mainNumbers)].sort((a, b) => a - b);
+  }
+  if (mainNumbers.length !== expectedCount) return null;
+
+  let bonusNumber = null;
+  if (cfg.bonusPool > 0) {
+    bonusNumber = Number(rawDraw.bonusNumber || rawDraw[cfg.bonusField] || rawDraw.special);
+    if (!Number.isInteger(bonusNumber) || bonusNumber < 1 || bonusNumber > cfg.bonusPool) return null;
+  }
 
   return {
     gameType,
@@ -1534,6 +1587,248 @@ function normalizeDraw(rawDraw, gameType, now = new Date()) {
     bonusNumber,
     source: String(rawDraw.source || 'unknown'),
   };
+}
+
+function toIntegerArray(value) {
+  if (Array.isArray(value)) return value.map((n) => Number(n)).filter((n) => Number.isInteger(n));
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.map((n) => Number(n)).filter((n) => Number.isInteger(n));
+    } catch (_) {
+      return value.split(/[^0-9]+/).map((n) => Number(n)).filter((n) => Number.isInteger(n));
+    }
+  }
+  return [];
+}
+
+function normalizePreferredNumbers({ gameType, numbers, special, ranges }) {
+  if (!ranges) throw new Error('Configuracion del juego no encontrada.');
+  const mainNumbers = toIntegerArray(numbers);
+  if (mainNumbers.length !== ranges.mainCount) {
+    throw new Error('Debes ingresar ' + ranges.mainCount + ' numeros principales.');
+  }
+
+  const outOfRange = mainNumbers.some((n) => n < ranges.mainMin || n > ranges.mainMax);
+  if (outOfRange) {
+    throw new Error('Hay numeros fuera del rango permitido ' + ranges.mainMin + '-' + ranges.mainMax + '.');
+  }
+
+  const allowRepeats = ranges.allowRepeats === true || String(gameType || '').startsWith('win4');
+  if (!allowRepeats && new Set(mainNumbers).size !== mainNumbers.length) {
+    throw new Error('No se permiten numeros duplicados en este juego.');
+  }
+
+  const preserveOrder = ranges.preserveOrder === true || String(gameType || '').startsWith('win4');
+  const normalized = preserveOrder ? mainNumbers : [...mainNumbers].sort((a, b) => a - b);
+  let specialNumber = null;
+  if (ranges.hasSpecial) {
+    specialNumber = Number(special);
+    if (!Number.isInteger(specialNumber) || specialNumber < ranges.specialMin || specialNumber > ranges.specialMax) {
+      throw new Error('Verifica el numero especial ' + ranges.specialMin + '-' + ranges.specialMax + '.');
+    }
+  }
+
+  return { mainNumbers: normalized, special: specialNumber };
+}
+
+function normalizePreferredHistoryDraw(rawDraw) {
+  if (!rawDraw) return null;
+  const mainNumbers = toIntegerArray(rawDraw.mainNumbers || rawDraw.numbers);
+  if (!mainNumbers.length) return null;
+  const drawDate = rawDraw.drawDate || rawDraw.drawDateIso || rawDraw.date || rawDraw.drawingDate || null;
+  const drawDateIso = drawDate ? new Date(drawDate).toISOString() : null;
+  const specialRaw = rawDraw.bonusNumber != null ? rawDraw.bonusNumber : rawDraw.special;
+  const special = Number(specialRaw);
+  return {
+    mainNumbers,
+    bonusNumber: Number.isInteger(special) ? special : null,
+    drawDateIso,
+  };
+}
+
+function buildConfidenceLabel(sampleSize) {
+  if (sampleSize >= 50) return 'high';
+  if (sampleSize >= 10) return 'medium';
+  return 'low';
+}
+
+function roundPct(value) {
+  return Number((Math.max(-100, Math.min(100, Number(value) || 0))).toFixed(2));
+}
+
+function buildPreferredNumberComment({ gameType, mainNumbers, special, ranges, setScorePct, setMarginVsPoolPct, sampleSize }) {
+  const gameLabel = {
+    powerball: 'Powerball',
+    millionaireforlife: 'Millionaire For Life',
+    megamillions: 'Mega Millions',
+    pick10: 'Pick 10',
+    take5day: 'Take 5 Day',
+    take5eve: 'Take 5 Eve',
+    win4day: 'Win 4 Day',
+    win4eve: 'Win 4 Eve',
+  }[gameType] || 'este juego';
+  const specialLabel = gameType === 'megamillions'
+    ? 'Mega Ball'
+    : gameType === 'millionaireforlife'
+      ? 'Millionaire Ball'
+      : 'Powerball';
+  const specialText = ranges && ranges.hasSpecial && Number.isInteger(special)
+    ? ' + ' + specialLabel + ' ' + special
+    : '';
+  const margin = Number(setMarginVsPoolPct) || 0;
+  const direction = margin > 0.01
+    ? 'por encima del promedio historico del juego'
+    : margin < -0.01
+      ? 'por debajo del promedio historico del juego'
+      : 'en linea con el promedio historico del juego';
+  return 'Tu jugada ' + mainNumbers.join(', ') + specialText + ' para ' + gameLabel
+    + ' marca un score historico de ' + setScorePct + '% y un margen de '
+    + (margin >= 0 ? '+' : '') + setMarginVsPoolPct + '% ' + direction
+    + ' sobre ' + sampleSize + ' sorteos analizados. Es una lectura estadistica historica, no una garantia de premio.';
+}
+
+function calculateNumberScores(history, ranges, useSpecial = false) {
+  const min = useSpecial ? ranges.specialMin : ranges.mainMin;
+  const max = useSpecial ? ranges.specialMax : ranges.mainMax;
+  const poolSize = max - min + 1;
+  const counts = {};
+  const weightedCounts = {};
+  const gaps = {};
+  const latestFirst = [...history].sort((a, b) => {
+    const da = a.drawDateIso ? new Date(a.drawDateIso).getTime() : 0;
+    const db = b.drawDateIso ? new Date(b.drawDateIso).getTime() : 0;
+    return db - da;
+  });
+
+  for (let n = min; n <= max; n += 1) {
+    counts[n] = 0;
+    weightedCounts[n] = 0;
+    gaps[n] = latestFirst.length;
+  }
+
+  let totalWeight = 0;
+  latestFirst.forEach((draw, index) => {
+    const weight = Math.exp(-index / 12);
+    totalWeight += weight;
+    const appeared = useSpecial
+      ? [draw.bonusNumber].filter((n) => Number.isInteger(n))
+      : [...new Set(draw.mainNumbers || [])];
+    appeared.forEach((n) => {
+      if (n < min || n > max) return;
+      counts[n] += 1;
+      weightedCounts[n] += weight;
+      if (gaps[n] === latestFirst.length) gaps[n] = index;
+    });
+  });
+
+  const sampleSize = latestFirst.length;
+  const expectedGap = sampleSize / Math.max(1, poolSize);
+  const scores = {};
+  let totalScore = 0;
+
+  for (let n = min; n <= max; n += 1) {
+    const frequencyPct = sampleSize ? (counts[n] / sampleSize) * 100 : 0;
+    const recencyPct = totalWeight ? (weightedCounts[n] / totalWeight) * 100 : 0;
+    const gapBalancePct = Math.max(0, 1 - Math.abs(gaps[n] - expectedGap) / (expectedGap + 1)) * 100;
+    const scorePct = (frequencyPct * 0.45) + (recencyPct * 0.35) + (gapBalancePct * 0.2);
+    scores[n] = {
+      number: n,
+      frequencyPct: roundPct(frequencyPct),
+      recencyPct: roundPct(recencyPct),
+      scorePct: roundPct(scorePct),
+      currentGap: gaps[n],
+    };
+    totalScore += scorePct;
+  }
+
+  return { scores, averageScorePct: totalScore / Math.max(1, poolSize) };
+}
+
+function estimatePreferredNumbers({ gameType, numbers, special, ranges, history }) {
+  const normalizedHistory = (Array.isArray(history) ? history : [])
+    .map(normalizePreferredHistoryDraw)
+    .filter(Boolean);
+  const normalized = normalizePreferredNumbers({ gameType, numbers, special, ranges });
+  const mainScoreSet = calculateNumberScores(normalizedHistory, ranges, false);
+  const selected = normalized.mainNumbers.map((number) => {
+    const score = mainScoreSet.scores[number] || { number, frequencyPct: 0, recencyPct: 0, scorePct: 0, currentGap: normalizedHistory.length };
+    return {
+      ...score,
+      marginVsPoolPct: roundPct(score.scorePct - mainScoreSet.averageScorePct),
+    };
+  });
+  const setScorePct = selected.reduce((sum, item) => sum + item.scorePct, 0) / Math.max(1, selected.length);
+  const result = {
+    gameType,
+    numbers: selected,
+    setScorePct: roundPct(setScorePct),
+    setMarginVsPoolPct: roundPct(setScorePct - mainScoreSet.averageScorePct),
+    sampleSize: normalizedHistory.length,
+    confidenceLabel: buildConfidenceLabel(normalizedHistory.length),
+    disclaimer: PREFERRED_DISCLAIMER,
+  };
+
+  if (ranges.hasSpecial) {
+    const specialScoreSet = calculateNumberScores(normalizedHistory, ranges, true);
+    const specialScore = specialScoreSet.scores[normalized.special] || {
+      number: normalized.special,
+      frequencyPct: 0,
+      recencyPct: 0,
+      scorePct: 0,
+      currentGap: normalizedHistory.length,
+    };
+    result.special = {
+      ...specialScore,
+      marginVsPoolPct: roundPct(specialScore.scorePct - specialScoreSet.averageScorePct),
+    };
+  }
+
+  result.comment = buildPreferredNumberComment({
+    gameType,
+    mainNumbers: normalized.mainNumbers,
+    special: normalized.special,
+    ranges,
+    setScorePct: result.setScorePct,
+    setMarginVsPoolPct: result.setMarginVsPoolPct,
+    sampleSize: result.sampleSize,
+  });
+
+  return result;
+}
+
+async function loadPreferredHistoryDraws(db, gameType, limit = 600) {
+  const draws = [];
+  const path = PREFERRED_DRAWING_PATHS[gameType];
+  if (path) {
+    const snap = await db.collection(path).orderBy('date', 'desc').limit(limit).get();
+    snap.forEach((doc) => {
+      const normalized = normalizePreferredHistoryDraw(doc.data());
+      if (normalized) draws.push(normalized);
+    });
+  }
+
+  if (draws.length < 3 && LOTTERY_GAMES[gameType]) {
+    const agentDraws = await loadGameDraws(db, gameType, limit);
+    agentDraws.forEach((draw) => {
+      draws.push({
+        mainNumbers: draw.mainNumbers,
+        bonusNumber: draw.bonusNumber,
+        drawDateIso: draw.drawDateIso,
+      });
+    });
+  }
+
+  const seen = new Set();
+  return draws
+    .filter((draw) => {
+      const key = (draw.drawDateIso || '') + '|' + draw.mainNumbers.join(',') + '|' + String(draw.bonusNumber || '');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => new Date(b.drawDateIso || 0).getTime() - new Date(a.drawDateIso || 0).getTime())
+    .slice(0, limit);
 }
 
 function extractNumbersFromText(text) {
@@ -1599,32 +1894,73 @@ function buildMockDraw(gameType, when = new Date()) {
 }
 
 async function fetchOfficialDrawsForGame(gameType) {
-  const endpointByGame = {
-    powerball: 'https://www.powerball.com/api/v1/numbers/powerball/recent10?_format=json',
-    megamillions: 'https://www.powerball.com/api/v1/numbers/mega-millions/recent10?_format=json',
+  const ny = {
+    powerball: { url: 'https://data.ny.gov/resource/d6yy-54nr.json', kind: 'pb' },
+    megamillions: { url: 'https://data.ny.gov/resource/5xaw-6ayf.json', kind: 'mm' },
+    millionaireforlife: { url: 'https://data.ny.gov/resource/kwxv-fwze.json', kind: 'm4l' },
+    pick10: { url: 'https://data.ny.gov/resource/bycu-cw7c.json', kind: 'p10' },
+    take5day: { url: 'https://data.ny.gov/resource/dg63-4siq.json', kind: 't5day' },
+    take5eve: { url: 'https://data.ny.gov/resource/dg63-4siq.json', kind: 't5eve' },
+    win4day: { url: 'https://data.ny.gov/resource/hsys-3def.json', kind: 'w4day' },
+    win4eve: { url: 'https://data.ny.gov/resource/hsys-3def.json', kind: 'w4eve' },
   };
-  const url = endpointByGame[gameType];
-  if (!url) return [];
+  const spec = ny[gameType];
+  if (!spec) return [];
 
   try {
+    const url = spec.url + '?$limit=200&$order=draw_date+DESC';
     const res = await fetch(url);
     if (!res.ok) throw new Error('status_' + res.status);
     const body = await res.json();
-    const arr = Array.isArray(body) ? body : [];
-    return arr
-      .map((item) => parseNumbersFromOfficialItem(item, gameType))
-      .filter((draw) => !!draw);
+    if (!Array.isArray(body)) return [];
+    const out = [];
+    body.forEach((row) => {
+      const date = row.draw_date ? String(row.draw_date).split('T')[0] : null;
+      if (!date) return;
+      let mainNumbers = [];
+      let bonusNumber = null;
+      if (spec.kind === 'pb' && row.winning_numbers) {
+        const nums = String(row.winning_numbers).trim().split(/\s+/).map(Number);
+        mainNumbers = nums.slice(0, 5);
+        bonusNumber = nums[5];
+      } else if (spec.kind === 'mm' && row.winning_numbers) {
+        mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
+        bonusNumber = Number(row.mega_ball);
+      } else if (spec.kind === 'm4l' && row.winning_numbers) {
+        mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
+        bonusNumber = Number(row.cash_ball != null ? row.cash_ball : row.millionaire_ball);
+      } else if (spec.kind === 'p10' && row.winning_numbers) {
+        mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
+      } else if (spec.kind === 't5day' && row.midday_winning_numbers) {
+        mainNumbers = String(row.midday_winning_numbers).trim().split(/\s+/).map(Number);
+      } else if (spec.kind === 't5eve' && row.evening_winning_numbers) {
+        mainNumbers = String(row.evening_winning_numbers).trim().split(/\s+/).map(Number);
+      } else if (spec.kind === 'w4day' && row.midday_win_4 != null) {
+        mainNumbers = String(row.midday_win_4).padStart(4, '0').split('').map(Number);
+      } else if (spec.kind === 'w4eve' && row.evening_win_4 != null) {
+        mainNumbers = String(row.evening_win_4).padStart(4, '0').split('').map(Number);
+      } else {
+        return;
+      }
+      const normalized = normalizeDraw({
+        drawDate: date,
+        mainNumbers,
+        bonusNumber,
+        source: 'ny_open_data',
+        drawId: date,
+      }, gameType);
+      if (normalized) out.push(normalized);
+    });
+    return out;
   } catch (err) {
-    // TODO: Reemplazar fallback mock por proveedor oficial secundario cuando se valide un endpoint estable.
-    console.warn('[fetchOfficialDrawsForGame] fallback mock for ' + gameType + ':', err.message);
-    const mock = buildMockDraw(gameType, new Date());
-    return mock ? [mock] : [];
+    console.warn('[fetchOfficialDrawsForGame] NY Open Data falló para ' + gameType + ':', err.message);
+    return [];
   }
 }
 
-function createFrequencyMap(maxNumber) {
+function createFrequencyMap(maxNumber, minNumber = 1) {
   const out = {};
-  for (let i = 1; i <= maxNumber; i += 1) out[String(i)] = 0;
+  for (let i = minNumber; i <= maxNumber; i += 1) out[String(i)] = 0;
   return out;
 }
 
@@ -1634,8 +1970,8 @@ function getRecentDraws(draws, limit) {
   return draws.slice(draws.length - limit);
 }
 
-function computeWindowFrequency(draws, maxNumber) {
-  const freq = createFrequencyMap(maxNumber);
+function computeWindowFrequency(draws, maxNumber, minNumber = 1) {
+  const freq = createFrequencyMap(maxNumber, minNumber);
   draws.forEach((draw) => {
     (draw.mainNumbers || []).forEach((n) => {
       const key = String(n);
@@ -1645,9 +1981,9 @@ function computeWindowFrequency(draws, maxNumber) {
   return freq;
 }
 
-function computeGapAverages(draws, maxNumber) {
+function computeGapAverages(draws, maxNumber, minNumber = 1) {
   const stats = {};
-  for (let i = 1; i <= maxNumber; i += 1) {
+  for (let i = minNumber; i <= maxNumber; i += 1) {
     stats[String(i)] = { lastSeen: null, sumGap: 0, countGap: 0, averageGap: null, currentGap: draws.length };
   }
   draws.forEach((draw, idx) => {
@@ -1702,21 +2038,62 @@ function computeTrendStats(draws) {
   };
 }
 
+function predictBonusFromHistory(historyDraws, bonusPool) {
+  if (!bonusPool) return null;
+  const freq = {};
+  for (let i = 1; i <= bonusPool; i += 1) freq[i] = 0;
+  historyDraws.forEach((draw, idx) => {
+    const b = Number(draw.bonusNumber);
+    if (!Number.isInteger(b) || b < 1 || b > bonusPool) return;
+    const recency = 1 + (idx / Math.max(1, historyDraws.length));
+    freq[b] += recency;
+  });
+  let best = 1;
+  let bestScore = -1;
+  for (let i = 1; i <= bonusPool; i += 1) {
+    if (freq[i] > bestScore) {
+      bestScore = freq[i];
+      best = i;
+    }
+  }
+  return best;
+}
+
 function predictCandidateFromHistory(historyDraws, gameType, weights) {
   const cfg = LOTTERY_GAMES[gameType];
-  if (!cfg) return null;
-  const freq100 = computeWindowFrequency(getRecentDraws(historyDraws, 100), cfg.mainPool);
-  const freq500 = computeWindowFrequency(getRecentDraws(historyDraws, 500), cfg.mainPool);
-  const gaps = computeGapAverages(historyDraws, cfg.mainPool);
-  const trend = computeTrendStats(historyDraws);
+  if (!cfg || !historyDraws.length) return null;
+  const minN = cfg.minNumber == null ? 1 : cfg.minNumber;
   const w = {
     hot100: Number(weights && weights.hot100) || 1,
     warm500: Number(weights && weights.warm500) || 0.6,
     gapPressure: Number(weights && weights.gapPressure) || 0.9,
   };
 
+  if (cfg.positional) {
+    const positions = [[], [], [], []];
+    historyDraws.forEach((draw) => {
+      const nums = draw.mainNumbers || [];
+      for (let p = 0; p < 4; p += 1) if (Number.isInteger(nums[p])) positions[p].push(nums[p]);
+    });
+    const mainNumbers = positions.map((col) => {
+      const freq = {};
+      for (let d = minN; d <= cfg.mainPool; d += 1) freq[d] = 0;
+      col.forEach((n, idx) => {
+        const recency = idx >= col.length - 30 ? 2 : 1;
+        if (n >= minN && n <= cfg.mainPool) freq[n] += recency;
+      });
+      return Number(Object.entries(freq).sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0]);
+    });
+    return { mainNumbers, bonusNumber: null, trend: computeTrendStats(historyDraws) };
+  }
+
+  const freq100 = computeWindowFrequency(getRecentDraws(historyDraws, 100), cfg.mainPool, minN);
+  const freq500 = computeWindowFrequency(getRecentDraws(historyDraws, 500), cfg.mainPool, minN);
+  const gaps = computeGapAverages(historyDraws, cfg.mainPool, minN);
+  const trend = computeTrendStats(historyDraws);
+
   const candidates = [];
-  for (let i = 1; i <= cfg.mainPool; i += 1) {
+  for (let i = minN; i <= cfg.mainPool; i += 1) {
     const key = String(i);
     const gapData = gaps[key] || {};
     const avgGap = Number(gapData.averageGap || 0);
@@ -1727,23 +2104,30 @@ function predictCandidateFromHistory(historyDraws, gameType, weights) {
   }
   candidates.sort((a, b) => b.score - a.score || a.number - b.number);
 
-  const mainNumbers = candidates.slice(0, cfg.mainCount).map((item) => item.number).sort((a, b) => a - b);
-  const bonusNumber = ((mainNumbers.reduce((acc, n) => acc + n, 0) % cfg.bonusPool) || 1);
+  const pickCount = cfg.mainCount;
+  const mainNumbers = candidates.slice(0, pickCount).map((item) => item.number).sort((a, b) => a - b);
+  const bonusNumber = cfg.bonusPool > 0 ? predictBonusFromHistory(historyDraws, cfg.bonusPool) : null;
   return { mainNumbers, bonusNumber, trend };
 }
 
-function computeAccuracy(predictions, actualDraws, mainCount) {
-  if (!predictions.length || !actualDraws.length) return 0;
+function computeAccuracy(predictions, actualDraws, cfg) {
+  if (!predictions.length || !actualDraws.length || !cfg) return 0;
+  const positional = !!cfg.positional;
+  const denom = cfg.mainCount;
   let score = 0;
   const size = Math.min(predictions.length, actualDraws.length);
   for (let i = 0; i < size; i += 1) {
-    const p = new Set(predictions[i].mainNumbers || []);
-    const a = new Set(actualDraws[i].mainNumbers || []);
+    const predicted = predictions[i].mainNumbers || [];
+    const actual = actualDraws[i].mainNumbers || [];
     let hits = 0;
-    p.forEach((n) => {
-      if (a.has(n)) hits += 1;
-    });
-    score += hits / mainCount;
+    if (positional) {
+      const n = Math.min(predicted.length, actual.length);
+      for (let p = 0; p < n; p += 1) if (predicted[p] === actual[p]) hits += 1;
+    } else {
+      const a = new Set(actual);
+      predicted.forEach((n) => { if (a.has(n)) hits += 1; });
+    }
+    score += hits / denom;
   }
   return Number((score / size).toFixed(4));
 }
@@ -1760,7 +2144,7 @@ async function runBacktesting(draws, gameType, existingWeights) {
   const cfg = LOTTERY_GAMES[gameType];
   if (!cfg || draws.length < LOTTERY_MIN_BACKTEST_DRAWS) {
     return {
-      method: 'rolling_frequency_gap_v1',
+      method: 'rolling_frequency_gap_v2',
       drawsEvaluated: 0,
       accuracy: 0,
       weightsUsed: existingWeights || { hot100: 1, warm500: 0.6, gapPressure: 0.9 },
@@ -1768,24 +2152,36 @@ async function runBacktesting(draws, gameType, existingWeights) {
     };
   }
 
+  const weightGrid = [
+    existingWeights || { hot100: 1, warm500: 0.6, gapPressure: 0.9 },
+    { hot100: 1.2, warm500: 0.4, gapPressure: 1.15 },
+    { hot100: 0.8, warm500: 0.8, gapPressure: 0.7 },
+    { hot100: 1.0, warm500: 0.5, gapPressure: 1.3 },
+  ];
   const testStart = Math.max(20, Math.floor(draws.length * 0.7));
-  const predicted = [];
-  const actual = [];
-  for (let i = testStart; i < draws.length; i += 1) {
-    const history = draws.slice(0, i);
-    const pred = predictCandidateFromHistory(history, gameType, existingWeights);
-    if (!pred) continue;
-    predicted.push(pred);
-    actual.push(draws[i]);
+  let best = null;
+
+  for (const weights of weightGrid) {
+    const predicted = [];
+    const actual = [];
+    for (let i = testStart; i < draws.length; i += 1) {
+      const history = draws.slice(0, i);
+      const pred = predictCandidateFromHistory(history, gameType, weights);
+      if (!pred) continue;
+      predicted.push(pred);
+      actual.push(draws[i]);
+    }
+    const accuracy = computeAccuracy(predicted, actual, cfg);
+    const summary = {
+      method: 'rolling_frequency_gap_v2',
+      drawsEvaluated: predicted.length,
+      accuracy,
+      weightsUsed: weights,
+    };
+    if (!best || accuracy > best.accuracy) best = summary;
   }
-  const accuracy = computeAccuracy(predicted, actual, cfg.mainCount);
-  const summary = {
-    method: 'rolling_frequency_gap_v1',
-    drawsEvaluated: predicted.length,
-    accuracy,
-    weightsUsed: existingWeights || { hot100: 1, warm500: 0.6, gapPressure: 0.9 },
-  };
-  return { ...summary, tunedWeights: tuneWeights(summary) };
+
+  return { ...best, tunedWeights: best.weightsUsed };
 }
 
 async function loadGameDraws(db, gameType, limit = 1200) {
@@ -1825,15 +2221,16 @@ async function trainModelForGame(db, gameType) {
     return { ok: false, reason: 'no_draws' };
   }
 
+  const minN = cfg.minNumber == null ? 1 : cfg.minNumber;
   const windowStats = {};
   LOTTERY_WINDOWS.forEach((w) => {
     if (draws.length >= w) {
-      windowStats[String(w)] = computeWindowFrequency(getRecentDraws(draws, w), cfg.mainPool);
+      windowStats[String(w)] = computeWindowFrequency(getRecentDraws(draws, w), cfg.mainPool, minN);
     } else if (draws.length > 0) {
-      windowStats[String(w)] = computeWindowFrequency(draws, cfg.mainPool);
+      windowStats[String(w)] = computeWindowFrequency(draws, cfg.mainPool, minN);
     }
   });
-  const gaps = computeGapAverages(draws, cfg.mainPool);
+  const gaps = computeGapAverages(draws, cfg.mainPool, minN);
   const trends = computeTrendStats(draws);
 
   const modelRef = db.doc('prediction_models/' + gameType);
@@ -1854,7 +2251,7 @@ async function trainModelForGame(db, gameType) {
     updatedAt: FieldValue.serverTimestamp(),
   }, { merge: true });
 
-  await db.doc('agent_intelligence/' + gameType).set({
+    await db.doc('agent_intelligence/' + gameType).set({
     gameType,
     snapshotAt: FieldValue.serverTimestamp(),
     totalDraws: draws.length,
@@ -1872,6 +2269,71 @@ async function trainModelForGame(db, gameType) {
     totalDraws: draws.length,
     backtestingAccuracy: backtesting.accuracy,
     recommendation,
+  };
+}
+
+async function ingestOfficialDrawsIfEmpty(db, gameType, maxInsert) {
+  const existing = await loadGameDraws(db, gameType, 8);
+  if (existing.length) return existing.length;
+  const fetched = await fetchOfficialDrawsForGame(gameType);
+  const cap = Number(maxInsert) > 0 ? Number(maxInsert) : 80;
+  let inserted = 0;
+  for (const draw of fetched.slice(0, cap)) {
+    if (!draw || draw.source === 'mock_fallback') continue;
+    const year = parseYearFromHistoryDoc('', new Date(draw.drawDateIso));
+    const historyId = gameType + '_' + year;
+    const drawId = draw.drawId || draw.drawDateIso.slice(0, 10);
+    await db.doc('lottery_history/' + historyId + '/draws/' + drawId).set({
+      gameType,
+      drawDate: draw.drawDateIso,
+      mainNumbers: draw.mainNumbers,
+      bonusNumber: draw.bonusNumber,
+      source: draw.source,
+      ingestedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    inserted += 1;
+  }
+  return inserted;
+}
+
+function formatLotteryPlayLine(mainNumbers, special) {
+  const nums = Array.isArray(mainNumbers) ? mainNumbers.join(' - ') : '';
+  if (!nums) return '';
+  return special != null ? nums + ' + ' + special : nums;
+}
+
+function formatLotteryAgentPayload(gameType, model) {
+  const recommendation = (model && model.latestRecommendation) || null;
+  const mains = recommendation && recommendation.mainNumbers ? recommendation.mainNumbers : [];
+  const special = recommendation && recommendation.bonusNumber != null ? recommendation.bonusNumber : null;
+  const trends = (model && model.trends) || {};
+  const accuracy = model && model.backtesting ? Number(model.backtesting.accuracy || 0) : 0;
+  const play = formatLotteryPlayLine(mains, special);
+  let confidence = 5;
+  if (accuracy > 0) confidence = accuracy <= 1 ? Math.max(1, Math.round(accuracy * 10)) : Math.min(10, Math.round(accuracy));
+  const wisdom = [
+    'Agente Firebase (rolling frequency + gap): compara pesos de frecuencia reciente vs rezago y se queda con el set que más acertó en sorteos pasados.',
+    'Par/impar promedio: ' + String(trends.avgEven || 0) + '/' + String(trends.avgOdd || 0) + '.',
+    'Suma histórica típica: ' + String(trends.avgSum || 0) + '.',
+    'Backtesting (fracción de aciertos parciales, no jackpot): ' + String(accuracy || 0) + '.',
+    'Cada sorteo es independiente. Esta cifra no garantiza el próximo resultado.',
+  ].join(' ');
+  return {
+    gameType,
+    play,
+    mainNumbers: mains,
+    special,
+    smartPlay: recommendation,
+    wisdom,
+    confidence,
+    modelMeta: {
+      totalDraws: (model && model.totalDraws) || 0,
+      accuracy: accuracy || 0,
+      updatedAt: model && model.updatedAt && typeof model.updatedAt.toDate === 'function'
+        ? model.updatedAt.toDate().toISOString()
+        : null,
+      method: model && model.backtesting ? model.backtesting.method : null,
+    },
   };
 }
 
@@ -1913,6 +2375,7 @@ exports.ingestOfficialLotteryResults = onSchedule(
         const drawRef = db.doc('lottery_history/' + historyId + '/draws/' + drawId);
         const exists = await drawRef.get();
         if (exists.exists) continue;
+        if (draw.source === 'mock_fallback') continue;
         await drawRef.set({
           gameType,
           drawDate: draw.drawDateIso,
@@ -1938,47 +2401,97 @@ exports.ingestOfficialLotteryResults = onSchedule(
   }
 );
 
-exports.getLotteryAgentInsight = onCall(
+exports.estimatePreferredNumbers = onCall(
   { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
   async (request) => {
-    if (!request.auth) {
-      throw new HttpsError('unauthenticated', 'Debes estar autenticado para obtener insights.');
+    const identity = getRequestIdentity(request);
+
+    const gameType = normalizePreferredGameType(request.data && request.data.gameType);
+    const ranges = gameType ? PREFERRED_LOTTERY_RANGES[gameType] : null;
+    if (!gameType || !ranges) {
+      throw new HttpsError('invalid-argument', 'Juego de loteria no soportado.');
     }
+
+    let normalizedInput;
+    try {
+      normalizedInput = normalizePreferredNumbers({
+        gameType,
+        numbers: request.data && request.data.numbers,
+        special: request.data && request.data.special,
+        ranges,
+      });
+    } catch (err) {
+      throw new HttpsError('invalid-argument', err instanceof Error ? err.message : 'Numeros invalidos.');
+    }
+
+    try {
+      const db = getFirestore();
+      const history = await loadPreferredHistoryDraws(db, gameType);
+      if (history.length < 3) {
+        throw new HttpsError('failed-precondition', 'No hay suficiente historial para calcular un margen responsable.');
+      }
+      return estimatePreferredNumbers({
+        gameType,
+        numbers: normalizedInput.mainNumbers,
+        special: normalizedInput.special,
+        ranges,
+        history,
+      });
+    } catch (err) {
+      if (err instanceof HttpsError) throw err;
+      console.error('[estimatePreferredNumbers]', {
+        uid: identity.uid,
+        guest: identity.isGuest,
+        gameType,
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      });
+      throw new HttpsError('internal', 'No se pudo calcular el margen historico ahora mismo.');
+    }
+  }
+);
+
+exports.getLotteryAgentInsight = onCall(
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: false, timeoutSeconds: 120 },
+  async (request) => {
+    getRequestIdentity(request);
     const gameType = normalizeGameType(request.data && request.data.gameType);
     if (!gameType) {
-      throw new HttpsError('invalid-argument', 'gameType inválido. Usa powerball o megaMillions.');
+      throw new HttpsError('invalid-argument', 'gameType inválido. Usa powerball, megamillions, millionaireforlife, pick10, take5day, take5eve, win4day o win4eve.');
     }
     const db = getFirestore();
     let modelSnap = await db.doc('prediction_models/' + gameType).get();
     if (!modelSnap.exists) {
+      await ingestOfficialDrawsIfEmpty(db, gameType, 80);
       await trainModelForGame(db, gameType);
       modelSnap = await db.doc('prediction_models/' + gameType).get();
     }
     if (!modelSnap.exists) {
       throw new HttpsError('failed-precondition', 'No hay suficiente data para generar insight.');
     }
-    const model = modelSnap.data();
-    const recommendation = model.latestRecommendation || null;
-    const trends = model.trends || {};
-    const accuracy = model.backtesting && Number(model.backtesting.accuracy || 0);
+    return formatLotteryAgentPayload(gameType, modelSnap.data());
+  }
+);
 
-    const wisdom = [
-      'El agente prioriza frecuencia reciente + presión de gap.',
-      'Par/impar promedio: ' + String(trends.avgEven || 0) + '/' + String(trends.avgOdd || 0) + '.',
-      'Suma histórica típica: ' + String(trends.avgSum || 0) + '.',
-      'Backtesting (simple) accuracy: ' + String(accuracy || 0) + '.',
-    ].join(' ');
-
+exports.getLotteryAgentsBoard = onCall(
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: false, timeoutSeconds: 60 },
+  async (request) => {
+    getRequestIdentity(request);
+    const db = getFirestore();
+    const games = {};
+    for (const gameType of Object.keys(LOTTERY_GAMES)) {
+      const snap = await db.doc('prediction_models/' + gameType).get();
+      if (!snap.exists) continue;
+      games[gameType] = formatLotteryAgentPayload(gameType, snap.data());
+    }
     return {
-      gameType,
-      smartPlay: recommendation,
-      wisdom,
-      modelMeta: {
-        totalDraws: model.totalDraws || 0,
-        accuracy: accuracy || 0,
-        updatedAt: model.updatedAt ? model.updatedAt.toDate().toISOString() : null,
-        method: model.backtesting ? model.backtesting.method : null,
-      },
+      games,
+      generatedAt: new Date().toISOString(),
+      disclaimer: 'Agentes Firebase (frecuencia+gap). La próxima jugada de la home usa walk-forward de 8 métodos en el cliente.',
     };
   }
 );
+
+exports.normalizePreferredNumbersForTest = normalizePreferredNumbers;
+exports.estimatePreferredNumbersForTest = estimatePreferredNumbers;
+exports.getRequestIdentityForTest = getRequestIdentity;

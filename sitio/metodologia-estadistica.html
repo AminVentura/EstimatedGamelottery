@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metodología estadística de predicciones de lotería | prediccionloteria.com</title>
+  <meta name="description" content="Explicación editorial de la metodología estadística usada en prediccionloteria.com: frecuencias, ventanas recientes, pares, gaps y límites de todo modelo de lotería." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/metodologia-estadistica.html" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Metodología estadística de predicciones de lotería",
+    "dateModified": "2026-05-20",
+    "author": { "@type": "Organization", "name": "prediccionloteria.com" },
+    "publisher": { "@type": "Organization", "name": "Businessskore LLC" },
+    "inLanguage": "es"
+  }
+  </script>
+</head>
+<body class="px-2 py-3 sm:p-6 md:p-8 min-h-screen flex flex-col items-center justify-start bg-gray-900 text-white">
+<main class="bg-gray-900 bg-opacity-95 backdrop-blur-lg p-4 sm:p-8 rounded-2xl w-full max-w-5xl border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4">
+    <a href="/" class="text-cyan-400 hover:underline">Inicio</a>
+    <span class="mx-2">/</span>
+    <span>Metodología estadística</span>
+  </nav>
+
+  <h1 class="text-2xl sm:text-3xl font-bold text-white mb-3">Metodología estadística de predicciones de lotería</h1>
+  <p class="text-gray-400 text-sm sm:text-base leading-relaxed mb-8">
+    Esta página explica, en lenguaje claro, cómo se construyen las sugerencias de prediccionloteria.com y qué límites tiene cualquier herramienta de análisis de lotería. La lotería es azar: ninguna fórmula garantiza premios. El valor del sitio es organizar datos históricos, enseñar cómo leerlos y ofrecer una referencia transparente para entretenimiento responsable.
+  </p>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">1. Datos de entrada</h2>
+    <p class="text-gray-300 leading-relaxed mb-3">
+      El análisis parte de resultados históricos verificables: fecha del sorteo, números principales, bola especial cuando aplica y nombre del juego. Para juegos de New York Lottery se usan referencias públicas como NY Open Data y la página oficial de resultados. Cuando una fuente no responde o cambia estructura, el sitio conserva el último historial cargado y recomienda verificar manualmente en la web oficial.
+    </p>
+    <p class="text-gray-300 leading-relaxed">
+      Antes de generar una sugerencia se normalizan los datos: se eliminan duplicados, se ordenan por fecha, se separan juegos diurnos/nocturnos y se valida que cada número esté dentro del rango permitido por las reglas del juego. Esta limpieza evita que una combinación mal escrita distorsione las estadísticas.
+    </p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">2. Frecuencia, ventanas y números fríos</h2>
+    <p class="text-gray-300 leading-relaxed mb-3">
+      La frecuencia global cuenta cuántas veces apareció cada número en todo el historial disponible. La frecuencia reciente analiza una ventana más corta, por ejemplo los últimos 30, 60 o 100 sorteos. Esa diferencia importa: un número puede ser muy frecuente históricamente pero estar ausente en la ventana reciente, o al revés.
+    </p>
+    <p class="text-gray-300 leading-relaxed">
+      Los “números calientes” no significan que estén obligados a salir; solo indican presencia alta en el registro observado. Los “números fríos” tampoco significan que deban aparecer pronto. En una lotería justa, cada sorteo es independiente. Por eso mostramos estas categorías como señales descriptivas, no como promesas.
+    </p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">3. Pares, gaps y balance por rangos</h2>
+    <p class="text-gray-300 leading-relaxed mb-3">
+      Además de contar números individuales, se revisan pares que aparecen juntos, intervalos entre apariciones (“gaps”) y distribución por rangos. El objetivo es evitar combinaciones demasiado concentradas en un solo tramo numérico. Por ejemplo, para un juego de cinco números, una mezcla con rangos bajos, medios y altos suele ser más legible que elegir todos los valores de una misma decena.
+    </p>
+    <p class="text-gray-300 leading-relaxed">
+      El balance por rangos no cambia las probabilidades oficiales del juego; solo ayuda a construir combinaciones menos sesgadas por una única señal. Cuando el usuario registra resultados, el sistema puede comparar si la sugerencia tuvo aciertos parciales y mostrar aprendizaje histórico.
+    </p>
+  </section>
+
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold text-cyan-400 mb-3">4. Qué no hace el modelo</h2>
+    <ul class="list-disc list-inside text-gray-300 leading-relaxed space-y-2">
+      <li>No vende boletos ni procesa apuestas.</li>
+      <li>No garantiza premios ni “números seguros”.</li>
+      <li>No está afiliado a Powerball, Mega Millions, New York Lottery ni ninguna lotería oficial.</li>
+      <li>No sustituye la verificación en fuentes oficiales.</li>
+    </ul>
+  </section>
+
+  <section class="mb-8 rounded-xl border border-amber-700/40 bg-amber-950/20 p-4">
+    <h2 class="text-xl font-semibold text-amber-300 mb-3">Conclusión responsable</h2>
+    <p class="text-gray-300 leading-relaxed">
+      Usa las predicciones como una guía educativa para entender patrones históricos, no como instrucción financiera. Si decides jugar, hazlo con presupuesto pequeño, sin perseguir pérdidas y solo si eres mayor de edad en tu jurisdicción.
+    </p>
+  </section>
+
+  <div class="flex flex-wrap gap-2 text-sm pt-4 border-t border-gray-700">
+    <a href="/" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Volver al inicio</a>
+    <a href="/guia-lectura-resultados.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Cómo leer resultados</a>
+    <a href="/juego-responsable.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Juego responsable</a>
+    <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">FAQ</a>
+  </div>
+</main>
+<p class="text-gray-400 text-xs text-center mt-6 max-w-3xl mx-auto px-4">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. <a href="/juego-responsable.html" class="text-cyan-400 underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-400 underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-400 underline">Privacidad</a></p>
+</body>
+</html>

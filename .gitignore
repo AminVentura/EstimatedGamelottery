@@ -76,3 +76,7 @@ functions/.env.*
 
 # dataconnect generated files
 .dataconnect
+
+_ARCHIVO/
+docs/AUDITORIA-LANZAMIENTO-2026-09-29.md
+docs/SRS.md

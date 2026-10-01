@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cómo se elige la próxima jugada | prediccionloteria.com</title>
+  <meta name="description" content="Walk-forward de 8 métodos estadísticos: frecuencia, fríos, mixta, pares, decenas, paridad, Markov-Poisson y ensemble. El ganador histórico es la próxima jugada. Sin garantía de premio." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.prediccionloteria.com/analisis/proxima-jugada.html" />
+  <link rel="stylesheet" href="../styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="px-2 py-3 sm:p-6 min-h-screen bg-gray-900 text-white">
+<main class="bg-gray-900 p-4 sm:p-8 rounded-2xl w-full max-w-5xl mx-auto border border-gray-800 text-left">
+  <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Próxima jugada</nav>
+  <h1 class="text-2xl sm:text-3xl font-bold mb-3">Cómo el algoritmo elige la próxima jugada</h1>
+  <p class="text-gray-300 leading-relaxed mb-4">Hasta 2026 el botón PREDECIR mostraba ocho combinaciones en un orden fijo y guardaba la primera (frecuencia) como “tu predicción”. Eso no medía cuál método había acertado más en ese juego. Ahora el cliente hace un walk-forward de los últimos 40 sorteos (si hay al menos 24) y reordena: el método con más aciertos medios pasa al frente y se guarda como predicción del día.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué es walk-forward aquí</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Imagina que hoy es el sorteo 501. Para “predecir” el 500, el modelo solo puede ver 1–499. Se genera una combinación por cada método, se compara con el resultado real del 500 y se anota cuántos números coincidieron. Se repite hacia atrás. Al final hay un ranking: avgHits y vsRandom (aciertos medios menos el valor esperado si eligieras al azar).</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Baseline de azar (aproximado): Powerball 5/69 ≈ 0,36 aciertos de 5; Take 5 5/39 ≈ 0,64; Pick 10 (10 contra 20 de 80) ≈ 2,5; Win 4 posicional ≈ 0,4 de 4. Si el ganador queda por debajo de esa línea, la interfaz lo dice en claro: no hay ventaja medible en el historial cargado.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Walk-forward optimization de la mixta</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Además de rankear los ocho métodos, la <strong>mixta</strong> ya no mezcla calientes y fríos de toda la historia al 60/40 fijo. Los calientes salen de los últimos 50 sorteos (frecuencia ponderada). Los “fríos” son números con mayor <em>gap</em> (más sorteos sin aparecer). Luego se prueban proporciones 40/60, 50/50, 60/40, 70/30 y 80/20 sobre el mismo walk-forward y se congela el % que más acertó para la combinación que ves como próxima jugada.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">Eso es walk-forward optimization (WFO): se elige el parámetro en el pasado y se aplica al siguiente sorteo. No es una prueba de jackpot. Si el banner muestra que la mixta ganó, mira también el % afinado y el Top 3.</p>
+  <ol class="list-decimal list-inside text-gray-300 leading-relaxed space-y-2 mb-4">
+    <li>Frecuencia ponderada por fecha (sorteos recientes pesan más).</li>
+    <li>Números fríos (los que menos han salido en el registro).</li>
+    <li>Mixta: mayoría caliente + complemento frío.</li>
+    <li>Patrón de repetición entre sorteos consecutivos.</li>
+    <li>Por decenas: el más frecuente de cada bloque 1–9, 10–19…</li>
+    <li>Paridad y suma histórica (ajuste de impar/par y rango de suma).</li>
+    <li>Markov con Laplace + Poisson del gap + logística.</li>
+    <li>Ensemble de scores (frecuencia, ponderada, EMA, gap, Markov, saturación de franjas).</li>
+  </ol>
+  <p class="text-gray-300 leading-relaxed mb-4">Win 4 no usa el mismo pool: cada dígito se cuenta por posición (unidades, decenas, centenas, millar) y los últimos 30 sorteos cuentan doble. Pick 10 compara los 10 sugeridos contra los 20 oficiales.</p>
+
+  <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué hace el agente en Cloud Functions</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">trainLotteryAgent y getLotteryAgentInsight entrenan un modelo por juego sobre lottery_history. La ingestión programada ahora lee NY Open Data (los mismos dataset IDs que el navegador) y ya no escribe sorteos inventados (mock_fallback) en Firestore: un resultado falso contaminaría el ranking. La bola especial se elige por frecuencia real, no por el residuo de la suma de los principales.</p>
+  <p class="text-gray-300 leading-relaxed mb-4">La “accuracy” del agente es la fracción media de aciertos parciales en el tramo de prueba (último 30 % del historial). No es probabilidad de jackpot. Publicarla como “Nuestra IA tiene X% de efectividad” sin ese contexto es engañoso; por eso el home debe mostrar el método y el vsRandom, no un porcentaje vacío.</p>
+
+  <h2 class="text-xl font-semibold text-amber-300 mb-3">Límites que no negociamos</h2>
+  <ul class="list-disc list-inside text-gray-300 space-y-2 mb-6">
+    <li>No hay memoria del sorteo futuro. El walk-forward solo describe el pasado.</li>
+    <li>Pocas filas (&lt;24) → no hay ranking fiable; se cae a ensemble.</li>
+    <li>Verifica siempre en nylottery.ny.gov o el operador de tu estado.</li>
+    <li>18+. Si el juego deja de ser entretenimiento, busca ayuda (NCPG).</li>
+  </ul>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Volver al índice de análisis</a> · <a class="text-cyan-400 hover:underline" href="/metodologia-estadistica.html">Metodología</a></p>
+</main>
+</body>
+</html>

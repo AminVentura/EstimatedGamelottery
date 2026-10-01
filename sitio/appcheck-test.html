@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Check Verification — prediccionloteria.com</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0f1e;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;padding:24px;min-height:100vh}
+    h1{font-size:1.4rem;font-weight:900;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+    .subtitle{color:#6b7280;font-size:0.8rem;margin-bottom:24px}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:20px;margin-bottom:16px}
+    .card h2{font-size:0.95rem;font-weight:700;color:#f1f5f9;margin-bottom:14px}
+    .test-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+    .test-label{color:#9ca3af;font-size:0.82rem;min-width:220px;flex-shrink:0}
+    .btn{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb44;border-radius:8px;padding:7px 14px;font-size:0.8rem;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+    .btn:hover{background:#1d4ed8}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn-run-all{background:linear-gradient(90deg,#1d4ed8,#7c3aed);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:0.9rem;font-weight:800;cursor:pointer;width:100%;margin-bottom:16px}
+    .btn-run-all:disabled{opacity:.5;cursor:not-allowed}
+    .result{font-size:0.78rem;font-family:'Courier New',monospace;background:#0d1117;border-radius:6px;padding:8px 12px;max-width:100%;word-break:break-all;border-left:3px solid #374151;flex:1;min-width:0}
+    .result.pass{border-left-color:#22c55e;color:#86efac}
+    .result.fail{border-left-color:#ef4444;color:#fca5a5}
+    .result.warn{border-left-color:#f59e0b;color:#fde68a}
+    .result.pending{border-left-color:#6b7280;color:#9ca3af}
+    .badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:0.7rem;font-weight:900;flex-shrink:0}
+    .badge.pass{background:#16a34a;color:#fff}
+    .badge.fail{background:#dc2626;color:#fff}
+    .badge.warn{background:#d97706;color:#fff}
+    .badge.pending{background:#374151;color:#9ca3af}
+    .badge.running{background:#2563eb;color:#fff;animation:pulse 1s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .summary{display:flex;gap:16px;margin-top:12px;padding:14px;background:#0d1117;border-radius:8px;flex-wrap:wrap}
+    .summary-item{text-align:center;min-width:60px}
+    .summary-item .num{font-size:1.6rem;font-weight:900}
+    .summary-item .lbl{font-size:0.7rem;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}
+    .pass-num{color:#22c55e}.fail-num{color:#ef4444}.skip-num{color:#9ca3af}
+    hr.div{border:none;border-top:1px solid #1f293766;margin:6px 0 10px}
+    .info{background:#0d1117;border:1px solid #1d4ed844;border-radius:8px;padding:12px;font-size:0.78rem;color:#93c5fd;margin-bottom:14px;line-height:1.6}
+    code{background:#1e3a5f55;padding:1px 5px;border-radius:4px;font-family:'Courier New',monospace}
+  </style>
+</head>
+<body>
+
+<h1>🔐 App Check Verification Dashboard</h1>
+<p class="subtitle">prediccionloteria.com — Verifica que App Check (reCAPTCHA Enterprise) permite peticiones legítimas</p>
+
+<div class="info">
+  ℹ️ Todas las Cloud Functions tienen <code>enforceAppCheck: true</code> + <code>consumeAppCheckToken: true</code>.
+  Esta página verifica que el token se obtiene, se envía y se consume correctamente en cada llamada.
+</div>
+
+<button class="btn-run-all" id="runAllBtn" onclick="runAllTests()">▶ Ejecutar Todas las Pruebas</button>
+
+<div class="summary" id="summary" style="display:none">
+  <div class="summary-item"><div class="num pass-num" id="sumPass">0</div><div class="lbl">Passed</div></div>
+  <div class="summary-item"><div class="num fail-num" id="sumFail">0</div><div class="lbl">Failed</div></div>
+  <div class="summary-item"><div class="num skip-num" id="sumSkip">0</div><div class="lbl">Warn</div></div>
+  <div class="summary-item"><div class="num" id="sumTime" style="color:#a78bfa">—</div><div class="lbl">Total ms</div></div>
+</div>
+
+<div class="card">
+  <h2>⚡ 1. Inicialización Firebase</h2>
+  <div class="test-row">
+    <span class="test-label">App Check Token</span>
+    <button class="btn" id="btn1" onclick="testAppCheckToken()">Test</button>
+    <div class="result pending" id="res1">Pendiente…</div>
+    <span class="badge pending" id="badge1">?</span>
+  </div>
+  <hr class="div">
+  <div class="test-row">
+    <span class="test-label">Auth State (usuario actual)</span>
+    <button class="btn" id="btn2" onclick="testAuthState()">Test</button>
+    <div class="result pending" id="res2">Pendiente…</div>
+    <span class="badge pending" id="badge2">?</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>☁️ 2. Cloud Functions Protegidas</h2>
+  <div class="test-row">
+    <span class="test-label">getSportsOdds(NBA)</span>
+    <button class="btn" id="btn3" onclick="testSportsOdds()">Test</button>
+    <div class="result pending" id="res3">Pendiente…</div>
+    <span class="badge pending" id="badge3">?</span>
+  </div>
+  <hr class="div">
+  <div class="test-row">
+    <span class="test-label">getStandings(NBA)</span>
+    <button class="btn" id="btn4" onclick="testStandings()">Test</button>
+    <div class="result pending" id="res4">Pendiente…</div>
+    <span class="badge pending" id="badge4">?</span>
+  </div>
+  <hr class="div">
+  <div class="test-row">
+    <span class="test-label">getPlayerStatsHistory(MLB, playerId=660271)</span>
+    <button class="btn" id="btn5" onclick="testPlayerStats()">Test</button>
+    <div class="result pending" id="res5">Pendiente…</div>
+    <span class="badge pending" id="badge5">?</span>
+  </div>
+  <hr class="div">
+  <div class="test-row">
+    <span class="test-label">getUserPlan</span>
+    <button class="btn" id="btn6" onclick="testUserPlan()">Test</button>
+    <div class="result pending" id="res6">Pendiente…</div>
+    <span class="badge pending" id="badge6">?</span>
+  </div>
+  <hr class="div">
+  <div class="test-row">
+    <span class="test-label">createCheckoutSession (verifica auth/App Check)</span>
+    <button class="btn" id="btn7" onclick="testCheckoutAuth()">Test</button>
+    <div class="result pending" id="res7">Pendiente…</div>
+    <span class="badge pending" id="badge7">?</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>🛡️ 3. Token Consumption (Anti-Replay)</h2>
+  <div class="test-row">
+    <span class="test-label">Doble llamada simultánea (token reuse test)</span>
+    <button class="btn" id="btn8" onclick="testTokenReplay()">Test</button>
+    <div class="result pending" id="res8">Pendiente…</div>
+    <span class="badge pending" id="badge8">?</span>
+  </div>
+  <p style="color:#6b7280;font-size:0.75rem;margin-top:8px">
+    Con <code>consumeAppCheckToken: true</code> la 2ª llamada simultánea puede recibir error de token ya consumido — eso confirma el blindaje activo.
+  </p>
+</div>
+
+<script type="module">
+import { initializeApp }               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, getToken }
+                                       from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js';
+import { getAuth, signInAnonymously }  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js';
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDSAITFTaBwGdz0mNV2yRBUHlTwmNkM4Do",
+  authDomain:        "game-lottery-b0e90.firebaseapp.com",
+  projectId:         "game-lottery-b0e90",
+  storageBucket:     "game-lottery-b0e90.appspot.com",
+  messagingSenderId: "192610858921",
+  appId:             "1:192610858921:web:7e76e398b3c5978f7b36b8",
+};
+const RECAPTCHA_KEY = "6LfiV0ArAAAAAExb1q7o3nHF0amIgCg7h5PMhJJC";
+
+let _app, _auth, _fns, _ac;
+
+async function init() {
+  if (_app) return;
+  _app  = initializeApp(FIREBASE_CONFIG);
+  _ac   = initializeAppCheck(_app, {
+    provider: new ReCaptchaEnterpriseProvider(RECAPTCHA_KEY),
+    isTokenAutoRefreshEnabled: true,
+  });
+  _auth = getAuth(_app);
+  _fns  = getFunctions(_app, 'us-central1');
+  try { await signInAnonymously(_auth); } catch (_) {}
+}
+
+function setR(id, cls, text) {
+  const el = document.getElementById('res' + id);
+  el.className = 'result ' + cls;
+  el.textContent = text;
+}
+function setB(id, cls) {
+  const el = document.getElementById('badge' + id);
+  el.className = 'badge ' + cls;
+  el.textContent = cls === 'pass' ? '✓' : cls === 'fail' ? '✗' : cls === 'warn' ? '!' : cls === 'running' ? '…' : '?';
+}
+function run(id) {
+  setB(id, 'running'); setR(id, 'pending', 'Ejecutando…');
+  const b = document.getElementById('btn' + id); if (b) b.disabled = true;
+}
+function done(id, status, msg) {
+  setB(id, status); setR(id, status, msg);
+  const b = document.getElementById('btn' + id); if (b) b.disabled = false;
+}
+async function timed(fn) {
+  const t = Date.now();
+  try { return { ok: true, r: await fn(), ms: Date.now() - t }; }
+  catch (e) { return { ok: false, e, ms: Date.now() - t }; }
+}
+
+window.testAppCheckToken = async () => {
+  run(1); await init();
+  const { ok, r, e, ms } = await timed(() => getToken(_ac, false));
+  if (ok) {
+    const tok = r.token || '';
+    done(1, 'pass', `✓ Token OK (${ms}ms) · ${tok.slice(0,28)}… · exp: ${new Date(r.expireTimeMillis||0).toLocaleTimeString()}`);
+  } else {
+    done(1, 'fail', `✗ ${e.code||e.message} (${ms}ms)`);
+  }
+};
+
+window.testAuthState = async () => {
+  run(2); await init();
+  const user = _auth.currentUser;
+  if (user) done(2, 'pass', `✓ UID: ${user.uid.slice(0,16)}… · anónimo: ${user.isAnonymous}`);
+  else done(2, 'fail', '✗ Sin usuario autenticado');
+};
+
+window.testSportsOdds = async () => {
+  run(3); await init();
+  const fn = httpsCallable(_fns, 'getSportsOdds');
+  const { ok, r, e, ms } = await timed(() => fn({ sport: 'NBA' }));
+  if (ok) {
+    const d = r.data || {};
+    done(3, 'pass', `✓ getSportsOdds OK (${ms}ms) · odds: ${(d.odds||[]).length} juegos · cached: ${d.cached}`);
+  } else {
+    const rateLimit = e.code === 'functions/resource-exhausted';
+    done(3, rateLimit ? 'warn' : 'fail',
+      rateLimit ? `⚠ Rate limit (App Check OK) (${ms}ms)` : `✗ ${e.code||e.message} (${ms}ms)`);
+  }
+};
+
+window.testStandings = async () => {
+  run(4); await init();
+  const fn = httpsCallable(_fns, 'getStandings');
+  const { ok, r, e, ms } = await timed(() => fn({ sport: 'NBA' }));
+  if (ok) {
+    const t = (r.data && r.data.teams) ? r.data.teams.length : 0;
+    done(4, 'pass', `✓ getStandings OK (${ms}ms) · ${t} equipos · isDemo: ${r.data&&r.data.isDemo}`);
+  } else done(4, 'fail', `✗ ${e.code||e.message} (${ms}ms)`);
+};
+
+window.testPlayerStats = async () => {
+  run(5); await init();
+  const fn = httpsCallable(_fns, 'getPlayerStatsHistory');
+  const { ok, r, e, ms } = await timed(() => fn({ sport:'MLB', playerId:'660271', metric:'strikeouts', lastN:10 }));
+  if (ok) {
+    const d = r.data || {};
+    done(5, 'pass', `✓ getPlayerStatsHistory OK (${ms}ms) · src: ${d.source} · last5: [${(d.last5||[]).join(',')}]`);
+  } else {
+    const notFound = e.code === 'functions/not-found' || e.code === 'functions/failed-precondition';
+    done(5, notFound ? 'warn' : 'fail',
+      notFound ? `⚠ Sin historial en Firestore aún (App Check OK) (${ms}ms)` : `✗ ${e.code||e.message} (${ms}ms)`);
+  }
+};
+
+window.testUserPlan = async () => {
+  run(6); await init();
+  const fn = httpsCallable(_fns, 'getUserPlan');
+  const { ok, r, e, ms } = await timed(() => fn({}));
+  if (ok) {
+    const d = r.data || {};
+    done(6, 'pass', `✓ getUserPlan OK (${ms}ms) · plan: ${d.planType} · remaining: ${d.remaining}`);
+  } else done(6, 'fail', `✗ ${e.code||e.message} (${ms}ms)`);
+};
+
+window.testCheckoutAuth = async () => {
+  run(7); await init();
+  const fn = httpsCallable(_fns, 'createCheckoutSession');
+  const { ok, r, e, ms } = await timed(() => fn({}));
+  if (ok) {
+    done(7, 'pass', `✓ createCheckoutSession OK (${ms}ms) · url: ${r.data&&r.data.url?'recibida':'sin url'}`);
+  } else {
+    const appCheckOk = e.code !== 'functions/permission-denied';
+    done(7, appCheckOk ? 'warn' : 'fail',
+      appCheckOk
+        ? `⚠ App Check pasó · error lógica: ${e.code} (${ms}ms)`
+        : `✗ App Check bloqueó petición: ${e.code} (${ms}ms)`);
+  }
+};
+
+window.testTokenReplay = async () => {
+  run(8); await init();
+  const fn = httpsCallable(_fns, 'getStandings');
+  const t0 = Date.now();
+  const [r1, r2] = await Promise.allSettled([fn({ sport:'NBA' }), fn({ sport:'NBA' })]);
+  const ms = Date.now() - t0;
+  const ok1 = r1.status === 'fulfilled';
+  const ok2 = r2.status === 'fulfilled';
+  if (ok1 && !ok2) {
+    done(8, 'pass', `✓ Token consumido (${ms}ms) · 1ª: OK · 2ª bloqueada: ${r2.reason&&r2.reason.code}`);
+  } else if (ok1 && ok2) {
+    done(8, 'warn', `⚠ Ambas OK (${ms}ms) — Firebase puede emitir nuevo token entre llamadas paralelas`);
+  } else {
+    done(8, 'fail', `✗ 1ª llamada falló: ${r1.reason&&r1.reason.code} (${ms}ms)`);
+  }
+};
+
+window.runAllTests = async () => {
+  const btn = document.getElementById('runAllBtn');
+  btn.disabled = true; btn.textContent = '⏳ Ejecutando…';
+  document.getElementById('summary').style.display = 'none';
+  const t0 = Date.now();
+  const tests = [
+    window.testAppCheckToken, window.testAuthState,
+    window.testSportsOdds, window.testStandings,
+    window.testPlayerStats, window.testUserPlan,
+    window.testCheckoutAuth, window.testTokenReplay,
+  ];
+  for (const t of tests) { await t(); await new Promise(r => setTimeout(r, 700)); }
+  let pass=0, fail=0, warn=0;
+  for (let i=1; i<=8; i++) {
+    const c = document.getElementById('badge'+i).className;
+    if (c.includes('pass')) pass++;
+    else if (c.includes('fail')) fail++;
+    else warn++;
+  }
+  document.getElementById('sumPass').textContent = pass;
+  document.getElementById('sumFail').textContent = fail;
+  document.getElementById('sumSkip').textContent = warn;
+  document.getElementById('sumTime').textContent = (Date.now()-t0)+'ms';
+  document.getElementById('summary').style.display = 'flex';
+  btn.disabled = false; btn.textContent = '▶ Ejecutar Todas las Pruebas';
+};
+</script>
+</body>
+</html>
