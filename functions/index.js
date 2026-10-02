@@ -1479,8 +1479,11 @@ exports.updateStandings = onSchedule(
 // ════════════════════════════════════════════════════════════════════════════
 const LOTTERY_GAMES = {
   powerball: { mainPool: 69, mainCount: 5, drawResultCount: 5, bonusPool: 26, bonusField: 'powerball', minNumber: 1 },
-  megamillions: { mainPool: 70, mainCount: 5, drawResultCount: 5, bonusPool: 25, bonusField: 'megaBall', minNumber: 1 },
-  millionaireforlife: { mainPool: 58, mainCount: 5, drawResultCount: 5, bonusPool: 5, bonusField: 'cash_ball', minNumber: 1 },
+  // rulesSince: sorteos anteriores tienen otras reglas y se descartan en normalizeDraw.
+  // Mega Millions: 5/70 + Mega Ball 1-24 desde el 2025-04-08 (antes 1-25).
+  megamillions: { mainPool: 70, mainCount: 5, drawResultCount: 5, bonusPool: 24, bonusField: 'megaBall', minNumber: 1, rulesSince: '2025-04-08' },
+  // Millionaire For Life arrancó el 2026-02-22; kwxv-fwze trae Cash4Life (retirado, 1-60 + 1-4), que no debe mezclarse.
+  millionaireforlife: { mainPool: 58, mainCount: 5, drawResultCount: 5, bonusPool: 5, bonusField: 'millionaire_ball', minNumber: 1, rulesSince: '2026-02-22' },
   pick10: { mainPool: 80, mainCount: 10, drawResultCount: 20, bonusPool: 0, bonusField: null, minNumber: 1 },
   take5day: { mainPool: 39, mainCount: 5, drawResultCount: 5, bonusPool: 0, bonusField: null, minNumber: 1 },
   take5eve: { mainPool: 39, mainCount: 5, drawResultCount: 5, bonusPool: 0, bonusField: null, minNumber: 1 },
@@ -1493,7 +1496,7 @@ const LOTTERY_MIN_BACKTEST_DRAWS = 40;
 const PREFERRED_LOTTERY_RANGES = {
   powerball: { mainCount: 5, mainMin: 1, mainMax: 69, hasSpecial: true, specialMin: 1, specialMax: 26 },
   millionaireforlife: { mainCount: 5, mainMin: 1, mainMax: 58, hasSpecial: true, specialMin: 1, specialMax: 5 },
-  megamillions: { mainCount: 5, mainMin: 1, mainMax: 70, hasSpecial: true, specialMin: 1, specialMax: 25 },
+  megamillions: { mainCount: 5, mainMin: 1, mainMax: 70, hasSpecial: true, specialMin: 1, specialMax: 24 },
   pick10: { mainCount: 10, mainMin: 1, mainMax: 80, hasSpecial: false },
   take5day: { mainCount: 5, mainMin: 1, mainMax: 39, hasSpecial: false },
   take5eve: { mainCount: 5, mainMin: 1, mainMax: 39, hasSpecial: false },
@@ -1560,6 +1563,7 @@ function normalizeDraw(rawDraw, gameType, now = new Date()) {
   const drawDateRaw = rawDraw.drawDate || rawDraw.date || rawDraw.drawingDate || now.toISOString();
   const drawDate = new Date(drawDateRaw);
   if (Number.isNaN(drawDate.getTime())) return null;
+  if (cfg.rulesSince && drawDate.toISOString().slice(0, 10) < cfg.rulesSince) return null;
 
   const minN = cfg.minNumber == null ? 1 : cfg.minNumber;
   const expectedCount = cfg.drawResultCount || cfg.mainCount;
@@ -1928,7 +1932,7 @@ async function fetchOfficialDrawsForGame(gameType) {
         bonusNumber = Number(row.mega_ball);
       } else if (spec.kind === 'm4l' && row.winning_numbers) {
         mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
-        bonusNumber = Number(row.cash_ball != null ? row.cash_ball : row.millionaire_ball);
+        bonusNumber = Number(row.millionaire_ball != null ? row.millionaire_ball : row.cash_ball);
       } else if (spec.kind === 'p10' && row.winning_numbers) {
         mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
       } else if (spec.kind === 't5day' && row.midday_winning_numbers) {
