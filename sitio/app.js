@@ -1014,7 +1014,6 @@ const renderHistory = (lottery) => {
 
   toShow.forEach(item => {
     const parsed = parseDrawingData(item.data);
-    const isSeed = item.id && String(item.id).startsWith('seed-');
     const entryDiv = document.createElement('div');
     entryDiv.className = 'history-item history-line flex flex-col sm:flex-row sm:items-center justify-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg mb-2 flex-nowrap';
     const specialHtml = hasSpecial && item.data.special != null
@@ -1028,22 +1027,7 @@ const renderHistory = (lottery) => {
       </div>
     `;
 
-    if (!isSeed) {
-      const deleteBtn = document.createElement('button');
-      deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-      deleteBtn.className = 'delete-btn text-gray-600 hover:text-red-500 p-2 rounded-full ml-auto';
-      deleteBtn.onclick = async (e) => {
-        e.stopPropagation();
-        if (!window.confirm('¿Eliminar sorteo?')) return;
-        try {
-          await deleteDoc(doc(db, paths[lottery], item.id));
-          showMessage('Sorteo eliminado.', 'bg-yellow-600 text-white');
-        } catch (error) {
-          showMessage('Error al eliminar.', 'bg-red-500 text-white');
-        }
-      };
-      entryDiv.appendChild(deleteBtn);
-    }
+    // Sin botón de borrar: los sorteos del historial público no se borran desde el navegador.
     history.appendChild(entryDiv);
   });
 
@@ -1386,25 +1370,17 @@ const setupEventListeners = () => {
         return showMessage('Verifica el número especial.', 'bg-red-500 text-white');
       }
 
+      // 2026-10-10: el historial público ya no admite escrituras desde el navegador
+      // (firestore.rules: write false en *_drawings). El resultado que escribe el
+      // visitante solo se usa aquí, para medir la precisión de su predicción.
       try {
-        const q = query(collection(db, paths[lottery]), where("date", "==", date));
-        if (!(await getDocs(q)).empty) return showMessage('Ya existe ese sorteo.', 'bg-yellow-500 text-black');
-
-        await addDoc(collection(db, paths[lottery]), {
-          mainNumbers: JSON.stringify(mains),
-          special: ranges.hasSpecial ? special : null,
-          date,
-          createdAt: new Date(),
-          userId
-        });
-
-        showMessage('¡Sorteo guardado!', 'bg-green-600 text-white');
-        Array.from(section.querySelectorAll('input')).forEach(i => { i.value = ''; });
         calculatePrecision(lottery, mains, ranges.hasSpecial ? special : undefined);
         updateStatistics();
         updatePrecisionDisplay();
+        Array.from(section.querySelectorAll('input')).forEach(i => { i.value = ''; });
+        showMessage('Resultado usado para calcular tu precisión. El historial público solo se actualiza con resultados oficiales.', 'bg-green-600 text-white');
       } catch (e) {
-        showMessage('Error al guardar.', 'bg-red-500 text-white');
+        showMessage('No se pudo calcular la precisión.', 'bg-red-500 text-white');
       }
     });
   });

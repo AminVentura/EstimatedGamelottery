@@ -6,101 +6,50 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function drawingKeysOk() {
-      return request.resource.data.keys().hasOnly(['mainNumbers', 'date', 'userId', 'createdAt', 'special']);
-    }
-
-    function dateStringOk() {
-      return request.resource.data.date is string
-             && request.resource.data.date.size() == 10
-             && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
-    }
-
-    function mainNumbersSizeOk() {
-      return (request.resource.data.mainNumbers is string
-              && request.resource.data.mainNumbers.size() > 0
-              && request.resource.data.mainNumbers.size() <= 220)
-             || (request.resource.data.mainNumbers is list
-                 && request.resource.data.mainNumbers.size() > 0
-                 && request.resource.data.mainNumbers.size() <= 25);
-    }
-
-    function hasDrawingFields() {
-      return drawingKeysOk()
-             && request.resource.data.keys().hasAll(['mainNumbers', 'date', 'userId', 'createdAt'])
-             && dateStringOk()
-             && request.resource.data.createdAt is timestamp
-             && request.resource.data.userId is string
-             && request.resource.data.userId == request.auth.uid
-             && mainNumbersSizeOk()
-             && (request.resource.data.special == null
-                 || request.resource.data.special is int);
-    }
-
-    function isValidDrawing() {
-      return isSignedIn() && hasDrawingFields();
-    }
-
-    function isOwner() {
-      return isSignedIn() && resource.data.userId == request.auth.uid;
-    }
-
     function userStatsWriteOk(userId) {
       return isSignedIn()
              && request.auth.uid == userId
              && request.resource.data.keys().size() <= 48;
     }
 
+    // ── Sorteos (historial público) ──────────────────────────────────────
+    // Lectura pública. Ningún cliente crea, cambia ni borra sorteos: antes cualquier
+    // sesión anónima podía añadir resultados falsos. Solo escribe el Admin SDK
+    // (Cloud Functions), que no pasa por estas reglas.
     match /artifacts/EstimatedGamelottery-app/public/data/powerball_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
 
     match /artifacts/EstimatedGamelottery-app/public/data/millionaireforlife_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
 
     match /artifacts/EstimatedGamelottery-app/public/data/megamillions_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
 
     match /artifacts/EstimatedGamelottery-app/public/data/pick10_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
     match /artifacts/EstimatedGamelottery-app/public/data/take5day_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
     match /artifacts/EstimatedGamelottery-app/public/data/take5eve_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
     match /artifacts/EstimatedGamelottery-app/public/data/win4day_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
     match /artifacts/EstimatedGamelottery-app/public/data/win4eve_drawings/{docId} {
       allow read: if true;
-      allow create: if isValidDrawing();
-      allow update: if false;
-      allow delete: if isOwner();
+      allow write: if false;
     }
 
     match /artifacts/EstimatedGamelottery-app/public/data/user_stats/{userId} {
@@ -115,17 +64,20 @@ service cloud.firestore {
     match /sportsVotes/{voteId} {
       allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
       allow create: if isSignedIn()
-        && request.resource.data.uid == request.auth.uid
-        && voteId == request.auth.uid + '_' + request.resource.data.predId
         && request.resource.data.keys().hasOnly(['uid','predId','sport','vote','createdAt','date'])
-        && (request.resource.data.vote == 'yes' || request.resource.data.vote == 'no')
+        && request.resource.data.keys().hasAll(['uid','predId','sport','vote','createdAt','date'])
+        && request.resource.data.uid == request.auth.uid
         && request.resource.data.predId is string
+        && request.resource.data.predId.size() > 0
         && request.resource.data.predId.size() <= 64
+        && voteId == request.auth.uid + '_' + request.resource.data.predId
+        && (request.resource.data.vote == 'yes' || request.resource.data.vote == 'no')
         && request.resource.data.sport is string
+        && request.resource.data.sport.size() > 0
         && request.resource.data.sport.size() <= 32
-        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt == request.time
         && request.resource.data.date is string
-        && request.resource.data.date.size() == 10;
+        && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
       allow update: if false;
       allow delete: if false;
     }
