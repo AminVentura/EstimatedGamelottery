@@ -59,7 +59,7 @@ async function main() {
   for (const gameType of games) {
     // --desde-fuente: además de lottery_history, descarga el historial completo de la fuente
     // oficial (NY Open Data, hasta 5000 filas). Solo entra lo que normalizeDraw acepta.
-    let draws = await fn.loadGameDrawsForOps(db, gameType, 100000, { listParents: true });
+    let draws = await fn.loadGameDrawsForOps(db, gameType, 100000, { includeUnofficial: true });
     if (fromSource) {
       const official = await fn.fetchOfficialDrawsForOps(gameType, { limit: 5000 });
       if (!official.length) throw new Error('La fuente oficial no devolvió sorteos para ' + gameType + '.');

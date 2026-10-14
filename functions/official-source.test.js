@@ -76,13 +76,17 @@ function fakeDb(drawsByParent) {
   };
 }
 
-test('lottery_history sin documentos padre: solo listParents encuentra los sorteos', async () => {
+test('lottery_history sin documentos padre: loadGameDraws encuentra los sorteos y descarta mock_fallback', async () => {
   const db = fakeDb({
-    powerball_2026: [{ id: '2026-10-12', drawDate: '2026-10-12T00:00:00.000Z', mainNumbers: [1, 2, 3, 4, 5], bonusNumber: 9, source: 'ny_open_data' }],
+    powerball_2026: [
+      { id: '2026-10-12', drawDate: '2026-10-12T00:00:00.000Z', mainNumbers: [1, 2, 3, 4, 5], bonusNumber: 9, source: 'ny_open_data' },
+      { id: '2026-10-13', drawDate: '2026-10-13T00:00:00.000Z', mainNumbers: [6, 7, 8, 9, 10], bonusNumber: 1, source: 'mock_fallback' },
+    ],
     megamillions_2026: [{ id: '2026-10-10', drawDate: '2026-10-10T00:00:00.000Z', mainNumbers: [1, 2, 3, 4, 5], bonusNumber: 9, source: 'ny_open_data' }],
   });
-  assert.equal((await loadGameDrawsForOps(db, 'powerball', 100)).length, 0);
-  const found = await loadGameDrawsForOps(db, 'powerball', 100, { listParents: true });
+  const found = await loadGameDrawsForOps(db, 'powerball', 100);
   assert.equal(found.length, 1);
   assert.equal(found[0].drawId, '2026-10-12');
+  // El script de relleno pide todo y filtra él mismo (cuenta los descartes).
+  assert.equal((await loadGameDrawsForOps(db, 'powerball', 100, { includeUnofficial: true })).length, 2);
 });

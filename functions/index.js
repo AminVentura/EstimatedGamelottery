@@ -27,7 +27,7 @@ const {
   fetchNbaPlayerGamelog,
   fetchMlbPlayerSeasonStats,
 } = require('./sports-eternal');
-const { isOfficialPublicDoc, mirrorDrawsToPublic } = require('./public-drawings');
+const { OFFICIAL_SOURCES, isOfficialPublicDoc, mirrorDrawsToPublic, publicDrawingsPath } = require('./public-drawings');
 const { consumeQuotas } = require('./rate-limit.js');
 
 // Guard: only initialize once (safe across hot-reloads & multi-file setups)
@@ -2201,15 +2201,16 @@ async function runBacktesting(draws, gameType, existingWeights) {
   return { ...best, tunedWeights: best.weightsUsed };
 }
 
+// lottery_history/<juego>_<año>/draws: copia interna de la ingesta. Los documentos padre
+// <juego>_<año> no existen en producción (solo su subcolección draws), así que
+// collection('lottery_history').get() devuelve 0; listDocuments() sí los lista.
+// Solo cuenta lo que viene de una fuente oficial: en producción hay documentos antiguos
+// con source 'mock_fallback' (datos generados, no sorteos) que nunca deben usarse.
+// options.includeUnofficial: solo para scripts/backfill-historial-publico.js, que filtra y
+// cuenta los descartes él mismo (mirrorDrawsToPublic).
 async function loadGameDraws(db, gameType, limit = 1200, options = {}) {
   const prefix = gameType + '_';
-  // Los documentos padre lottery_history/<juego>_<año> no existen en producción (la ingesta
-  // solo escribe en su subcolección draws), así que collection().get() no los devuelve.
-  // listDocuments() sí. Por ahora solo lo usa el script de relleno (options.listParents);
-  // el resto de llamadas conserva el comportamiento desplegado (ver docs/CAMBIOS-2026-10-14.md).
-  const historyIds = options.listParents === true
-    ? (await db.collection('lottery_history').listDocuments()).map((ref) => ref.id)
-    : (await db.collection('lottery_history').get()).docs.map((doc) => doc.id);
+  const historyIds = (await db.collection('lottery_history').listDocuments()).map((ref) => ref.id);
   const targetHistoryDocs = historyIds
     .filter((id) => id.startsWith(prefix))
     .sort();
@@ -2221,6 +2222,7 @@ async function loadGameDraws(db, gameType, limit = 1200, options = {}) {
       .limit(limit)
       .get();
     drawsSnap.forEach((doc) => {
+      if (options.includeUnofficial !== true && !OFFICIAL_SOURCES.has(String(doc.data().source || ''))) return;
       const normalized = normalizeDraw({
         drawId: doc.id,
         drawDate: doc.data().drawDate,
@@ -2235,13 +2237,70 @@ async function loadGameDraws(db, gameType, limit = 1200, options = {}) {
   return draws.slice(-limit);
 }
 
+// Fuente de los modelos (desde 2026-10-14): el historial público oficial (*_drawings con
+// id = fecha y fuente oficial), el mismo que enseña la web. Motivo: en lottery_history hay
+// 91 documentos 'mock_fallback' (Powerball 40, Mega Millions 51), 165 sorteos de Cash4Life
+// guardados como Millionaire For Life y le faltan 34 sorteos de Millionaire For Life que sí
+// están en el público (rellenado desde a4w9-a3tp). normalizeDraw descarta lo anterior a rulesSince.
+const TRAINING_SOURCE = 'public_official';
+
+async function loadOfficialPublicDraws(db, gameType, limit = 1200) {
+  if (!LOTTERY_GAMES[gameType]) return [];
+  const snap = await db.collection(publicDrawingsPath(gameType)).orderBy('date', 'desc').limit(limit).get();
+  const draws = [];
+  snap.forEach((doc) => {
+    const data = doc.data();
+    if (!isOfficialPublicDoc(doc.id, data)) return;
+    if (!OFFICIAL_SOURCES.has(String(data.source || ''))) return;
+    const normalized = normalizeDraw({
+      drawId: doc.id,
+      drawDate: data.date + 'T00:00:00.000Z',
+      mainNumbers: data.mainNumbers,
+      bonusNumber: data.special,
+      source: data.source,
+    }, gameType);
+    if (normalized) draws.push({ ...normalized, drawPath: doc.ref.path });
+  });
+  draws.sort((a, b) => new Date(a.drawDateIso).getTime() - new Date(b.drawDateIso).getTime());
+  return draws;
+}
+
+// Fecha (AAAA-MM-DD) del último sorteo oficial del historial público, o null.
+async function latestOfficialPublicDate(db, gameType) {
+  const snap = await db.collection(publicDrawingsPath(gameType)).orderBy('date', 'desc').limit(5).get();
+  let latest = null;
+  snap.forEach((doc) => {
+    const data = doc.data();
+    if (latest || !isOfficialPublicDoc(doc.id, data) || !OFFICIAL_SOURCES.has(String(data.source || ''))) return;
+    latest = data.date;
+  });
+  return latest;
+}
+
+// Entrena solo si el modelo falta, viene de otra fuente o no incluye el último sorteo oficial.
+// Así la ingesta y el disparador pueden llamarlo sin repetir trabajo (2 lecturas si está al día).
+async function trainIfStale(db, gameType) {
+  const [modelSnap, latestDate] = await Promise.all([
+    db.doc('prediction_models/' + gameType).get(),
+    latestOfficialPublicDate(db, gameType),
+  ]);
+  if (!latestDate) return { ok: false, reason: 'no_draws', totalDraws: 0 };
+  const model = modelSnap.exists ? modelSnap.data() : null;
+  if (model && model.dataSource === TRAINING_SOURCE && model.latestDrawDate === latestDate) {
+    return { ok: true, skipped: true, totalDraws: model.totalDraws || 0, latestDrawDate: latestDate };
+  }
+  return trainModelForGame(db, gameType);
+}
+
 async function trainModelForGame(db, gameType) {
   const cfg = LOTTERY_GAMES[gameType];
   if (!cfg) throw new Error('unsupported_game_' + gameType);
-  const draws = await loadGameDraws(db, gameType);
+  const draws = await loadOfficialPublicDraws(db, gameType);
   if (!draws.length) {
-    return { ok: false, reason: 'no_draws' };
+    return { ok: false, reason: 'no_draws', totalDraws: 0 };
   }
+  const firstDrawDate = draws[0].drawDateIso.slice(0, 10);
+  const latestDrawDate = draws[draws.length - 1].drawDateIso.slice(0, 10);
 
   const minN = cfg.minNumber == null ? 1 : cfg.minNumber;
   const windowStats = {};
@@ -2264,6 +2323,9 @@ async function trainModelForGame(db, gameType) {
   await modelRef.set({
     gameType,
     totalDraws: draws.length,
+    dataSource: TRAINING_SOURCE,
+    firstDrawDate,
+    latestDrawDate,
     windows: windowStats,
     gaps,
     trends,
@@ -2277,6 +2339,8 @@ async function trainModelForGame(db, gameType) {
     gameType,
     snapshotAt: FieldValue.serverTimestamp(),
     totalDraws: draws.length,
+    dataSource: TRAINING_SOURCE,
+    latestDrawDate,
     backtesting: {
       method: backtesting.method,
       drawsEvaluated: backtesting.drawsEvaluated,
@@ -2289,33 +2353,11 @@ async function trainModelForGame(db, gameType) {
   return {
     ok: true,
     totalDraws: draws.length,
+    firstDrawDate,
+    latestDrawDate,
     backtestingAccuracy: backtesting.accuracy,
     recommendation,
   };
-}
-
-async function ingestOfficialDrawsIfEmpty(db, gameType, maxInsert) {
-  const existing = await loadGameDraws(db, gameType, 8);
-  if (existing.length) return existing.length;
-  const fetched = await fetchOfficialDrawsForGame(gameType);
-  const cap = Number(maxInsert) > 0 ? Number(maxInsert) : 80;
-  let inserted = 0;
-  for (const draw of fetched.slice(0, cap)) {
-    if (!draw || draw.source === 'mock_fallback') continue;
-    const year = parseYearFromHistoryDoc('', new Date(draw.drawDateIso));
-    const historyId = gameType + '_' + year;
-    const drawId = draw.drawId || draw.drawDateIso.slice(0, 10);
-    await db.doc('lottery_history/' + historyId + '/draws/' + drawId).set({
-      gameType,
-      drawDate: draw.drawDateIso,
-      mainNumbers: draw.mainNumbers,
-      bonusNumber: draw.bonusNumber,
-      source: draw.source,
-      ingestedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
-    inserted += 1;
-  }
-  return inserted;
 }
 
 function formatLotteryPlayLine(mainNumbers, special) {
@@ -2359,6 +2401,20 @@ function formatLotteryAgentPayload(gameType, model) {
   };
 }
 
+// Resumen para los logs (sin la recomendación completa).
+function summarizeTraining(result) {
+  if (!result) return null;
+  return {
+    ok: !!result.ok,
+    skipped: !!result.skipped,
+    reason: result.reason || null,
+    totalDraws: result.totalDraws || 0,
+    firstDrawDate: result.firstDrawDate || null,
+    latestDrawDate: result.latestDrawDate || null,
+    backtestingAccuracy: result.backtestingAccuracy == null ? null : result.backtestingAccuracy,
+  };
+}
+
 exports.trainLotteryAgent = onDocumentCreated(
   { document: 'lottery_history/{historyId}/draws/{drawId}', region: 'us-central1', timeoutSeconds: 180 },
   async (event) => {
@@ -2369,8 +2425,10 @@ exports.trainLotteryAgent = onDocumentCreated(
       return null;
     }
     const db = getFirestore();
-    const result = await trainModelForGame(db, gameType);
-    console.log('[trainLotteryAgent] trained', JSON.stringify({ gameType, historyId, result }));
+    // Lee el historial público oficial; si el sorteo aún no está copiado allí, no entrena
+    // (lo hará la ingesta justo después de copiarlo).
+    const result = await trainIfStale(db, gameType);
+    console.log('[trainLotteryAgent] trained', JSON.stringify({ gameType, historyId, result: summarizeTraining(result) }));
     return null;
   }
 );
@@ -2424,12 +2482,23 @@ exports.ingestOfficialLotteryResults = onSchedule(
         console.error('[ingestOfficialLotteryResults] historial público falló para ' + gameType + ':', publicError);
       }
 
+      // Modelo del juego: se entrena con el historial público oficial cuando hay un sorteo
+      // nuevo o el modelo no existe (trainIfStale). Un fallo aquí no tumba la ingesta.
+      let training = null;
+      try {
+        training = summarizeTraining(await trainIfStale(db, gameType));
+      } catch (err) {
+        training = { ok: false, error: err instanceof Error ? err.message : String(err) };
+        console.error('[ingestOfficialLotteryResults] entrenamiento falló para ' + gameType + ':', training.error);
+      }
+
       // TODO: Evaluar deduplicación cross-year avanzada si un proveedor publica fechas con timezone ambiguo.
       report.push({
         gameType,
         inserted,
         publicCreated,
         publicError,
+        training,
         source: fetched[0].source || 'unknown',
         attemptedAt: now.toISOString(),
       });
@@ -2530,19 +2599,43 @@ exports.estimatePreferredNumbers = onCall(
   }
 );
 
+// Límites de getLotteryAgentInsight (pública con App Check, como estimatePreferredNumbers).
+// Normalmente es 1 lectura (el modelo ya entrenado por la ingesta); si el modelo falta,
+// entrena una vez desde el historial público (hasta ~250 lecturas). Ya no escribe sorteos.
+const INSIGHT_LIMIT_PER_ID = 60;
+const INSIGHT_LIMIT_PER_IP = 240;
+const INSIGHT_WINDOW_MS = 60 * 60 * 1000;
+
 exports.getLotteryAgentInsight = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: false, timeoutSeconds: 120 },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true, timeoutSeconds: 60, maxInstances: 10 },
   async (request) => {
-    getRequestIdentity(request);
+    const identity = getRequestIdentity(request);
+    if (request.app && request.app.alreadyConsumed === true) {
+      throw new HttpsError('permission-denied', 'Solicitud repetida. Vuelve a intentarlo.');
+    }
     const gameType = normalizeGameType(request.data && request.data.gameType);
     if (!gameType) {
       throw new HttpsError('invalid-argument', 'gameType inválido. Usa powerball, megamillions, millionaireforlife, pick10, take5day, take5eve, win4day o win4eve.');
     }
     const db = getFirestore();
+    let quota;
+    try {
+      quota = await consumeQuotas(db, [
+        { key: 'insight_id_' + identity.uid, limit: INSIGHT_LIMIT_PER_ID },
+        { key: 'insight_ip_' + requestIp(request), limit: INSIGHT_LIMIT_PER_IP },
+      ], INSIGHT_WINDOW_MS);
+    } catch (err) {
+      console.error('[getLotteryAgentInsight] limite', err instanceof Error ? err.message : String(err));
+      throw new HttpsError('unavailable', 'No se pudo cargar el análisis ahora mismo.');
+    }
+    if (!quota.ok) {
+      throw new HttpsError('resource-exhausted', 'Has hecho muchas consultas seguidas. Prueba de nuevo en ' + Math.ceil(quota.retryAfterSec / 60) + ' min.');
+    }
+
     let modelSnap = await db.doc('prediction_models/' + gameType).get();
     if (!modelSnap.exists) {
-      await ingestOfficialDrawsIfEmpty(db, gameType, 80);
-      await trainModelForGame(db, gameType);
+      const result = await trainModelForGame(db, gameType);
+      console.log('[getLotteryAgentInsight] trained', JSON.stringify({ gameType, result: summarizeTraining(result) }));
       modelSnap = await db.doc('prediction_models/' + gameType).get();
     }
     if (!modelSnap.exists) {
@@ -2576,6 +2669,9 @@ exports.loadPreferredHistoryDrawsForTest = loadPreferredHistoryDraws;
 exports.normalizeDrawForTest = normalizeDraw;
 // Para scripts de operación (scripts/backfill-historial-publico.js); no son Cloud Functions.
 exports.loadGameDrawsForOps = loadGameDraws;
+exports.loadOfficialPublicDrawsForTest = loadOfficialPublicDraws;
+exports.trainModelForGameForTest = trainModelForGame;
+exports.trainIfStaleForTest = trainIfStale;
 exports.LOTTERY_GAME_TYPES_FOR_OPS = Object.keys(LOTTERY_GAMES);
 exports.fetchOfficialDrawsForOps = fetchOfficialDrawsForGame;
 exports.estimatePreferredNumbersForTest = estimatePreferredNumbers;

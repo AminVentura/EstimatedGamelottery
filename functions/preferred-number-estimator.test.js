@@ -115,7 +115,9 @@ test('preferred margin flow times out and annotates numbers matching today predi
   assert.match(appSource, /Coincide con tu prediccion de hoy/);
 });
 
-test('public lottery callables accept authenticated public calls without App Check enforcement', () => {
+// 2026-10-14 (decisión de Amin): getLotteryAgentInsight exige App Check de un solo uso y tiene
+// límite de uso, como estimatePreferredNumbers; getLotteryAgentsBoard no cambia.
+test('getLotteryAgentInsight exige App Check y límite de uso; el tablero sigue igual', () => {
   const functionsSource = fs.readFileSync(path.join(__dirname, 'index.js'), 'utf8');
   const insightStart = functionsSource.indexOf('exports.getLotteryAgentInsight = onCall(');
   const boardStart = functionsSource.indexOf('exports.getLotteryAgentsBoard = onCall(');
@@ -124,7 +126,11 @@ test('public lottery callables accept authenticated public calls without App Che
 
   assert.ok(insightStart > -1);
   assert.ok(boardStart > -1);
-  assert.doesNotMatch(insightBlock, /enforceAppCheck:\s*true/);
+  assert.match(insightBlock, /enforceAppCheck:\s*true/);
+  assert.match(insightBlock, /consumeAppCheckToken:\s*true/);
+  assert.match(insightBlock, /alreadyConsumed/);
+  assert.match(insightBlock, /consumeQuotas\(/);
+  assert.doesNotMatch(insightBlock, /ingestOfficialDrawsIfEmpty/);
   assert.doesNotMatch(boardBlock, /enforceAppCheck:\s*true/);
   assert.match(insightBlock, /getRequestIdentity\(request\)/);
   assert.match(boardBlock, /getRequestIdentity\(request\)/);
