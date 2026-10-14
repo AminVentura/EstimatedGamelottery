@@ -27,6 +27,7 @@ const {
   fetchNbaPlayerGamelog,
   fetchMlbPlayerSeasonStats,
 } = require('./sports-eternal');
+const { isOfficialPublicDoc, mirrorDrawsToPublic } = require('./public-drawings');
 
 // Guard: only initialize once (safe across hot-reloads & multi-file setups)
 if (!getApps().length) initializeApp();
@@ -1806,8 +1807,16 @@ async function loadPreferredHistoryDraws(db, gameType, limit = 600) {
   const path = PREFERRED_DRAWING_PATHS[gameType];
   if (path) {
     const snap = await db.collection(path).orderBy('date', 'desc').limit(limit).get();
+    // Por fecha manda el documento oficial del servidor (id = fecha) sobre los antiguos
+    // que crearon los navegadores; los antiguos solo cuentan donde no hay oficial.
+    const officialDates = new Set();
     snap.forEach((doc) => {
-      const normalized = normalizePreferredHistoryDraw(doc.data());
+      if (isOfficialPublicDoc(doc.id, doc.data())) officialDates.add(doc.data().date);
+    });
+    snap.forEach((doc) => {
+      const data = doc.data();
+      if (officialDates.has(data.date) && !isOfficialPublicDoc(doc.id, data)) return;
+      const normalized = normalizePreferredHistoryDraw(data);
       if (normalized) draws.push(normalized);
     });
   }
@@ -1913,7 +1922,7 @@ async function fetchOfficialDrawsForGame(gameType) {
 
   try {
     const url = spec.url + '?$limit=200&$order=draw_date+DESC';
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) throw new Error('status_' + res.status);
     const body = await res.json();
     if (!Array.isArray(body)) return [];
@@ -2358,7 +2367,7 @@ exports.trainLotteryAgent = onDocumentCreated(
 );
 
 exports.ingestOfficialLotteryResults = onSchedule(
-  { schedule: 'every 6 hours', region: 'us-central1', timeoutSeconds: 180 },
+  { schedule: 'every 6 hours', region: 'us-central1', timeoutSeconds: 300 },
   async () => {
     const db = getFirestore();
     const now = new Date();
@@ -2391,10 +2400,27 @@ exports.ingestOfficialLotteryResults = onSchedule(
         inserted += 1;
       }
 
+      // Historial público (*_drawings, lo que lee la web): se copian los sorteos oficiales
+      // que falten, con id = fecha y create() (no pisa ni borra nada). Un fallo aquí no
+      // debe tumbar la ingesta de lottery_history; se reintenta en la siguiente pasada.
+      let publicCreated = 0;
+      let publicError = null;
+      try {
+        const mirror = await mirrorDrawsToPublic(db, gameType, fetched, {
+          serverTimestamp: () => FieldValue.serverTimestamp(),
+        });
+        publicCreated = mirror.created;
+      } catch (err) {
+        publicError = err instanceof Error ? err.message : String(err);
+        console.error('[ingestOfficialLotteryResults] historial público falló para ' + gameType + ':', publicError);
+      }
+
       // TODO: Evaluar deduplicación cross-year avanzada si un proveedor publica fechas con timezone ambiguo.
       report.push({
         gameType,
         inserted,
+        publicCreated,
+        publicError,
         source: fetched[0].source || 'unknown',
         attemptedAt: now.toISOString(),
       });
@@ -2497,5 +2523,10 @@ exports.getLotteryAgentsBoard = onCall(
 );
 
 exports.normalizePreferredNumbersForTest = normalizePreferredNumbers;
+exports.loadPreferredHistoryDrawsForTest = loadPreferredHistoryDraws;
+exports.normalizeDrawForTest = normalizeDraw;
+// Para scripts de operación (scripts/backfill-historial-publico.js); no son Cloud Functions.
+exports.loadGameDrawsForOps = loadGameDraws;
+exports.LOTTERY_GAME_TYPES_FOR_OPS = Object.keys(LOTTERY_GAMES);
 exports.estimatePreferredNumbersForTest = estimatePreferredNumbers;
 exports.getRequestIdentityForTest = getRequestIdentity;

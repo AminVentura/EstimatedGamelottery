@@ -5,6 +5,7 @@ const PRECACHE = [
   '/styles.css',
   '/consent.js',
   '/app.js',
+  '/historial-oficial.js',
   '/sports-dashboard.js',
   '/lottery-algorithms.js',
   '/manifest.json'

@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { initializeFirestore, getFirestore, collection, addDoc, onSnapshot, query, where, getDocs, orderBy, deleteDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { mezclarHistorial } from "./historial-oficial.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const firebaseConfig = {
@@ -1568,37 +1569,9 @@ const setupRealtimeListeners = () => {
         query(collection(db, paths[key]), orderBy("date", "desc")),
         (snapshot) => {
           const firebaseItems = snapshot.docs.map(d => ({ id: d.id, data: d.data() }));
-          if (key === 'pick10') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = PICK10_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else if (key === 'megamillions') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = MEGA_MILLIONS_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else if (key === 'millionaireforlife') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = M4L_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else if (key === 'take5day') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = TAKE5DAY_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else if (key === 'take5eve') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = TAKE5EVE_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else if (key === 'win4day') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = WIN4DAY_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else if (key === 'win4eve') {
-            const existingDates = new Set(firebaseItems.map(i => i.data.date));
-            const seedOnly = WIN4EVE_SEED_HISTORY.filter(s => !existingDates.has(s.data.date));
-            allHistoryData[key] = [...seedOnly, ...firebaseItems].sort((a, b) => new Date(b.data.date) - new Date(a.data.date));
-          } else {
-            allHistoryData[key] = firebaseItems;
-          }
+          // Por fecha gana el sorteo oficial del servidor (id = fecha); se conservan las
+          // semillas y las filas de NY Open Data ya cargadas para fechas que Firestore no trae.
+          allHistoryData[key] = mezclarHistorial(firebaseItems, allHistoryData[key]);
           renderHistory(key);
           updateStatistics();
         },

@@ -5,7 +5,7 @@
     "serve": "firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "node --test preferred-number-estimator.test.js"
+    "test": "node --test preferred-number-estimator.test.js public-drawings.test.js"
   },
   "engines": {
     "node": "22"
