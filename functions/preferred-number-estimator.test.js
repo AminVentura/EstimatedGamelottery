@@ -135,6 +135,6 @@ test('public lottery callables accept authenticated public calls without App Che
 test('service worker fetches app shell from network before cached fallback', () => {
   const swSource = fs.readFileSync(path.join(__dirname, '..', 'sitio', 'sw.js'), 'utf8');
 
-  assert.match(swSource, /plv1-cache-v8/);
+  assert.match(swSource, /plv1-cache-v9/);
   assert.match(swSource, /fetch\(e\.request\)[\s\S]+caches\.match\(e\.request\)/);
 });

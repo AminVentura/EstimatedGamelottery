@@ -1596,7 +1596,7 @@ const NY_OPEN_DATA = {
   take5:              'https://data.ny.gov/resource/dg63-4siq.json',
   win4:               'https://data.ny.gov/resource/hsys-3def.json',
   pick10:             'https://data.ny.gov/resource/bycu-cw7c.json',
-  millionaireforlife: 'https://data.ny.gov/resource/kwxv-fwze.json'
+  millionaireforlife: 'https://data.ny.gov/resource/a4w9-a3tp.json'
 };
 
 function _nyDate(str) { return str ? str.split('T')[0] : null; }
@@ -1697,12 +1697,12 @@ async function fetchNYOpenData() {
     }
 
     if (m4lRes.status === 'fulfilled' && Array.isArray(m4lRes.value)) {
-      // kwxv-fwze es el conjunto de Cash4Life (retirado el 2026-02-21; 1-60 + Cash Ball 1-4).
-      // Solo se aceptan filas desde el arranque de Millionaire For Life (2026-02-22) y dentro de su rango (5 de 1-58 + bola 1-5).
+      // a4w9-a3tp: conjunto oficial de Millionaire For Life (desde 2026-02-22; bola en mill_ball).
+      // Se mantiene el filtro de arranque y de rango (5 de 1-58 + bola 1-5) por si llegan filas de Cash4Life.
       const items = m4lRes.value.map(row => {
         const date = _nyDate(row.draw_date);
         const main = String(row.winning_numbers || '').trim().split(/\s+/).map(Number).sort((a, b) => a - b);
-        const ball = Number(row.millionaire_ball ?? row.cash_ball);
+        const ball = Number(row.mill_ball ?? row.millionaire_ball);
         return _nyItem('m4l', date, main, ball);
       }).filter(it => it.data.date >= '2026-02-22'
         && it.data.mainNumbers.length === 5

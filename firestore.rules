@@ -52,6 +52,18 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ── Archivo de sorteos antiguos de navegadores (2026-10-14) ──────────
+    // Copias de los 98 documentos que crearon los navegadores antes de la ingesta
+    // oficial. No es público: ningún cliente lo lee ni lo escribe (solo Admin SDK).
+    match /archived_browser_drawings/{docId} {
+      allow read, write: if false;
+    }
+
+    // Contadores de límite de uso de las callables (solo Cloud Functions).
+    match /rate_limits/{key} {
+      allow read, write: if false;
+    }
+
     match /artifacts/EstimatedGamelottery-app/public/data/user_stats/{userId} {
       allow read: if isSignedIn() && request.auth.uid == userId;
       allow create: if userStatsWriteOk(userId);

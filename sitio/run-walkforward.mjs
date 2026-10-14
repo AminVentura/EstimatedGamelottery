@@ -61,7 +61,7 @@ const NY = {
   take5: 'https://data.ny.gov/resource/dg63-4siq.json',
   win4: 'https://data.ny.gov/resource/hsys-3def.json',
   pick10: 'https://data.ny.gov/resource/bycu-cw7c.json',
-  millionaireforlife: 'https://data.ny.gov/resource/kwxv-fwze.json'
+  millionaireforlife: 'https://data.ny.gov/resource/a4w9-a3tp.json'
 };
 
 async function fetchJson(url) {
@@ -111,7 +111,7 @@ async function loadHistory() {
     millionaireforlife: m4l.map(row => {
       const date = nyDate(row.draw_date);
       const main = row.winning_numbers.trim().split(/\s+/).map(Number).sort((a, b) => a - b);
-      const special = Number(row.cash_ball ?? row.millionaire_ball ?? row.millionaire_ball_number);
+      const special = Number(row.mill_ball ?? row.millionaire_ball);
       return nyItem('m4l', date, main, special);
     }),
     take5day: [],

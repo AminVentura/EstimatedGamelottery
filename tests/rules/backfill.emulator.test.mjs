@@ -56,6 +56,7 @@ before(async () => {
   await draw('powerball', '2026-10-10', [11, 21, 31, 41, 51], 8);
   await draw('powerball', '2026-10-12', [12, 22, 32, 42, 52], 9, 'mock_fallback'); // nunca debe publicarse
   await draw('win4eve', '2026-10-10', [0, 7, 0, 3], null);
+  await draw('win4day', '2026-10-10', [1, 2, 3, 4], null); // sin documento padre lottery_history/win4day_2026, como en producción
   // Documento antiguo de un navegador, con datos distintos al oficial de esa fecha.
   await admin.doc(`${BASE}/powerball_drawings/Ab3dEf6hIj9kLm2nOp5q`).set(VIEJO);
 });
@@ -67,7 +68,7 @@ after(async () => {
 
 test('la simulación no escribe nada', async () => {
   const total = runScript('--dry-run');
-  assert.equal(total.porCrear, 4);
+  assert.equal(total.porCrear, 5);
   assert.equal(total.creados, 0);
   assert.equal(total.descartadosPorFuente, 1);
   assert.deepEqual(Object.keys(await publico('powerball')), ['Ab3dEf6hIj9kLm2nOp5q']);
@@ -82,7 +83,8 @@ test('sin --write tampoco escribe (la simulación es el modo por defecto)', asyn
 
 test('con --write copia solo lo oficial, con id = fecha, y deja intacto el documento antiguo', async () => {
   const total = runScript('--write');
-  assert.equal(total.creados, 4);
+  assert.equal(total.creados, 5);
+  assert.deepEqual(Object.keys(await publico('win4day')), ['2026-10-10']);
   const pb = await publico('powerball');
   assert.deepEqual(Object.keys(pb).sort(), ['2025-12-31', '2026-10-07', '2026-10-10', 'Ab3dEf6hIj9kLm2nOp5q']);
   assert.deepEqual(pb['2026-10-10'].mainNumbers, [11, 21, 31, 41, 51]);
@@ -101,7 +103,7 @@ test('repetir --write no crea ni cambia nada', async () => {
   const antes = JSON.stringify(await publico('powerball'));
   const total = runScript('--write');
   assert.equal(total.creados, 0);
-  assert.equal(total.yaExistian, 4);
+  assert.equal(total.yaExistian, 5);
   assert.equal(JSON.stringify(await publico('powerball')), antes);
 });
 

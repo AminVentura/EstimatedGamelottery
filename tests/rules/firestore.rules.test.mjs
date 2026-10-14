@@ -155,6 +155,31 @@ test('user_stats: solo el dueño', async () => {
   await assertFails(setDoc(doc(bob, `${BASE}/user_stats/ana`), { aciertos: 99 }));
 });
 
+test('el archivo de sorteos de navegadores no se lee ni se escribe desde el cliente', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'archived_browser_drawings/powerball__Ab3dEf6hIj9kLm2nOp5q'), { date: '2026-10-07', originalPath: 'x' });
+  });
+  const anon = env.unauthenticatedContext().firestore();
+  const ana = env.authenticatedContext('ana').firestore();
+  for (const db of [anon, ana]) {
+    await assertFails(getDoc(doc(db, 'archived_browser_drawings/powerball__Ab3dEf6hIj9kLm2nOp5q')));
+    await assertFails(getDocs(collection(db, 'archived_browser_drawings')));
+    await assertFails(setDoc(doc(db, 'archived_browser_drawings/nuevo'), { a: 1 }));
+    await assertFails(addDoc(collection(db, 'archived_browser_drawings'), { a: 1 }));
+    await assertFails(deleteDoc(doc(db, 'archived_browser_drawings/powerball__Ab3dEf6hIj9kLm2nOp5q')));
+  }
+});
+
+test('los contadores de límite de uso no se leen ni se tocan desde el cliente', async () => {
+  const ana = env.authenticatedContext('ana').firestore();
+  const anon = env.unauthenticatedContext().firestore();
+  for (const db of [ana, anon]) {
+    await assertFails(getDoc(doc(db, 'rate_limits/estimate_id_ana')));
+    await assertFails(setDoc(doc(db, 'rate_limits/estimate_id_ana'), { count: 0, windowStartMs: 0 }));
+    await assertFails(deleteDoc(doc(db, 'rate_limits/estimate_id_ana')));
+  }
+});
+
 test('cualquier otra ruta está denegada por defecto', async () => {
   const ana = env.authenticatedContext('ana').firestore();
   await assertFails(setDoc(doc(ana, 'cualquier/cosa'), { a: 1 }));

@@ -28,6 +28,7 @@ const {
   fetchMlbPlayerSeasonStats,
 } = require('./sports-eternal');
 const { isOfficialPublicDoc, mirrorDrawsToPublic } = require('./public-drawings');
+const { consumeQuotas } = require('./rate-limit.js');
 
 // Guard: only initialize once (safe across hot-reloads & multi-file setups)
 if (!getApps().length) initializeApp();
@@ -1483,7 +1484,8 @@ const LOTTERY_GAMES = {
   // rulesSince: sorteos anteriores tienen otras reglas y se descartan en normalizeDraw.
   // Mega Millions: 5/70 + Mega Ball 1-24 desde el 2025-04-08 (antes 1-25).
   megamillions: { mainPool: 70, mainCount: 5, drawResultCount: 5, bonusPool: 24, bonusField: 'megaBall', minNumber: 1, rulesSince: '2025-04-08' },
-  // Millionaire For Life arrancó el 2026-02-22; kwxv-fwze trae Cash4Life (retirado, 1-60 + 1-4), que no debe mezclarse.
+  // Millionaire For Life arrancó el 2026-02-22. Fuente oficial: a4w9-a3tp (NY Open Data, NY State Gaming Commission).
+  // kwxv-fwze es Cash4Life (retirado, 1-60 + 1-4) y no debe mezclarse; rulesSince lo descarta igualmente.
   millionaireforlife: { mainPool: 58, mainCount: 5, drawResultCount: 5, bonusPool: 5, bonusField: 'millionaire_ball', minNumber: 1, rulesSince: '2026-02-22' },
   pick10: { mainPool: 80, mainCount: 10, drawResultCount: 20, bonusPool: 0, bonusField: null, minNumber: 1 },
   take5day: { mainPool: 39, mainCount: 5, drawResultCount: 5, bonusPool: 0, bonusField: null, minNumber: 1 },
@@ -1906,11 +1908,12 @@ function buildMockDraw(gameType, when = new Date()) {
   }, gameType, when);
 }
 
-async function fetchOfficialDrawsForGame(gameType) {
+async function fetchOfficialDrawsForGame(gameType, options = {}) {
   const ny = {
     powerball: { url: 'https://data.ny.gov/resource/d6yy-54nr.json', kind: 'pb' },
     megamillions: { url: 'https://data.ny.gov/resource/5xaw-6ayf.json', kind: 'mm' },
-    millionaireforlife: { url: 'https://data.ny.gov/resource/kwxv-fwze.json', kind: 'm4l' },
+    // a4w9-a3tp: «Lottery Millionaire For Life Winning Numbers: Beginning 2026» (desde 2026-02-22; campo mill_ball).
+    millionaireforlife: { url: 'https://data.ny.gov/resource/a4w9-a3tp.json', kind: 'm4l' },
     pick10: { url: 'https://data.ny.gov/resource/bycu-cw7c.json', kind: 'p10' },
     take5day: { url: 'https://data.ny.gov/resource/dg63-4siq.json', kind: 't5day' },
     take5eve: { url: 'https://data.ny.gov/resource/dg63-4siq.json', kind: 't5eve' },
@@ -1921,7 +1924,8 @@ async function fetchOfficialDrawsForGame(gameType) {
   if (!spec) return [];
 
   try {
-    const url = spec.url + '?$limit=200&$order=draw_date+DESC';
+    const limit = Number.isInteger(options.limit) && options.limit > 0 ? Math.min(options.limit, 5000) : 200;
+    const url = spec.url + '?$limit=' + limit + '&$order=draw_date+DESC';
     const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
     if (!res.ok) throw new Error('status_' + res.status);
     const body = await res.json();
@@ -1941,7 +1945,7 @@ async function fetchOfficialDrawsForGame(gameType) {
         bonusNumber = Number(row.mega_ball);
       } else if (spec.kind === 'm4l' && row.winning_numbers) {
         mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
-        bonusNumber = Number(row.millionaire_ball != null ? row.millionaire_ball : row.cash_ball);
+        bonusNumber = Number(row.mill_ball != null ? row.mill_ball : row.millionaire_ball);
       } else if (spec.kind === 'p10' && row.winning_numbers) {
         mainNumbers = String(row.winning_numbers).trim().split(/\s+/).map(Number);
       } else if (spec.kind === 't5day' && row.midday_winning_numbers) {
@@ -2197,11 +2201,16 @@ async function runBacktesting(draws, gameType, existingWeights) {
   return { ...best, tunedWeights: best.weightsUsed };
 }
 
-async function loadGameDraws(db, gameType, limit = 1200) {
+async function loadGameDraws(db, gameType, limit = 1200, options = {}) {
   const prefix = gameType + '_';
-  const historySnap = await db.collection('lottery_history').get();
-  const targetHistoryDocs = historySnap.docs
-    .map((doc) => doc.id)
+  // Los documentos padre lottery_history/<juego>_<año> no existen en producción (la ingesta
+  // solo escribe en su subcolección draws), así que collection().get() no los devuelve.
+  // listDocuments() sí. Por ahora solo lo usa el script de relleno (options.listParents);
+  // el resto de llamadas conserva el comportamiento desplegado (ver docs/CAMBIOS-2026-10-14.md).
+  const historyIds = options.listParents === true
+    ? (await db.collection('lottery_history').listDocuments()).map((ref) => ref.id)
+    : (await db.collection('lottery_history').get()).docs.map((doc) => doc.id);
+  const targetHistoryDocs = historyIds
     .filter((id) => id.startsWith(prefix))
     .sort();
 
@@ -2431,10 +2440,36 @@ exports.ingestOfficialLotteryResults = onSchedule(
   }
 );
 
+// Límites de estimatePreferredNumbers (pública con App Check): por usuario/invitado y por IP,
+// ventana de 1 hora. La sesión anónima es gratis de crear, por eso también se limita por IP.
+const PREFERRED_LIMIT_PER_ID = 30;
+const PREFERRED_LIMIT_PER_IP = 120;
+const PREFERRED_WINDOW_MS = 60 * 60 * 1000;
+// Caché del historial por instancia: evita leer hasta 600 documentos en cada llamada.
+const PREFERRED_HISTORY_TTL_MS = 10 * 60 * 1000;
+const preferredHistoryCache = new Map();
+
+async function loadPreferredHistoryCached(db, gameType, nowMs = Date.now()) {
+  const hit = preferredHistoryCache.get(gameType);
+  if (hit && nowMs - hit.at < PREFERRED_HISTORY_TTL_MS) return hit.draws;
+  const draws = await loadPreferredHistoryDraws(db, gameType);
+  preferredHistoryCache.set(gameType, { at: nowMs, draws });
+  return draws;
+}
+
+function requestIp(request) {
+  const ip = request && request.rawRequest ? String(request.rawRequest.ip || '') : '';
+  return ip.replace(/[^0-9a-fA-F.:]/g, '').slice(0, 45) || 'unknown';
+}
+
 exports.estimatePreferredNumbers = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true, timeoutSeconds: 30, maxInstances: 10 },
   async (request) => {
     const identity = getRequestIdentity(request);
+    // Token de App Check de un solo uso (la web pide limitedUseAppCheckTokens): no se acepta repetido.
+    if (request.app && request.app.alreadyConsumed === true) {
+      throw new HttpsError('permission-denied', 'Solicitud repetida. Vuelve a intentarlo.');
+    }
 
     const gameType = normalizePreferredGameType(request.data && request.data.gameType);
     const ranges = gameType ? PREFERRED_LOTTERY_RANGES[gameType] : null;
@@ -2454,9 +2489,23 @@ exports.estimatePreferredNumbers = onCall(
       throw new HttpsError('invalid-argument', err instanceof Error ? err.message : 'Numeros invalidos.');
     }
 
+    const db = getFirestore();
+    let quota;
     try {
-      const db = getFirestore();
-      const history = await loadPreferredHistoryDraws(db, gameType);
+      quota = await consumeQuotas(db, [
+        { key: 'estimate_id_' + identity.uid, limit: PREFERRED_LIMIT_PER_ID },
+        { key: 'estimate_ip_' + requestIp(request), limit: PREFERRED_LIMIT_PER_IP },
+      ], PREFERRED_WINDOW_MS);
+    } catch (err) {
+      console.error('[estimatePreferredNumbers] limite', err instanceof Error ? err.message : String(err));
+      throw new HttpsError('unavailable', 'No se pudo calcular el margen historico ahora mismo.');
+    }
+    if (!quota.ok) {
+      throw new HttpsError('resource-exhausted', 'Has hecho muchas consultas seguidas. Prueba de nuevo en ' + Math.ceil(quota.retryAfterSec / 60) + ' min.');
+    }
+
+    try {
+      const history = await loadPreferredHistoryCached(db, gameType);
       if (history.length < 3) {
         throw new HttpsError('failed-precondition', 'No hay suficiente historial para calcular un margen responsable.');
       }
@@ -2528,5 +2577,6 @@ exports.normalizeDrawForTest = normalizeDraw;
 // Para scripts de operación (scripts/backfill-historial-publico.js); no son Cloud Functions.
 exports.loadGameDrawsForOps = loadGameDraws;
 exports.LOTTERY_GAME_TYPES_FOR_OPS = Object.keys(LOTTERY_GAMES);
+exports.fetchOfficialDrawsForOps = fetchOfficialDrawsForGame;
 exports.estimatePreferredNumbersForTest = estimatePreferredNumbers;
 exports.getRequestIdentityForTest = getRequestIdentity;

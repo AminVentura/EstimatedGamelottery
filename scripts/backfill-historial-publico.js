@@ -6,15 +6,18 @@
 // - No borra ni reescribe nada. No inventa sorteos ni rellena huecos.
 // - Por defecto NO escribe (simulación). Para escribir hay que pasar --write.
 //
-// Uso (desde la raíz del repo, con credenciales de aplicación de gcloud:
-//      gcloud auth application-default login):
+// Uso (desde la raíz del repo, con credenciales de aplicación de gcloud
+//      —gcloud auth application-default login— o con un token de corta vida:
+//      export GCLOUD_ACCESS_TOKEN=$(gcloud auth print-access-token)):
 //   node scripts/backfill-historial-publico.js --project game-lottery-b0e90 --dry-run
 //   node scripts/backfill-historial-publico.js --project game-lottery-b0e90 --write
 // Opcional: --game powerball   (un solo juego)
+//           --desde-fuente     (también descarga el historial completo de la fuente oficial)
 //
 // Contra el emulador: FIRESTORE_EMULATOR_HOST=127.0.0.1:8089 y --project demo-...
 
 const path = require('node:path');
+const { openFirestore } = require('./lib/firestore-cli.js');
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -42,32 +45,38 @@ async function main() {
   const functionsDir = path.join(__dirname, '..', 'functions');
   const fn = require(path.join(functionsDir, 'index.js'));
   const { mirrorDrawsToPublic } = require(path.join(functionsDir, 'public-drawings.js'));
-  // firebase-admin se resuelve desde functions/ (es donde está instalado).
-  const requireFromFunctions = require('node:module').createRequire(path.join(functionsDir, 'package.json'));
-  const { getFirestore, FieldValue } = requireFromFunctions('firebase-admin/firestore');
-  const db = getFirestore();
+  // Credenciales: emulador, GCLOUD_ACCESS_TOKEN o credenciales de aplicación (ver scripts/lib/firestore-cli.js).
+  const { db, FieldValue, auth } = openFirestore(project);
 
   const onlyGame = value('--game');
+  const fromSource = flag('--desde-fuente');
   const games = fn.LOTTERY_GAME_TYPES_FOR_OPS.filter((g) => !onlyGame || g === onlyGame);
   if (!games.length) throw new Error('Juego no soportado: ' + onlyGame);
 
-  console.log(JSON.stringify({ project, emulator: emulator || null, modo: dryRun ? 'SIMULACION (no escribe)' : 'ESCRITURA', games }));
+  console.log(JSON.stringify({ project, auth, emulator: emulator || null, modo: dryRun ? 'SIMULACION (no escribe)' : 'ESCRITURA', desdeFuente: fromSource, games }));
 
-  const totals = { enLotteryHistory: 0, descartadosPorFuente: 0, yaExistian: 0, creados: 0, porCrear: 0 };
+  const totals = { leidos: 0, descartadosPorFuente: 0, yaExistian: 0, creados: 0, porCrear: 0 };
   for (const gameType of games) {
-    const draws = await fn.loadGameDrawsForOps(db, gameType, 100000);
+    // --desde-fuente: además de lottery_history, descarga el historial completo de la fuente
+    // oficial (NY Open Data, hasta 5000 filas). Solo entra lo que normalizeDraw acepta.
+    let draws = await fn.loadGameDrawsForOps(db, gameType, 100000, { listParents: true });
+    if (fromSource) {
+      const official = await fn.fetchOfficialDrawsForOps(gameType, { limit: 5000 });
+      if (!official.length) throw new Error('La fuente oficial no devolvió sorteos para ' + gameType + '.');
+      draws = draws.concat(official);
+    }
     const result = await mirrorDrawsToPublic(db, gameType, draws, {
       dryRun,
       serverTimestamp: () => FieldValue.serverTimestamp(),
     });
-    totals.enLotteryHistory += draws.length;
+    totals.leidos += draws.length;
     totals.descartadosPorFuente += result.skipped;
     totals.yaExistian += result.existing;
     totals.creados += result.created;
     totals.porCrear += result.wouldCreate.length;
     console.log(JSON.stringify({
       gameType,
-      enLotteryHistory: draws.length,
+      leidos: draws.length,
       descartadosPorFuente: result.skipped,
       candidatos: result.candidates,
       yaExistian: result.existing,

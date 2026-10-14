@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'plv1-cache-v8';
+const CACHE_NAME = 'plv1-cache-v9';
 const PRECACHE = [
   '/',
   '/styles.css',
