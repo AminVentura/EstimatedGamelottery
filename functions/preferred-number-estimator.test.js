@@ -116,8 +116,8 @@ test('preferred margin flow times out and annotates numbers matching today predi
 });
 
 // 2026-10-14 (decisión de Amin): getLotteryAgentInsight exige App Check de un solo uso y tiene
-// límite de uso, como estimatePreferredNumbers; getLotteryAgentsBoard no cambia.
-test('getLotteryAgentInsight exige App Check y límite de uso; el tablero sigue igual', () => {
+// límite de uso, como estimatePreferredNumbers; desde la tanda 3 también getLotteryAgentsBoard.
+test('getLotteryAgentInsight y getLotteryAgentsBoard exigen App Check y límite de uso', () => {
   const functionsSource = fs.readFileSync(path.join(__dirname, 'index.js'), 'utf8');
   const insightStart = functionsSource.indexOf('exports.getLotteryAgentInsight = onCall(');
   const boardStart = functionsSource.indexOf('exports.getLotteryAgentsBoard = onCall(');
@@ -131,7 +131,11 @@ test('getLotteryAgentInsight exige App Check y límite de uso; el tablero sigue 
   assert.match(insightBlock, /alreadyConsumed/);
   assert.match(insightBlock, /consumeQuotas\(/);
   assert.doesNotMatch(insightBlock, /ingestOfficialDrawsIfEmpty/);
-  assert.doesNotMatch(boardBlock, /enforceAppCheck:\s*true/);
+  const boardOnly = boardBlock.slice(0, boardBlock.indexOf('\n);') + 3);
+  assert.match(boardOnly, /enforceAppCheck:\s*true/);
+  assert.match(boardOnly, /consumeAppCheckToken:\s*true/);
+  assert.match(boardOnly, /alreadyConsumed/);
+  assert.match(boardOnly, /consumeQuotas\(/);
   assert.match(insightBlock, /getRequestIdentity\(request\)/);
   assert.match(boardBlock, /getRequestIdentity\(request\)/);
   assert.match(insightBlock, /formatLotteryAgentPayload/);

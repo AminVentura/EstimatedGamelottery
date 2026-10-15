@@ -2645,11 +2645,33 @@ exports.getLotteryAgentInsight = onCall(
   }
 );
 
+// Límites de getLotteryAgentsBoard (2026-10-14, como getLotteryAgentInsight): 8 lecturas
+// por llamada; la web la pide una vez al cargar la home.
+const BOARD_LIMIT_PER_ID = 60;
+const BOARD_LIMIT_PER_IP = 240;
+const BOARD_WINDOW_MS = 60 * 60 * 1000;
+
 exports.getLotteryAgentsBoard = onCall(
-  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: false, timeoutSeconds: 60 },
+  { region: 'us-central1', cors: ALLOWED_ORIGINS, enforceAppCheck: true, consumeAppCheckToken: true, timeoutSeconds: 60, maxInstances: 10 },
   async (request) => {
-    getRequestIdentity(request);
+    const identity = getRequestIdentity(request);
+    if (request.app && request.app.alreadyConsumed === true) {
+      throw new HttpsError('permission-denied', 'Solicitud repetida. Vuelve a intentarlo.');
+    }
     const db = getFirestore();
+    let quota;
+    try {
+      quota = await consumeQuotas(db, [
+        { key: 'board_id_' + identity.uid, limit: BOARD_LIMIT_PER_ID },
+        { key: 'board_ip_' + requestIp(request), limit: BOARD_LIMIT_PER_IP },
+      ], BOARD_WINDOW_MS);
+    } catch (err) {
+      console.error('[getLotteryAgentsBoard] limite', err instanceof Error ? err.message : String(err));
+      throw new HttpsError('unavailable', 'No se pudo cargar el tablero ahora mismo.');
+    }
+    if (!quota.ok) {
+      throw new HttpsError('resource-exhausted', 'Has hecho muchas consultas seguidas. Prueba de nuevo en ' + Math.ceil(quota.retryAfterSec / 60) + ' min.');
+    }
     const games = {};
     for (const gameType of Object.keys(LOTTERY_GAMES)) {
       const snap = await db.doc('prediction_models/' + gameType).get();

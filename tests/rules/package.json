@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Tests de firestore.rules con el emulador (no toca el proyecto real).",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore --project demo-gamelottery-rules \"node --test --test-concurrency=1 firestore.rules.test.mjs backfill.emulator.test.mjs archivo.emulator.test.mjs entrenamiento.emulator.test.mjs\""
+    "test": "firebase emulators:exec --only firestore --project demo-gamelottery-rules \"node --test --test-concurrency=1 firestore.rules.test.mjs backfill.emulator.test.mjs archivo.emulator.test.mjs entrenamiento.emulator.test.mjs archivo-lottery-history.emulator.test.mjs\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",

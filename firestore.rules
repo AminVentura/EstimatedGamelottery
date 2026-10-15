@@ -59,6 +59,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ── Archivo de lottery_history (2026-10-14) ──────────────────────────
+    // Sorteos de lottery_history que no coinciden con la fuente oficial (91 mock_fallback,
+    // 165 de Cash4Life guardados como Millionaire For Life). Solo Admin SDK.
+    match /archived_lottery_history/{docId} {
+      allow read, write: if false;
+    }
+
     // Contadores de límite de uso de las callables (solo Cloud Functions).
     match /rate_limits/{key} {
       allow read, write: if false;
