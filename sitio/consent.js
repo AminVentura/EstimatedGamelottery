@@ -5,7 +5,9 @@
  *   <script src="/consent.js"></script>
  *
  * - Por defecto todo denegado (ad_storage, ad_user_data, ad_personalization, analytics_storage).
- * - El script de AdSense NO está en el HTML: lo inyecta loadAdSense() solo si el usuario acepta publicidad.
+ * - El <script> de AdSense va en el HTML de las páginas con contenido (el rastreador no ejecuta este archivo).
+ *   consent default queda denegado antes de ese script. loadAdSense() no lo duplica.
+ *   En páginas legales no hay script: solo la metaetiqueta.
  * - Banner con Aceptar / Rechazar del mismo peso y un botón Configurar.
  * - Cualquier elemento con [data-cookie-prefs] reabre el banner (enlace "Preferencias de cookies" del footer).
  * - La elección se guarda en localStorage (clave cookieConsentPrefs). Si el almacenamiento falla, se pregunta de nuevo.
@@ -62,16 +64,26 @@
     });
   }
 
+  var current = readPrefs();
+  if (current) applyConsent(current);
+
+  window.adsbygoogle = window.adsbygoogle || [];
+  if (!current || !current.personalization) window.adsbygoogle.requestNonPersonalizedAds = 1;
+
   var adsenseRequested = false;
   function loadAdSense() {
     if (adsenseRequested) return;
     var p = current;
     if (!p || !p.ads) return;
-    // Solo en páginas con huecos de anuncio (no en páginas legales)
-    if (!document.querySelector('ins.adsbygoogle')) return;
-    adsenseRequested = true;
     window.adsbygoogle = window.adsbygoogle || [];
     if (!p.personalization) window.adsbygoogle.requestNonPersonalizedAds = 1;
+    if (document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')) {
+      adsenseRequested = true;
+      document.dispatchEvent(new CustomEvent('bs:adsense-ready'));
+      return;
+    }
+    if (!document.querySelector('ins.adsbygoogle')) return;
+    adsenseRequested = true;
     var s = document.createElement('script');
     s.async = true;
     s.crossOrigin = 'anonymous';
@@ -81,9 +93,6 @@
     };
     document.head.appendChild(s);
   }
-
-  var current = readPrefs();
-  if (current) applyConsent(current);
 
   // ---------- Banner ----------
   var banner, panel, chkAds, chkPers;

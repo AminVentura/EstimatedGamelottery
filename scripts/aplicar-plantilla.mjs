@@ -8,6 +8,35 @@ import { fileURLToPath } from 'node:url';
 
 const SITIO = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'sitio');
 const EXCLUIR = new Set(['index.html', 'appcheck-test.html', '404.html']);
+const SIN_ANUNCIO = new Set([
+  '404.html',
+  'appcheck-test.html',
+  'contacto.html',
+  'terminos.html',
+  'juego-responsable.html',
+  'politica-privacidad.html',
+  'politica-cookies.html',
+]);
+const ADS_META = '  <meta name="google-adsense-account" content="ca-pub-8721021745606812">';
+const ADS_SCRIPT = '  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8721021745606812" crossorigin="anonymous"></script>';
+const CONSENT = '  <script src="/consent.js"></script>';
+
+function asegurarAdSense(s, rel) {
+  if (rel === '404.html' || rel === 'appcheck-test.html') return s;
+  const sinAnuncio = SIN_ANUNCIO.has(rel);
+  s = s.replace(/[ \t]*<meta name="google-adsense-account"[^>]*>\r?\n/g, '');
+  s = s.replace(/[ \t]*<script async src="https:\/\/pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js[^>]*>\s*<\/script>\r?\n/g, '');
+  if (!sinAnuncio && !s.includes('src="/consent.js"')) {
+    s = s.replace(/<head>/i, `<head>\n${CONSENT}`);
+  }
+  const bloque = `${ADS_META}${sinAnuncio ? '' : '\n' + ADS_SCRIPT}`;
+  if (s.includes('src="/consent.js"')) {
+    s = s.replace(/<script src="\/consent\.js"><\/script>/, `<script src="/consent.js"></script>\n${bloque}`);
+  } else {
+    s = s.replace(/<head>/i, `<head>\n${bloque}`);
+  }
+  return s;
+}
 
 const L = 'text-gray-300 hover:text-cyan-300 hover:underline';
 const NAV = `<!-- NAV:START -->
@@ -52,8 +81,14 @@ const paginas = [];
 
 for (const abs of paginas) {
   const rel = path.relative(SITIO, abs).replace(/\\/g, '/');
-  if (EXCLUIR.has(rel)) continue;
   let s = fs.readFileSync(abs, 'utf8');
+  const antesAds = s;
+  s = asegurarAdSense(s, rel);
+  if (EXCLUIR.has(rel)) {
+    if (s !== antesAds) fs.writeFileSync(abs, s, 'utf8');
+    if (s !== antesAds) console.log('adsense', rel);
+    continue;
+  }
   s = s.replace(AVISO_VIEJO, '');
   s = bloque(s, '<!-- NAV:START -->', '<!-- NAV:END -->', NAV, (t) => t.replace(/(<body[^>]*>)/, `$1\n${NAV}`));
   s = bloque(s, '<!-- PIE:START -->', '<!-- PIE:END -->', PIE, (t) => {

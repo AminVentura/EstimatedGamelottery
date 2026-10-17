@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <!-- Consent Mode v2 (todo denegado por defecto) + banner. Debe ir antes de cualquier etiqueta de Google. AdSense se inyecta desde aquí solo tras aceptar. -->
+  <!-- Consent Mode v2 denegado por defecto, antes del script de AdSense que va en este head. -->
   <script src="/consent.js"></script>
+  <meta name="google-adsense-account" content="ca-pub-8721021745606812">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8721021745606812" crossorigin="anonymous"></script>
   <!-- CSP en producción: firebase.json → hosting.headers Content-Security-Policy (incl. connect-src … ep1.adtrafficquality.google). No duplicar aquí otra CSP completa (el navegador exige cumplir todas las políticas). -->
   <!-- App Check (reCAPTCHA Enterprise): clave del sitio desde Firebase Console → App Check → tu app web. Sin clave no se inicializa App Check. -->
   <meta name="firebase-appcheck-recaptcha-site-key" content="6LeXmdgsAAAAADt_GN4dMGudJ8GNAJfgUUKfbM9G">
@@ -37,8 +39,6 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { corePlugins: { preflight: true } };</script>
-  <meta name="google-adsense-account" content="ca-pub-8721021745606812">
-  <!-- adsbygoogle.js ya no se carga aquí de forma incondicional: lo inyecta /consent.js tras el consentimiento (2026-09-29). -->
   <!-- ads.txt está en la raíz: https://www.prediccionloteria.com/ads.txt -->
   <meta name="google-site-verification" content="MVCG8sYtoNU7JvRxOkklKTn5PJGgLdjOExbZk6W-5W8" />
   <meta name="robots" content="index, follow">
