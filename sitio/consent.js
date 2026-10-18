@@ -5,8 +5,9 @@
  *   <script src="/consent.js"></script>
  *
  * - Por defecto todo denegado (ad_storage, ad_user_data, ad_personalization, analytics_storage).
- * - El <script> de AdSense va en el HTML de las páginas con contenido (el rastreador no ejecuta este archivo).
- *   consent default queda denegado antes de ese script. loadAdSense() no lo duplica.
+ * - El <script> de AdSense va en el HTML de las páginas con contenido (el rastreador no ejecuta este archivo),
+ *   siempre DESPUÉS del bloque inline bs-consent-default, primer script del <head> (tests/web/consent-order.test.mjs).
+ *   loadAdSense() no lo duplica.
  *   En páginas legales no hay script: solo la metaetiqueta.
  * - Banner con Aceptar / Rechazar del mismo peso y un botón Configurar.
  * - Cualquier elemento con [data-cookie-prefs] reabre el banner (enlace "Preferencias de cookies" del footer).
@@ -26,15 +27,19 @@
   function gtag() { window.dataLayer.push(arguments); }
   window.gtag = window.gtag || gtag;
 
-  // 1) Consent Mode v2: todo denegado antes de cualquier etiqueta
-  gtag('consent', 'default', {
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    analytics_storage: 'denied',
-    wait_for_update: 500
-  });
-  gtag('set', 'ads_data_redaction', true);
+  // 1) Consent Mode v2: todo denegado antes de cualquier etiqueta. Las páginas con AdSense ya lo traen
+  //    inline como primer script del <head> (bs-consent-default); aquí solo si falta, para no mandar dos "default".
+  if (!window.bsConsentDefault) {
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      wait_for_update: 500
+    });
+    gtag('set', 'ads_data_redaction', true);
+    window.bsConsentDefault = true;
+  }
 
   function readPrefs() {
     try {
