@@ -1,4 +1,5 @@
 # CI estándar de Businessskore (plantilla 2026-10-19, C:\Proyectos\_recursos\plantilla-ci): Construir -> Probar.
+# GameLottery: PrediccionLoteria/functions instala con --legacy-peer-deps porque firebase-functions 4.9 no declara compatibilidad con firebase-admin 13 (hallazgo real: actualizar firebase-functions).
 # Corre en cada push y en cada pull request. El deploy (deploy.yml) solo arranca
 # cuando este workflow termina en verde en la rama de producción.
 # Check que hay que exigir en la protección de rama: "CI / ci-ok".
@@ -32,15 +33,19 @@ jobs:
           #   node:     versión de Node (la de "engines" o la del hosting)
           #   scripts:  scripts de package.json, en orden (lint, typecheck, test, build...);
           #             "ws:build" = npm run build en todos los workspaces que lo tengan
+          #             "test@--passWithNoTests" = npm run test -- --passWithNoTests
+          #   npmflags: opciones extra de npm ci (p. ej. --legacy-peer-deps), vacío por defecto
           #   emulador: 'firestore' si los tests usan el emulador de Firestore
           - dir: .
             node: '22'
             scripts:
             emulador: ''
+            npmflags: ''
           - dir: PrediccionLoteria/functions
             node: '20'
             scripts:
             emulador: ''
+            npmflags: '--legacy-peer-deps'
     defaults:
       run:
         working-directory: ${{ matrix.dir }}
@@ -57,13 +62,14 @@ jobs:
           cache-dependency-path: ${{ matrix.dir }}/package*.json
 
       - name: Instalar (npm ci)
+        id: instalar
         shell: bash
         run: |
           if [ -f package-lock.json ]; then
-            npm ci --no-audit --no-fund
+            npm ci --no-audit --no-fund ${{ matrix.npmflags }}
           else
             echo "::warning title=Sin package-lock.json::${{ matrix.dir }} no tiene lockfile; se usa npm install (instalación no reproducible). Versionar package-lock.json."
-            npm install --no-audit --no-fund
+            npm install --no-audit --no-fund ${{ matrix.npmflags }}
           fi
 
       - name: Java para el emulador de Firestore
@@ -76,23 +82,33 @@ jobs:
       - name: Lint, typecheck, tests y build
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          fallos=""
           for s in ${{ matrix.scripts }}; do
-            echo "::group::npm run $s"
-            if [ "${s#ws:}" != "$s" ]; then
-              npm run "${s#ws:}" --workspaces --if-present
-            elif [ -n "${{ matrix.emulador }}" ] && [ "$s" = "test" ]; then
-              npx --yes firebase-tools@15.34.0 emulators:exec --only ${{ matrix.emulador }} --project demo-ci "npm run test"
+            nombre="${s%%@*}"; args=""
+            if [ "$nombre" != "$s" ]; then args="-- ${s#*@}"; fi
+            echo "::group::npm run $nombre $args"
+            if [ "${nombre#ws:}" != "$nombre" ]; then
+              npm run "${nombre#ws:}" --workspaces --if-present $args
+            elif [ -n "${{ matrix.emulador }}" ] && [ "$nombre" = "test" ]; then
+              npx --yes firebase-tools@15.34.0 emulators:exec --only ${{ matrix.emulador }} --project demo-ci "npm run test $args"
             else
-              npm run "$s"
+              npm run "$nombre" $args
             fi
+            rc=$?
             echo "::endgroup::"
+            if [ $rc -ne 0 ]; then echo "::error title=Falló npm run $nombre::${{ matrix.dir }}: exit $rc"; fallos="$fallos $nombre"; fi
           done
+          if [ -n "$fallos" ]; then echo "Fallaron:$fallos"; exit 1; fi
 
       - name: Licencias (prohibido GPL/AGPL)
+        # Corre aunque falle un paso anterior, para ver todos los hallazgos en un solo run.
+        if: ${{ !cancelled() && steps.instalar.outcome == 'success' }}
         run: node "$GITHUB_WORKSPACE/.github/scripts/licencias.mjs" .
 
       - name: npm audit (críticas)
+        # Corre aunque falle un paso anterior, para ver todos los hallazgos en un solo run.
+        if: ${{ !cancelled() && steps.instalar.outcome == 'success' }}
         shell: bash
         run: |
           if [ ! -f package-lock.json ]; then npm i --package-lock-only --no-audit --no-fund >/dev/null; fi

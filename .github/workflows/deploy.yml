@@ -1,0 +1,84 @@
+# Deploy estándar de Businessskore a Firebase (plantilla 2026-10-19, C:\Proyectos\_recursos\plantilla-ci): ... -> Publicar.
+# GameLottery (prediccionloteria.com): solo Hosting (sitio/).
+#
+# DESACTIVADO hasta que Amin configure la identidad: solo corre si la variable de
+# repositorio DEPLOY_ENABLED vale "true" (Settings -> Secrets and variables -> Actions -> Variables).
+#
+# Cuándo corre:
+#   - Solo después de que el workflow "CI" termine en VERDE por un push a la rama de producción.
+#   - O a mano (Actions -> Deploy -> Run workflow) desde la rama de producción: primero vuelve a pasar el CI.
+# Cada ejecución espera la APROBACIÓN MANUAL de Amin en el environment "production".
+#
+# Autenticación: Workload Identity Federation (google-github-actions/auth), sin claves JSON.
+# Secretos del environment "production" (nombres; los valores los pone Amin):
+#   GCP_WORKLOAD_IDENTITY_PROVIDER  projects/<NUMERO>/locations/global/workloadIdentityPools/github/providers/github
+#   GCP_SERVICE_ACCOUNT             github-deploy@<PROYECTO>.iam.gserviceaccount.com
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]          # rama de producción
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  RAMA_PRODUCCION: main
+  FIREBASE_PROJECT: game-lottery-b0e90
+  FIREBASE_ONLY: hosting   # orden de firebase: functions -> reglas -> hosting
+  FIREBASE_TOOLS: firebase-tools@15.34.0
+
+jobs:
+  ci:
+    # Con ejecución manual se vuelve a pasar el CI completo antes de publicar.
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: [ci]
+    if: >-
+      always() && vars.DEPLOY_ENABLED == 'true' && (
+        (github.event_name == 'workflow_run'
+          && github.event.workflow_run.conclusion == 'success'
+          && github.event.workflow_run.event == 'push'
+          && github.event.workflow_run.head_branch == 'main')
+        || (github.event_name == 'workflow_dispatch'
+          && github.ref == 'refs/heads/main'
+          && needs.ci.result == 'success'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production          # Amin: Required reviewers = tú; Deployment branches = main
+    permissions:
+      contents: read
+      id-token: write           # necesario para Workload Identity Federation
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # El commit exacto que pasó el CI.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # Hosting estático (carpeta sitio/): no hay build.
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: firebase deploy
+        run: npx --yes "$FIREBASE_TOOLS" deploy --only "$FIREBASE_ONLY" --project "$FIREBASE_PROJECT" --non-interactive
+
+      - name: Resumen
+        run: echo "Publicado ${{ github.event.workflow_run.head_sha || github.sha }} en $FIREBASE_PROJECT ($FIREBASE_ONLY)" >> "$GITHUB_STEP_SUMMARY"
