@@ -13,6 +13,14 @@
 # Secretos del environment "production" (nombres; los valores los pone Amin):
 #   GCP_WORKLOAD_IDENTITY_PROVIDER  projects/<NUMERO>/locations/global/workloadIdentityPools/github/providers/github
 #   GCP_SERVICE_ACCOUNT             github-deploy@<PROYECTO>.iam.gserviceaccount.com
+#
+# PLAN GRATUITO DE GITHUB (repos privados): los "required reviewers" del environment, los secretos de
+# environment y la protección de ramas solo existen en repos públicos (o con Pro/Team/Enterprise).
+# Por eso, por defecto, este deploy SOLO arranca a mano (Actions -> Deploy -> Run workflow): el clic de
+# Amin es la aprobación, y antes vuelve a pasar el CI completo. El arranque automático tras el CI verde
+# (workflow_run) solo se activa con la variable DEPLOY_AUTO=true, y solo debe ponerse cuando el
+# environment "production" tenga required reviewers (repo público o plan de pago).
+# Con plan gratuito y repo privado, los secretos van como secretos del REPOSITORIO (mismos nombres).
 name: Deploy
 
 on:
@@ -45,7 +53,7 @@ jobs:
     needs: [ci]
     if: >-
       always() && vars.DEPLOY_ENABLED == 'true' && (
-        (github.event_name == 'workflow_run'
+        (github.event_name == 'workflow_run' && vars.DEPLOY_AUTO == 'true'
           && github.event.workflow_run.conclusion == 'success'
           && github.event.workflow_run.event == 'push'
           && github.event.workflow_run.head_branch == 'main')
