@@ -82,7 +82,7 @@ jobs:
       - name: Lint, typecheck, tests y build
         shell: bash
         run: |
-          set -uo pipefail
+          set +e -uo pipefail   # seguir con los demás scripts aunque uno falle
           fallos=""
           for s in ${{ matrix.scripts }}; do
             nombre="${s%%@*}"; args=""
