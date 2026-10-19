@@ -1,7 +1,7 @@
 {
   "name": "PrediccionLoteria.com — USA Lottery AI",
   "short_name": "PredLoteria",
-  "description": "Predicciones de lotería USA con IA: Powerball, Mega Millions, Millionaire For Life, Take 5, Win 4.",
+  "description": "Análisis estadístico de lotería USA para entretenimiento: Powerball, Mega Millions, Millionaire For Life, Take 5, Win 4.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

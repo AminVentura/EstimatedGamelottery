@@ -1447,7 +1447,7 @@ const setupEventListeners = () => {
             'mixed-balanced': 'Mixta Equilibrada',
             'repeat-pattern': 'Patrones de Repetición',
             'por-decenas': 'Por decenas (1-9, 10-19, 20-29…)',
-            'random-optimized': 'IA Aleatoria',
+            'random-optimized': 'Paridad/suma',
             'markov-poisson-logistic': 'Markov+Poisson+Logística',
             'consenso-ensemble': 'Consenso Ensemble'
           };
