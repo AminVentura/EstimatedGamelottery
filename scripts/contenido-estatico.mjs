@@ -313,17 +313,61 @@ ${bloques}
 </section>`;
 }
 
-async function megaMillionsCompletitud() {
+async function millionaireForLife() {
+  const nombre = 'Lottery Millionaire For Life Winning Numbers: Beginning 2026';
+  const rows = await ny('a4w9-a3tp', `$order=draw_date DESC&$limit=2000`);
+  const draws = rows.map((r) => ({
+    f: fecha(r.draw_date),
+    n: String(r.winning_numbers || '').trim().split(/\s+/).map(Number),
+    b: Number(r.mill_ball),
+  })).filter((d) => d.n.length === 5 && d.n.every((x) => x >= 1 && x <= 58) && d.b >= 1 && d.b <= 5);
+  const blancos = Array(58).fill(0), bolas = Array(5).fill(0);
+  for (const d of draws) { d.n.forEach((x) => blancos[x - 1]++); bolas[d.b - 1]++; }
+  const ult = draws.slice(0, 12).map((d) => [d.f, d.n.map((x) => String(x).padStart(2, '0')).join(' '), String(d.b)]);
+  const desde = draws.length ? draws[draws.length - 1].f : 'sin datos';
+  return `<section class="mb-8" id="historial-oficial">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Últimos resultados oficiales y prueba de azar</h2>
+${tablaSorteos(ult, ['Fecha', 'Números (1–58)', 'Millionaire Ball'], 'Últimos 12 sorteos en el conjunto oficial.')}
+<p class="text-gray-400 text-xs mb-4">${fuenteNY('a4w9-a3tp', nombre)}</p>
+<p class="text-gray-300 text-sm mb-2">El conjunto arranca el ${desde}. Son ${nf0.format(draws.length)} sorteos con el formato actual (5 de 58 + bola 1–5). No mezclamos Cash4Life: aquel juego usaba otro bombo y otra bola.</p>
+${bloqueChi('Números principales (1–58)', blancos, draws.length, 58, 5)}
+${bloqueChi('Millionaire Ball (1–5)', bolas, draws.length, 5, 1)}
+<p class="text-gray-400 text-sm mb-3">Con pocos meses de historia, un número «caliente» cabe dentro del azar. La prueba de arriba mide el historial publicado; no dice qué bola sale mañana.</p>
+</section>`;
+}
+
+async function megaMillions() {
   // Desde el 8-abr-2025 Mega Millions es 5/70 + 1/24 y sortea martes y viernes.
+  const nombre = 'Lottery Mega Millions Winning Numbers: Beginning 2002';
   const rows = await ny('5xaw-6ayf', `$where=draw_date>='2025-04-08T00:00:00'&$order=draw_date DESC&$limit=500`);
+  const ultimo = rows[0] ? fecha(rows[0].draw_date) : HOY;
   let esperados = 0;
-  for (let d = new Date('2025-04-08T12:00:00Z'); d <= new Date(rows[0]?.draw_date ? rows[0].draw_date.slice(0, 10) + 'T12:00:00Z' : HOY); d.setUTCDate(d.getUTCDate() + 1)) {
+  for (let d = new Date('2025-04-08T12:00:00Z'); d <= new Date(ultimo + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + 1)) {
     if (d.getUTCDay() === 2 || d.getUTCDay() === 5) esperados++;
   }
-  return `<section class="mb-8" id="historial-oficial">
+  const draws = rows.map((r) => ({
+    f: fecha(r.draw_date),
+    n: String(r.winning_numbers || '').trim().split(/\s+/).map(Number),
+    b: Number(r.mega_ball),
+  })).filter((d) => d.n.length === 5 && d.n.every((x) => x >= 1 && x <= 70) && d.b >= 1 && d.b <= 24);
+  const completo = esperados > 0 && draws.length >= esperados * 0.95;
+  if (!completo) {
+    return `<section class="mb-8" id="historial-oficial">
 <h2 class="text-xl font-semibold text-cyan-400 mb-3">Sobre el historial oficial disponible</h2>
-<p class="text-gray-300 text-sm mb-2">Revisamos el conjunto público de NY Open Data (<a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/5xaw-6ayf" rel="noopener noreferrer" target="_blank">5xaw-6ayf</a>) el ${HOY}: desde el cambio de reglas del 8 de abril de 2025 hasta su último registro (${rows[0] ? fecha(rows[0].draw_date) : 'sin datos'}) contiene <strong>${rows.length}</strong> sorteos, cuando el calendario de martes y viernes implica unos <strong>${esperados}</strong>. Con un historial tan incompleto no publicamos frecuencias ni pruebas de azar para Mega Millions: serían engañosas.</p>
+<p class="text-gray-300 text-sm mb-2">Revisamos el conjunto público de NY Open Data (<a class="text-cyan-300 hover:underline" href="https://data.ny.gov/d/5xaw-6ayf" rel="noopener noreferrer" target="_blank">5xaw-6ayf</a>) el ${HOY}: desde el cambio de reglas del 8 de abril de 2025 hasta su último registro (${ultimo}) hay <strong>${draws.length}</strong> sorteos válidos, y el calendario de martes y viernes implica unos <strong>${esperados}</strong>. Con ese hueco no publicamos frecuencias: saldrían sesgadas.</p>
 <p class="text-gray-400 text-sm mb-3">Para resultados completos usa <a class="text-cyan-300 hover:underline" href="https://www.megamillions.com/Winning-Numbers/Previous-Drawings.aspx" rel="noopener noreferrer" target="_blank">megamillions.com</a> o <a class="text-cyan-300 hover:underline" href="https://nylottery.ny.gov/" rel="noopener noreferrer" target="_blank">nylottery.ny.gov</a>.</p>
+</section>`;
+  }
+  const blancos = Array(70).fill(0), bolas = Array(24).fill(0);
+  for (const d of draws) { d.n.forEach((x) => blancos[x - 1]++); bolas[d.b - 1]++; }
+  const ult = draws.slice(0, 12).map((d) => [d.f, d.n.map((x) => String(x).padStart(2, '0')).join(' '), String(d.b).padStart(2, '0')]);
+  return `<section class="mb-8" id="historial-oficial">
+<h2 class="text-xl font-semibold text-cyan-400 mb-3">Últimos resultados oficiales y prueba de azar</h2>
+${tablaSorteos(ult, ['Fecha', 'Números (1–70)', 'Mega Ball'], 'Últimos 12 sorteos con las reglas vigentes desde el 8 de abril de 2025.')}
+<p class="text-gray-400 text-xs mb-4">${fuenteNY('5xaw-6ayf', nombre)}</p>
+<p class="text-gray-300 text-sm mb-2">Desde el 8 de abril de 2025 el juego es 5 de 70 + Mega Ball 1–24, martes y viernes. En el conjunto hay <strong>${nf0.format(draws.length)}</strong> sorteos válidos hasta el ${ultimo}; el calendario de esos días cuenta <strong>${esperados}</strong>. No mezclamos sorteos anteriores: el bombo y la bola eran otros.</p>
+${bloqueChi('Números blancos (1–70)', blancos, draws.length, 70, 5)}
+${bloqueChi('Mega Ball (1–24)', bolas, draws.length, 24, 1)}
 </section>`;
 }
 
@@ -357,7 +401,7 @@ const PAG = {
 for (const [id, rel] of Object.entries(PAG)) reemplazarRegion(rel, 'probabilidades', seccionReglas(PROB[id]));
 
 if (!SIN_RED) {
-  const tareas = { powerball, pick10, take5, win4: () => win4(w4.pat), megamillions: megaMillionsCompletitud };
+  const tareas = { powerball, pick10, take5, win4: () => win4(w4.pat), megamillions: megaMillions, millionaireforlife: millionaireForLife };
   for (const [id, fn] of Object.entries(tareas)) {
     try {
       reemplazarRegion(PAG[id], 'historial', await fn());
