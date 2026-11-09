@@ -136,7 +136,7 @@
       </a>
       <a href="/faq.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">FAQ</a>
       <a href="/probabilidades-loteria.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Probabilidades</a>
-      <a href="/metodologia-estadistica.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Metodología</a>
+      <a href="/analisis/proxima-jugada.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Metodología</a>
       <a href="/guia-fuentes-loteria-deportes.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Fuentes</a>
       <a href="/about.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Acerca de</a>
       <a href="/contacto.html" class="text-xs sm:text-sm text-gray-400 hover:text-cyan-400 transition-colors hidden sm:inline">Contacto</a>
@@ -247,10 +247,10 @@
     </div>
     <div class="collapsible-content">
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3 mt-3">
-        Somos un sitio independiente de análisis estadístico para loterías de Estados Unidos. Ofrecemos <strong>predicciones numéricas basadas en historial de sorteos</strong> de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 (diurno y nocturno), con cobertura para todos los estados. Nuestro objetivo es dar a los usuarios <strong>herramientas de referencia y entretenimiento</strong>: números frecuentes y fríos, pares que más salen y varias estrategias de generación (frecuencia, mixta, Markov). No estamos afiliados a ninguna lotería oficial; las predicciones son solo apoyo estadístico y no garantizan premios.
+        Somos un sitio independiente de análisis estadístico para loterías de Estados Unidos. Ofrecemos <strong>predicciones numéricas basadas en historial de sorteos</strong> de Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 y Win 4 (diurno y nocturno). Nuestro objetivo es dar a los usuarios <strong>herramientas de referencia y entretenimiento</strong>: números frecuentes y fríos, pares que más salen y varias estrategias de generación (frecuencia, mixta, Markov). No estamos afiliados a ninguna lotería oficial; las predicciones son solo apoyo estadístico y no garantizan premios.
       </p>
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-        Puedes <strong>registrar los resultados oficiales</strong> de cada sorteo, guardar tus predicciones y ver tu precisión por juego. Todo el análisis se hace con algoritmos propios sobre los datos que la comunidad y nosotros mismos vamos añadiendo.
+        Puedes <strong>registrar los resultados oficiales</strong> de cada sorteo, guardar tus predicciones y ver tu precisión por juego. Los sorteos salen de NY Open Data (New York State Gaming Commission) y el análisis se hace con algoritmos propios.
       </p>
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed">
         Este sitio está pensado para mayores de 18 años. La lotería es un juego de azar; recomendamos jugar con moderación y nunca apostar más de lo que puedas permitirte perder. Para dudas sobre privacidad o cookies, consulta nuestras páginas de Política de Privacidad y Política de Cookies enlazadas en el pie de página.
@@ -259,17 +259,15 @@
   </section>
 
   <section class="text-left bg-gray-800/80 p-4 sm:p-6 rounded-xl mb-4 border border-gray-700">
-    <h2 class="text-lg sm:text-xl font-bold text-white mb-2">Contenido editorial y transparencia</h2>
+    <h2 class="text-lg sm:text-xl font-bold text-white mb-2">Más en el sitio</h2>
     <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">
-      Para que puedas evaluar mejor cómo funciona esta herramienta, publicamos secciones dedicadas de ayuda y documentación.
+      Reglas, probabilidades y análisis de cada juego, cada tema en su página.
     </p>
     <div class="flex flex-wrap gap-2 text-sm">
       <a href="/analisis/" class="px-3 py-2 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white">Análisis por juego</a>
       <a href="/probabilidades-loteria.html" class="px-3 py-2 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white">Probabilidades reales</a>
       <a href="/analisis/proxima-jugada.html" class="px-3 py-2 rounded-lg bg-cyan-800 hover:bg-cyan-700 text-white">Algoritmo de próxima jugada</a>
       <a href="/faq.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Preguntas Frecuentes</a>
-      <a href="/metodologia-estadistica.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Metodología estadística</a>
-      <a href="/guia-lectura-resultados.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Cómo leer resultados</a>
       <a href="/juego-responsable.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Juego responsable</a>
       <a href="/guia-fuentes-loteria-deportes.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Fuentes oficiales de lotería</a>
       <a href="/about.html" class="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200">Acerca del proyecto</a>
@@ -806,7 +804,7 @@
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-2">Ocho modelos compiten por sorteo: <strong>Frecuencia</strong>, <strong>Fríos</strong>, <strong>Mixta</strong>, <strong>Patrones de repetición</strong>, <strong>Por decenas</strong>, <strong>Paridad/suma</strong>, <strong>Markov+Poisson</strong> y <strong>Ensemble</strong>. PREDECIR corre un walk-forward (hasta 40 sorteos ya ocurridos) y pone al frente el método que más acertó en <em>ese</em> juego. Eso no es el jackpot: es aciertos parciales contra un baseline de azar. Detalle: <a href="/analisis/proxima-jugada.html" class="text-cyan-300 hover:underline">cómo se elige la próxima jugada</a>.</p>
       <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-3">Cada juego tiene su rango de números y reglas: Powerball y Mega Millions usan bola especial; Pick 10 sortea 20 números y tú eliges 10; Win 4 son cuatro dígitos por posición. Nuestras estadísticas se adaptan a cada uno.</p>
       <h3 class="text-sm sm:text-base font-semibold text-gray-200 mt-3 mb-2">Juegos disponibles en USA</h3>
-      <p class="text-gray-300 text-sm sm:text-base leading-relaxed"><strong>Powerball</strong> y <strong>Mega Millions</strong> son loterías multijurisdiccionales con premios muy altos; se juegan en la mayoría de estados. <strong>Millionaire For Life</strong> (desde feb 2026, sustituye a Cash4Life) ofrece premios vitalicios en más de 30 estados. <strong>Pick 10</strong> permite elegir 10 números de 1 a 80 mientras el sorteo extrae 20. <strong>Take 5</strong> (diurno y nocturno) usa 5 números del 1 al 39. <strong>Win 4</strong> (day y evening) usa 4 dígitos del 0 al 9 por posición. En nuestro sitio puedes obtener predicciones y estadísticas para todos ellos y registrar los resultados para seguir tu precisión.</p>
+      <p class="text-gray-300 text-sm sm:text-base leading-relaxed"><strong>Powerball</strong> y <strong>Mega Millions</strong> son loterías multijurisdiccionales con premios muy altos; se juegan en la mayoría de estados. <strong>Millionaire For Life</strong> (desde feb 2026, sustituye a Cash4Life) ofrece premios vitalicios. <strong>Pick 10</strong> permite elegir 10 números de 1 a 80 mientras el sorteo extrae 20. <strong>Take 5</strong> (diurno y nocturno) usa 5 números del 1 al 39. <strong>Win 4</strong> (day y evening) usa 4 dígitos del 0 al 9 por posición. En nuestro sitio puedes obtener predicciones y estadísticas para todos ellos y registrar los resultados para seguir tu precisión.</p>
       <div id="precisionHelp" class="bg-blue-900 bg-opacity-50 border border-blue-600 text-blue-200 text-sm p-3 rounded-lg mt-4 flex items-center justify-between flex-wrap gap-2">
         <span><i class="fas fa-info-circle mr-2"></i><strong>¿Por qué 0 %?</strong> Genera una predicción y luego guarda el resultado real de ese día para actualizar tu precisión.</span>
         <button type="button" onclick="this.parentElement.style.display='none'" class="text-blue-300 hover:text-white"><i class="fas fa-times"></i></button>
@@ -828,7 +826,7 @@
         </div>
         <div>
           <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Qué juegos cubre el sitio?</h3>
-          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">Powerball, Mega Millions, Millionaire For Life, Pick 10, Take 5 (diurno y nocturno) y Win 4 (diurno y nocturno), válidos para todos los estados de USA que ofrecen estos juegos.</p>
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">Powerball y Mega Millions (multiestatales), Millionaire For Life, y tres juegos de Nueva York: Pick 10, Take 5 y Win 4 (estos dos, de mediodía y de noche).</p>
         </div>
         <div>
           <h3 class="text-sm font-semibold text-cyan-300 mb-1">¿Cómo se calcula mi precisión?</h3>
@@ -1017,7 +1015,7 @@
       <span>|</span>
       <a href="/faq.html" class="hover:text-gray-300">FAQ</a>
       <span>|</span>
-      <a href="/metodologia-estadistica.html" class="hover:text-gray-300">Metodología</a>
+      <a href="/analisis/proxima-jugada.html" class="hover:text-gray-300">Metodología</a>
       <span>|</span>
       <a href="/juego-responsable.html" class="hover:text-gray-300">Juego Responsable</a>
       <span>|</span>
@@ -1026,7 +1024,7 @@
       <a href="/contacto.html" class="hover:text-gray-300">Contacto</a>
     </div>
     <p class="text-gray-500 text-xs mb-4">Última actualización: <span id="lastUpdate"></span></p>
-    <p class="text-gray-500 text-xs mb-4 pie-version" data-pie-version>v1.0.0 · Sitio actualizado el 7 nov 2026</p>
+    <p class="text-gray-500 text-xs mb-4 pie-version" data-pie-version>v1.0.0 · Sitio actualizado el 9 nov 2026</p>
     <p class="text-gray-400 text-xs mb-4">El uso de este sitio implica tu acuerdo con los <a href="/terminos.html" class="text-cyan-400 hover:underline">Términos de uso</a> y la <a href="/politica-privacidad.html" class="text-cyan-400 hover:underline">Política de Privacidad</a>.</p>
 
     <!-- Juego responsable (texto propio; 2026-09-30 se quitó el texto copiado de la NY Lottery) -->

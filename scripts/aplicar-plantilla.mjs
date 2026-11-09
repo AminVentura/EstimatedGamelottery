@@ -45,7 +45,7 @@ const NAV = `<!-- NAV:START -->
     <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
     <a href="/analisis/" class="${L}">Análisis por juego</a>
     <a href="/probabilidades-loteria.html" class="${L}">Probabilidades</a>
-    <a href="/metodologia-estadistica.html" class="${L}">Metodología</a>
+    <a href="/analisis/proxima-jugada.html" class="${L}">Metodología</a>
     <a href="/guia-fuentes-loteria-deportes.html" class="${L}">Fuentes</a>
     <a href="/faq.html" class="${L}">FAQ</a>
     <a href="/about.html" class="${L}">Acerca de</a>

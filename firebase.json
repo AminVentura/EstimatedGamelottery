@@ -69,6 +69,10 @@
         ]
       }
     ],
+    "redirects": [
+      { "source": "/metodologia-estadistica.html", "destination": "/analisis/proxima-jugada.html", "type": 301 },
+      { "source": "/guia-lectura-resultados.html", "destination": "/guia-fuentes-loteria-deportes.html#leer-resultados", "type": 301 }
+    ],
     "rewrites": [
       {
         "source": "/ads.txt",
