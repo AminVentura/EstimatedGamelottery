@@ -39,7 +39,7 @@
     <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
     <a href="/analisis/" class="text-gray-300 hover:text-cyan-300 hover:underline">Análisis por juego</a>
     <a href="/probabilidades-loteria.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Probabilidades</a>
-    <a href="/metodologia-estadistica.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
+    <a href="/analisis/proxima-jugada.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Metodología</a>
     <a href="/guia-fuentes-loteria-deportes.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Fuentes</a>
     <a href="/faq.html" class="text-gray-300 hover:text-cyan-300 hover:underline">FAQ</a>
     <a href="/about.html" class="text-gray-300 hover:text-cyan-300 hover:underline">Acerca de</a>
@@ -51,6 +51,10 @@
   <nav class="text-xs text-gray-500 mb-4"><a href="/" class="text-cyan-400 hover:underline">Inicio</a> / <a href="/analisis/" class="text-cyan-400 hover:underline">Análisis</a> / Próxima jugada</nav>
   <h1 class="text-2xl sm:text-3xl font-bold mb-3">Cómo el algoritmo elige la próxima jugada</h1>
   <p class="text-gray-300 leading-relaxed mb-4">Hasta 2026 el botón PREDECIR mostraba ocho combinaciones en un orden fijo y guardaba la primera (frecuencia) como “tu predicción”. Eso no medía cuál método había acertado más en ese juego. Ahora el cliente hace un walk-forward de los últimos 40 sorteos (si hay al menos 24) y reordena: el método con más aciertos medios pasa al frente y se guarda como predicción del día.</p>
+
+  <h2 id="datos" class="text-xl font-semibold text-cyan-400 mb-3">De dónde salen los sorteos y cómo se limpian</h2>
+  <p class="text-gray-300 leading-relaxed mb-3">Los modelos solo usan sorteos oficiales de NY Open Data (New York State Gaming Commission); la lista de conjuntos por juego está en la <a class="text-cyan-300 hover:underline" href="/guia-fuentes-loteria-deportes.html">guía de fuentes</a>. Antes de calcular nada se quitan duplicados, se ordena por fecha, se separan los sorteos de mediodía y noche de Take 5 y Win 4, y se descarta cualquier fila con un número fuera del rango del juego.</p>
+  <p class="text-gray-300 leading-relaxed mb-3">«Caliente» y «frío» describen cuántas veces salió un número en una ventana (por ejemplo, los últimos 50 sorteos). En una lotería justa cada sorteo es independiente: que un número lleve mucho sin salir no lo obliga a salir.</p>
 
   <h2 class="text-xl font-semibold text-cyan-400 mb-3">Qué es walk-forward aquí</h2>
   <p class="text-gray-300 leading-relaxed mb-3">Imagina que hoy es el sorteo 501. Para “predecir” el 500, el modelo solo puede ver 1–499. Se genera una combinación por cada método, se compara con el resultado real del 500 y se anota cuántos números coincidieron. Se repite hacia atrás. Al final hay un ranking: avgHits y vsRandom (aciertos medios menos el valor esperado si eligieras al azar).</p>
@@ -82,13 +86,13 @@
     <li>Verifica siempre en nylottery.ny.gov o el operador de tu estado.</li>
     <li>18+. Si el juego deja de ser entretenimiento, busca ayuda (NCPG).</li>
   </ul>
-  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Volver al índice de análisis</a> · <a class="text-cyan-400 hover:underline" href="/metodologia-estadistica.html">Metodología</a></p>
+  <p class="text-sm text-gray-500"><a class="text-cyan-400 hover:underline" href="/analisis/">Volver al índice de análisis</a> · <a class="text-cyan-400 hover:underline" href="/analisis/proxima-jugada.html">Metodología</a></p>
 </main>
 <!-- PIE:START -->
 <footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
   <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
-  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a></p>
-  <p class="mt-2 text-gray-500 pie-version" data-pie-version>v1.0.0 · Sitio actualizado el 7 nov 2026</p>
+  <p><a href="/juego-responsable.html" class="text-cyan-300 hover:underline">Juego responsable</a> · <a href="/terminos.html" class="text-cyan-300 hover:underline">Términos</a> · <a href="/politica-privacidad.html" class="text-cyan-300 hover:underline">Privacidad</a> · <a href="/politica-cookies.html" class="text-cyan-300 hover:underline">Cookies</a> · <a href="/about.html" class="text-cyan-300 hover:underline">Acerca de</a> · <a href="/contacto.html" class="text-cyan-300 hover:underline">Contacto</a> · <a href="/donde-jugar.html" class="text-cyan-300 hover:underline">Dónde jugar (publicidad)</a></p>
+  <p class="mt-2 text-gray-500 pie-version" data-pie-version>v1.0.0 · Sitio actualizado el 9 nov 2026</p>
 </footer>
 <!-- PIE:END -->
 </body>

@@ -45,7 +45,7 @@ const NAV = `<!-- NAV:START -->
     <a href="/" class="font-bold text-white hover:text-cyan-300 mr-2">prediccionloteria.com</a>
     <a href="/analisis/" class="${L}">Análisis por juego</a>
     <a href="/probabilidades-loteria.html" class="${L}">Probabilidades</a>
-    <a href="/metodologia-estadistica.html" class="${L}">Metodología</a>
+    <a href="/analisis/proxima-jugada.html" class="${L}">Metodología</a>
     <a href="/guia-fuentes-loteria-deportes.html" class="${L}">Fuentes</a>
     <a href="/faq.html" class="${L}">FAQ</a>
     <a href="/about.html" class="${L}">Acerca de</a>
@@ -58,7 +58,7 @@ const F = 'text-cyan-300 hover:underline';
 const PIE = `<!-- PIE:START -->
 <footer class="w-full max-w-5xl mx-auto mt-8 border-t border-gray-800 pt-4 pb-6 text-xs text-gray-400 text-center">
   <p class="mb-2">Solo mayores de 18 años (21+ donde la ley lo exija). La lotería es azar: este sitio no garantiza premios. Sitio independiente, sin afiliación con ninguna lotería oficial.</p>
-  <p><a href="/juego-responsable.html" class="${F}">Juego responsable</a> · <a href="/terminos.html" class="${F}">Términos</a> · <a href="/politica-privacidad.html" class="${F}">Privacidad</a> · <a href="/politica-cookies.html" class="${F}">Cookies</a> · <a href="/about.html" class="${F}">Acerca de</a> · <a href="/contacto.html" class="${F}">Contacto</a></p>
+  <p><a href="/juego-responsable.html" class="${F}">Juego responsable</a> · <a href="/terminos.html" class="${F}">Términos</a> · <a href="/politica-privacidad.html" class="${F}">Privacidad</a> · <a href="/politica-cookies.html" class="${F}">Cookies</a> · <a href="/about.html" class="${F}">Acerca de</a> · <a href="/contacto.html" class="${F}">Contacto</a> · <a href="/donde-jugar.html" class="${F}">Dónde jugar (publicidad)</a></p>
   <p class="mt-2 text-gray-500 pie-version" data-pie-version>v</p>
 </footer>
 <!-- PIE:END -->`;

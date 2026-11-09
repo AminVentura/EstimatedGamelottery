@@ -18,6 +18,7 @@ const TODAY    = new Date().toISOString().split('T')[0];
 const EXCLUDED = new Set([
   'appcheck-test.html', // página de prueba: noindex y fuera del hosting (firebase.json → ignore)
   '404.html',           // página de error: noindex
+  'donde-jugar.html',   // enlace de afiliado, sin AdSense: noindex (2026-11-08)
 ]);
 
 // Prioridades y frecuencias por página
@@ -25,7 +26,6 @@ const PAGE_CONFIG = {
   'index.html':                              { priority: '1.0', changefreq: 'daily' },
   'analisis/index.html':                     { priority: '0.85', changefreq: 'weekly' },
   'faq.html':                                { priority: '0.8', changefreq: 'weekly' },
-  'metodologia-estadistica.html':            { priority: '0.8', changefreq: 'monthly' },
   'probabilidades-loteria.html':             { priority: '0.85', changefreq: 'monthly' },
   'proxima-jugada.html':                     { priority: '0.85', changefreq: 'weekly' },
   'powerball.html':                          { priority: '0.8', changefreq: 'weekly' },
@@ -34,7 +34,6 @@ const PAGE_CONFIG = {
   'pick-10.html':                            { priority: '0.75', changefreq: 'weekly' },
   'take-5.html':                             { priority: '0.75', changefreq: 'weekly' },
   'win-4.html':                              { priority: '0.75', changefreq: 'weekly' },
-  'guia-lectura-resultados.html':            { priority: '0.75', changefreq: 'monthly' },
   'guia-fuentes-loteria-deportes.html':      { priority: '0.75', changefreq: 'monthly' },
   'juego-responsable.html':                  { priority: '0.7', changefreq: 'monthly' },
   'about.html':                              { priority: '0.6', changefreq: 'monthly' },
