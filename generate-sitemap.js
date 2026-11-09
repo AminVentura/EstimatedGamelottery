@@ -18,6 +18,7 @@ const TODAY    = new Date().toISOString().split('T')[0];
 const EXCLUDED = new Set([
   'appcheck-test.html', // página de prueba: noindex y fuera del hosting (firebase.json → ignore)
   '404.html',           // página de error: noindex
+  'donde-jugar.html',   // enlace de afiliado, sin AdSense: noindex (2026-11-08)
 ]);
 
 // Prioridades y frecuencias por página
